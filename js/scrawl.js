@@ -2,20 +2,49 @@ class ScrawlGame {
     constructor() {
         this.players = [];
         this.stacks = [];
-        this.currentRound = 0;
+        this.currentRound = 1;
         this.hints = scrawlHints.slice();
         shuffle(this.hints);
+    }
+
+    isComplete() {
+        return this.currentRound > 0 && this.stacks[0].heldBy == this.players[0].clientId;
     }
 
     addPlayer(identity) {
         this.players.push(identity);
     }
 
-    startRound() {
+    dealStacks() {
+        this.currentRound = 1;
         for (let player of this.players) {
             const hint = this.hints.pop();
             const stack = new Stack(player.clientId, hint);
             this.stacks.push(stack);
+        }
+    }
+
+    isRoundCompleted() {
+        const anyStacksNotSubmitted = this.stacks.filter(s => s.items.length <= this.currentRound);
+        return anyStacksNotSubmitted.length == 0;
+    }
+
+    addToStack(submittersClientId, stackItem) {
+        const stack = this.stacks.filter(s => s.heldBy == submittersClientId)[0];
+        stack.items.push({ ...stackItem, author: submittersClientId });
+    }
+
+    passStacksAround() {
+        if(!this.isRoundCompleted()) {
+            console.log("Don't actually let this happen...");
+        }
+
+
+        let holders = this.stacks.map(s => s.heldBy);
+        holders = [ holders.pop(), ...holders ];
+
+        for (let stackIndex in this.stacks) {
+            this.stacks[stackIndex].heldBy = holders[stackIndex];
         }
     }
 }
@@ -71,7 +100,6 @@ const scrawlHints = [
     "Moobs"
 ];
 
-
 function shuffle(collection) {
     for (let i = collection.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -80,5 +108,5 @@ function shuffle(collection) {
 }
 
 try {
-    module.exports = { ScrawlGame };  
+    module.exports = { ScrawlGame, StackItem };  
 } catch { }
