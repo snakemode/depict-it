@@ -11,6 +11,10 @@ class ScrawlGame {
         return this.currentRound > 0 && this.stacks[0].heldBy == this.players[0].clientId;
     }
 
+    anyPlayerHasWon() {
+        // Players win when they have 2 more points than the number of players.
+    }
+
     addPlayer(identity) {
         this.players.push(identity);
     }
@@ -31,14 +35,13 @@ class ScrawlGame {
 
     addToStack(submittersClientId, stackItem) {
         const stack = this.stacks.filter(s => s.heldBy == submittersClientId)[0];
-        stack.items.push({ ...stackItem, author: submittersClientId });
+        stack.items.push({ ...stackItem, author: submittersClientId, id: this.createId() });
     }
 
     passStacksAround() {
         if(!this.isRoundCompleted()) {
             console.log("Don't actually let this happen...");
         }
-
 
         let holders = this.stacks.map(s => s.heldBy);
         holders = [ holders.pop(), ...holders ];
@@ -47,16 +50,36 @@ class ScrawlGame {
             this.stacks[stackIndex].heldBy = holders[stackIndex];
         }
     }
+
+    awardScore(stackItemId) {
+        for (let stack of this.stacks) {
+            for (let item of stack.items) {
+                if (item.id == stackItemId) {
+                    const author = this.players.filter(p => p.clientId == item.author)[0];
+                    if(!author.score) {
+                        author.score = 0;
+                    }
+                    author.score++;
+                    return;
+                }
+            }
+        }
+    }
+
+    createId() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+    }
 }
 
 class Stack {
     constructor(ownerId, openingHint) {
         this.ownedBy = ownerId;
         this.heldBy = ownerId;
-
-        this.items = [
-            new StackItem("string", openingHint)
-        ];
+        this.items = [ new StackItem("string", openingHint) ];
+        this.items[0].author = "SYSTEM";
     }
 }
 

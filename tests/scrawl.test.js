@@ -1,5 +1,5 @@
 const { ScrawlGame, StackItem } = require("../js/scrawl.js");
-const { Identity } = require("../js/p2p.js");
+const { Identity, uuidv4 } = require("../js/p2p.js");
 
 const p1 = new Identity("Player 1");
 const p2 = new Identity("Player 2");
@@ -53,6 +53,15 @@ describe("Scrawl-clone", () => {
         expect(sut.stacks[0].items[1].author).toBe(p1.clientId);
     });
 
+    it("addToStack, ids added to item", async () => {
+        sut.addPlayer(p1);
+        sut.dealStacks();
+
+        sut.addToStack(p1.clientId, new StackItem("image", "http://tempuri.org/1.png"));
+
+        expect(sut.stacks[0].items[1].id).toBeDefined();
+    });
+
     it("isRoundCompleted, returns false when players are still due to submit", async () => {
         sut.addPlayer(p1);
         sut.addPlayer(p2);
@@ -98,7 +107,7 @@ describe("Scrawl-clone", () => {
         sut.addPlayer(p1);
         sut.addPlayer(p2);
         sut.addPlayer(p3);
-        
+
         sut.dealStacks();
 
         sut.passStacksAround();
@@ -108,5 +117,21 @@ describe("Scrawl-clone", () => {
         const completed = sut.isComplete();
 
         expect(completed).toBe(true);
+    });
+
+    it("awardScore, adds points to player that wrote card", async () => {
+        sut.addPlayer(p1);
+        sut.addPlayer(p2);
+        sut.addPlayer(p3);
+
+        sut.dealStacks();
+        sut.addToStack(p1.clientId, new StackItem("image", "http://tempuri.org/1.png"));
+        sut.addToStack(p2.clientId, new StackItem("image", "http://tempuri.org/2.png"));
+        sut.addToStack(p3.clientId, new StackItem("image", "http://tempuri.org/3.png"));
+
+        const stackItem = sut.stacks[0].items[1];
+        sut.awardScore(stackItem.id);
+
+        expect(sut.players[0].score).toBe(1);
     });
 })
