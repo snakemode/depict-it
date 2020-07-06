@@ -14,16 +14,16 @@ module.exports = async function (context, req) {
     const blobServiceClient = new BlobServiceClient(process.env.AZURE_BLOBSTORAGE, defaultAzureCredential);
     const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINERNAME);
 
-    // Generate unique filename and upload
-    const unique = `game_${req.body.gameId}_${uuidv4()}`;
+    const unique = `game_${req.body.gameId}_${uuidv4()}.png`;
+    const url = `${process.env.AZURE_BLOBSTORAGE}/${process.env.AZURE_CONTAINERNAME}/${unique}`;
+    const fileData = req.body.imageData.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = new Buffer(fileData, 'base64');
 
     const blockBlobClient = containerClient.getBlockBlobClient(unique);
-    const uploadBlobResponse = await blockBlobClient.upload(req.body.imageData, req.body.imageData.length || 0);
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length || 0);
 
     context.res = { 
         headers: { "content-type": "application/json" },
-        body: {
-            url: `${process.env.AZURE_BLOBSTORAGE}/${process.env.AZURE_CONTAINERNAME}/${unique}`
-        }
+        body: { url: url }
     };    
 };

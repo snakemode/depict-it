@@ -29,6 +29,7 @@ var app = new Vue({
       
       await this.p2pServer.connect();
       await this.p2pClient.connect();
+      
       this.canvas = new DrawableCanvas("paintCanvas").registerPaletteElements("palette");
     },
     join: async function(evt) { 
@@ -60,3 +61,7 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
     p2pClient?.onReceiveMessage(message);
   } 
 }
+
+try {
+  module.exports = { app };  
+} catch { }

@@ -1,5 +1,5 @@
 {
-  "name": "ablingo-tests",
+  "name": "tests",
   "version": "",
   "description": "",
   "repository": "http://tempuri.org",
@@ -9,7 +9,8 @@
     "test": "jest"
   },
   "author": "",
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
     "@babel/core": "^7.10.4",

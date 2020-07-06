@@ -33,4 +33,8 @@ class P2PServer {
       this.ably.sendMessage({ kind: "connection-acknowledged", serverState: this.state }, message.metadata.clientId);
       this.ably.sendMessage({ kind: "peer-status", serverState: this.state });
     }  
-}
+}  
+
+try {
+  module.exports = { P2PServer };  
+} catch { }

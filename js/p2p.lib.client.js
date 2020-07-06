@@ -27,7 +27,8 @@ class P2PClient {
           this.state.status = "acknowledged"; 
           break;
         case "drawing":
-          this.state.lastImage = "Nope";
+          console.log(message.imageUrl);
+          this.state.lastImage = message.imageUrl;
           break;
         default: () => { };
       }
@@ -41,13 +42,13 @@ class P2PClient {
         body: JSON.stringify({ gameId: this.uniqueId, imageData: asText })
       });
 
-      const bodyText = await result.json();
+      const savedUrl = await result.json();
 
-      console.log(result, bodyText);
-
-      // push to bucket
-      const bucketUrl = "something";
-      this.ably.sendMessage({ kind: "drawing", imageUrl: bucketUrl });
+      this.ably.sendMessage({ kind: "drawing", imageUrl: savedUrl.url });
     }
 
   }
+
+  try {
+    module.exports = { P2PClient };  
+  } catch { }

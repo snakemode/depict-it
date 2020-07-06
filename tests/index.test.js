@@ -21,6 +21,7 @@ class AblyStub {
 }
 
 global.Vue = vue;
+global.crypto = { getRandomValues: function() { return [ 123454373 ] } };
 global.Identity = Identity;
 global.PubSubClient = PubSubClient;
 global.DrawableCanvas = DrawableCanvas;
@@ -33,29 +34,22 @@ const { app } = require("../index.js");
 
 describe("Vue app", () => {
 
-    it("Creates an identity and game Id on creation", async () => { 
-        expect(app.identity.friendlyName).toBeDefined();
-        expect(app.identity.friendlyName).not.toBeNull();
-        expect(app.gameId).toBeDefined();
-        expect(app.gameId).not.toBeNull();
-    });
-
     it("Hosting a game creates a server", async () => {
-        await app.hostGame({ preventDefault: function() {}});
+        await app.host({ preventDefault: function() {}});
 
         expect(app.gameServer).toBeDefined();        
         expect(app.gameServer).not.toBeNull();        
     });
 
     it("Hosting a game creates a client", async () => {
-        await app.hostGame({ preventDefault: function() {}});
+        await app.host({ preventDefault: function() {}});
 
         expect(app.gameClient).toBeDefined();        
         expect(app.gameClient).not.toBeNull();        
     });
 
     it("Joining a game creates a client", async () => {
-        await app.joinGame({ preventDefault: function() {}});
+        await app.join({ preventDefault: function() {}});
 
         expect(app.gameClient).toBeDefined();        
         expect(app.gameClient).not.toBeNull();        
