@@ -21,6 +21,10 @@ export class DrawableCanvas {
         return this; 
     }
 
+    clear() {
+        this.paintContext.clearRect(0, 0, 100000, 100000);
+    }
+
     onMouseDownHandler(e) {
         this.dragging = true;
         this.cursorPoint.x = e.offsetX;

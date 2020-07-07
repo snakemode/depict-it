@@ -32,7 +32,7 @@
 
       <section v-else class="game-info">
         <h2>UniqueId: {{ uniqueId }}</h2>    
-        <button v-on:click="sendImage" class="form-button">Send Image</button>     
+        <button v-if="iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
         <h3>Active players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
@@ -40,21 +40,43 @@
             <span>{{ user.friendlyName }}</span>
           </li>
         </ul> 
-        
-        <div id="palette" class="palette">
-          <div style="background-color: black;"></div>
-          <div style="background-color: red;"></div>
-          <div style="background-color: green;"></div>
-          <div style="background-color: blue;"></div>
-        </div>
-                
-        <canvas id="paintCanvas" width="400" height="400"></canvas>
-        
-        <span>Last Image:</span>
-        {{ p2pClient.state.lastImage }}
+
         <div>
-          <img v-bind:src="p2pClient.state.lastImage" />
+          Current State Code: {{ transmittedServerState?.game?.state.code }}
         </div>
+        <div>
+          Current State Reason: {{ transmittedServerState?.game?.state.reason }}
+        </div>
+
+        <div>
+          <div v-if="myHeldStack?.requires=='image'">
+            <h1>Draw your image here</h1>
+        
+            <span>{{ myHeldStackTopItem?.value }}</span>
+
+            <div id="palette" class="palette">
+              <div style="background-color: black;"></div>
+              <div style="background-color: red;"></div>
+              <div style="background-color: green;"></div>
+              <div style="background-color: blue;"></div>
+            </div>
+                    
+            <canvas id="paintCanvas" width="400" height="400"></canvas>
+            <button v-on:click="sendImage" class="form-button">Send Image</button>
+          </div>
+
+          <div v-if="myHeldStack?.requires=='string'">
+            <h1>Caption this</h1>
+            
+            <img v-bind:src="myHeldStackTopItem?.value" />
+
+            <input type="text" name="caption" v-model="caption">            
+            <button v-on:click="sendCaption" class="form-button">Send Caption</button>
+          </div>
+
+        </div>
+
+
       </section>
     </div>
   </body>

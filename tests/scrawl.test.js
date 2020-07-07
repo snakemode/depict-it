@@ -1,11 +1,11 @@
-const { ScrawlGame, StackItem } = require("../js/scrawl.js");
+const { ScrawlGame, Stack, StackItem } = require("../js/scrawl.js");
 const { Identity } = require("../js/p2p.js");
 
 const p1 = new Identity("Player 1");
 const p2 = new Identity("Player 2");
 const p3 = new Identity("Player 3");
 
-describe("Scrawl-clone", () => {
+describe("ScrawlGame", () => {
 
     let sut;
     beforeEach(() => {
@@ -50,7 +50,7 @@ describe("Scrawl-clone", () => {
 
         sut.dealStacks();
 
-        expect(sut.currentState.reason).toBe("Waiting for all players to complete stack.");
+        expect(sut.state.reason).toBe("Waiting for all players to complete stack.");
     });
 
     it("addToStack, adds an item to the stack, recorded against the player", async () => {
@@ -158,6 +158,33 @@ describe("Scrawl-clone", () => {
         expect(sut.stacks[1].heldBy).toBe(p1.clientId);
     });
 })
+
+describe("Stack", () => {
+    let sut;
+    beforeEach(() => {
+        sut = new Stack("owner-id", "Some hint");
+    });
+
+    it("Can be constrcuted", () => {
+        expect(sut).not.toBeNull();
+    });
+
+    it("requires, returns type of card it next requires when created", () => {
+        expect(sut.requires).toBe("image");
+    });
+
+    it("requires, returns type of card it next requires when image provided", () => {
+        sut.add({author: "1234", id: "blah", ...new StackItem("image", "http://url.org") })
+
+        expect(sut.requires).toBe("string");
+    });
+
+    it("requires, returns type of card it next requires when string provided", () => {
+        sut.add({author: "1234", id: "blah", ...new StackItem("string", "I am very funny") })
+
+        expect(sut.requires).toBe("image");
+    });
+});
 
 function gameWithOnePlayer(sut) {
     sut.addPlayer(p1);

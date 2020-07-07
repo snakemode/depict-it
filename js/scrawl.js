@@ -4,27 +4,26 @@ export class ScrawlGame {
         this.stacks = [];
         this.currentRound = 1;
         this.currentTick = 1;
-        this.currentState = null;
+        this.state = { ticked: false, code: -1, reason: "Awaiting game start."};
         
         this.hints = scrawlHints.slice();
         shuffle(this.hints);
     }
 
     tryTick() {
-
         if (this.isRoundComplete()) {
             // Do scoring thing here
             console.log("Prompt users for scoring");
         }
 
         if (!this.isPassComplete()) {            
-            return this.currentState = { ticked: false, reason: "Waiting for all players to complete stack.", stateCode: 1 };
+            return this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 1 };
         }
 
         this.passStacksAround();
 
         this.currentTick++;
-        return this.currentState = { ticked: true, reason: "", stateCode: 0 };
+        return this.state = { ticked: true, reason: "", code: 0 };
     }
 
     // When starting player holds their cards again, our round is complete.
@@ -47,13 +46,12 @@ export class ScrawlGame {
             this.stacks.push(stack);
         }
 
-        this.currentState = { ticked: false, reason: "Waiting for all players to complete stack.", stateCode: 1 };
+        this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 1 };
     }
-
 
     addToStack(submittersClientId, stackItem) {
         const stack = this.stacks.filter(s => s.heldBy == submittersClientId)[0];
-        stack.items.push({ ...stackItem, author: submittersClientId, id: this.createId() });
+        stack.add({ ...stackItem, author: submittersClientId, id: this.createId() });
     }
 
     passStacksAround() {
@@ -88,12 +86,18 @@ export class ScrawlGame {
     }
 }
 
-class Stack {
+export class Stack {
     constructor(ownerId, openingHint) {
         this.ownedBy = ownerId;
         this.heldBy = ownerId;
         this.items = [ new StackItem("string", openingHint) ];
         this.items[0].author = "SYSTEM";
+        this.requires = "image";
+    }
+
+    add(item) {
+        this.items.push(item);
+        this.requires = item.type == "image" ? "string" : "image";
     }
 }
 
