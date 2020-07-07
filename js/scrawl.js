@@ -4,7 +4,7 @@ export class ScrawlGame {
         this.stacks = [];
         this.currentRound = 1;
         this.currentTick = 1;
-        this.state = { ticked: false, code: -1, reason: "Awaiting game start."};
+        this.state = { ticked: false, reason: "Awaiting game start.", code: -1};
         
         this.hints = scrawlHints.slice();
         shuffle(this.hints);
@@ -12,18 +12,22 @@ export class ScrawlGame {
 
     tryTick() {
         if (this.isRoundComplete()) {
-            // Do scoring thing here
-            console.log("Prompt users for scoring");
+            console.log("Users need to submit scores");
+            return this.state = { ticked: true, reason: "Round Completed. Awaiting votes.", code: 1 };
         }
 
         if (!this.isPassComplete()) {            
-            return this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 1 };
+            return this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 0 };
         }
 
         this.passStacksAround();
-
         this.currentTick++;
-        return this.state = { ticked: true, reason: "", code: 0 };
+
+        if (this.isRoundComplete()) {
+            return this.state = { ticked: true, reason: "Round Completed. Awaiting votes.", code: 1 };
+        } else {
+            return this.state = { ticked: true, reason: "", code: 0 };
+        }
     }
 
     // When starting player holds their cards again, our round is complete.
@@ -46,7 +50,7 @@ export class ScrawlGame {
             this.stacks.push(stack);
         }
 
-        this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 1 };
+        this.state = { ticked: false, reason: "Waiting for all players to complete stack.", code: 0 };
     }
 
     addToStack(submittersClientId, stackItem) {

@@ -47,16 +47,14 @@ export class P2PServer {
     }
 
     onClientCaption(message) {
-      console.log("Client submitted caption", new StackItem("string", message.caption));
+      this.state.game.addToStack(message.metadata.clientId, new StackItem("string", message.caption));
       this.cascadeAnyGameStateChanges();
     }
 
     cascadeAnyGameStateChanges() {
       const tickResult = this.state.game.tryTick();
       console.log("tickResult", tickResult);
-      if (tickResult.ticked) {
-        // step forwards!
-      }
+      
       this.ably.sendMessage({ kind: "game-state", serverState: this.state });
     }
 

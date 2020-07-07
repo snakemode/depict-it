@@ -28,12 +28,10 @@ export var app = new Vue({
     joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
     iAmHost: function() { return this.p2pServer != null; },
 
-    myHeldStack: function() {
-      return this.p2pClient?.serverState?.game?.stacks?.filter(s => s.heldBy == this.identity.clientId)[0];
-    },
-    myHeldStackTopItem: function() {
-      return this.myHeldStack.items[this.myHeldStack.items.length - 1];
-    }
+    heldStack: function() { return this.p2pClient?.serverState?.game?.stacks?.filter(s => s.heldBy == this.identity.clientId)[0]; },
+    heldStackTopItem: function() { return this.heldStack.items[this.heldStack.items.length - 1]; },
+    heldStackIsMine: function() { return this.heldStack?.ownedBy == this.identity.clientId; },
+    currentHandComplete: function() { return this.heldStack?.items.length > this.p2pClient?.serverState?.game?.currentTick; }
   },
   methods: {
     host: async function(evt) {
