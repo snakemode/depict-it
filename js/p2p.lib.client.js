@@ -1,4 +1,4 @@
-class P2PClient {
+export class P2PClient {
     constructor(identity, uniqueId, ably) {
       this.identity = identity;
       this.uniqueId = uniqueId;
@@ -48,7 +48,3 @@ class P2PClient {
     }
 
   }
-
-  try {
-    module.exports = { P2PClient };  
-  } catch { }

@@ -1,18 +1,18 @@
-function uuidv4() {
+export function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 }
 
-class Identity {
+export class Identity {
   constructor(friendlyName) {
     this.clientId = uuidv4();
     this.friendlyName = friendlyName;
   }
 }
 
-class PubSubClient {
+export class PubSubClient {
   constructor(onMessageReceivedCallback) {  
     this.connected = false;
     this.onMessageReceivedCallback = onMessageReceivedCallback;
@@ -43,7 +43,3 @@ class PubSubClient {
     this.channel.publish({ name: "myMessageName", data: message});
   }
 }
-
-try {
-  module.exports = { Identity, PubSubClient };  
-} catch { }

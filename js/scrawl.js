@@ -1,17 +1,37 @@
-class ScrawlGame {
+export class ScrawlGame {
     constructor() {
         this.players = [];
         this.stacks = [];
         this.currentRound = 1;
+        this.currentTick = 1;
+        this.currentState = null;
+        
         this.hints = scrawlHints.slice();
         shuffle(this.hints);
     }
 
-    isComplete() {
-        return this.currentRound > 0 && this.stacks[0].heldBy == this.players[0].clientId;
+    tryTick() {
+
+        if (this.isRoundComplete()) {
+            // Do scoring thing here
+            console.log("Prompt users for scoring");
+        }
+
+        if (!this.isPassComplete()) {            
+            return this.currentState = { ticked: false, reason: "Waiting for all players to complete stack.", stateCode: 1 };
+        }
+
+        this.passStacksAround();
+
+        this.currentTick++;
+        return this.currentState = { ticked: true, reason: "", stateCode: 0 };
     }
 
-    anyPlayerHasWon() {
+    // When starting player holds their cards again, our round is complete.
+    isRoundComplete() { return this.currentTick > 1 && this.stacks[0].heldBy == this.players[0].clientId; }
+    isPassComplete() { return this.stacks.filter(s => s.items.length <= this.currentTick).length == 0; }
+
+    anyPlayerHasWonGame() {
         // Players win when they have 2 more points than the number of players.
     }
 
@@ -20,18 +40,16 @@ class ScrawlGame {
     }
 
     dealStacks() {
-        this.currentRound = 1;
+        this.currentTick = 1;
         for (let player of this.players) {
             const hint = this.hints.pop();
             const stack = new Stack(player.clientId, hint);
             this.stacks.push(stack);
         }
+
+        this.currentState = { ticked: false, reason: "Waiting for all players to complete stack.", stateCode: 1 };
     }
 
-    isRoundCompleted() {
-        const anyStacksNotSubmitted = this.stacks.filter(s => s.items.length <= this.currentRound);
-        return anyStacksNotSubmitted.length == 0;
-    }
 
     addToStack(submittersClientId, stackItem) {
         const stack = this.stacks.filter(s => s.heldBy == submittersClientId)[0];
@@ -39,10 +57,6 @@ class ScrawlGame {
     }
 
     passStacksAround() {
-        if(!this.isRoundCompleted()) {
-            console.log("Don't actually let this happen...");
-        }
-
         let holders = this.stacks.map(s => s.heldBy);
         holders = [ holders.pop(), ...holders ];
 
@@ -83,7 +97,7 @@ class Stack {
     }
 }
 
-class StackItem {
+export class StackItem {
     constructor(type, value) { // "string" | "image" && full text | url
         this.type = type;
         this.value = value;
@@ -129,7 +143,3 @@ function shuffle(collection) {
       [collection[i], collection[j]] = [collection[j], collection[i]];
     }
 }
-
-try {
-    module.exports = { ScrawlGame, StackItem };  
-} catch { }

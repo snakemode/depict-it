@@ -1,4 +1,4 @@
-class DrawableCanvas {
+export class DrawableCanvas {
     constructor(canvasElementId) {
         this.canvasElementId = canvasElementId;
         this.paintCanvas = document.getElementById("paintCanvas");
@@ -46,8 +46,3 @@ class DrawableCanvas {
         return this.paintCanvas.toDataURL("image/png");
     }
 }
-
-
-try {
-    module.exports = { DrawableCanvas };  
-} catch { }

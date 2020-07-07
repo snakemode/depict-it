@@ -4,12 +4,16 @@ module.exports = function (wallaby) {
         localProjectDir: "tests",
         
         files: [
-            '/*.js',
-            '/js/*.js',
+            '/**/*.js',
+            '!/**/*.test.js',
+            '!/tests/node_modules/**/*.js',
+            '!/node_modules/**/*.js',
+            '!/api/node_modules/**/*.js',
         ],
 
         tests: [
-            '/tests/**/*test.js',
+            '/**/*.test.js',
+            '!/tests/node_modules/**/*.js',
             '!/node_modules/**/*.js',
             '!/api/node_modules/**/*.js',
             '!/tests/node_modules/**/*.js',

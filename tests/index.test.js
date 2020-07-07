@@ -1,9 +1,3 @@
-const { DrawableCanvas } = require("../js/painting.js");
-const { Identity, PubSubClient } = require("../js/p2p.js");
-const { P2PServer } = require("../js/p2p.lib.server.js");
-const { P2PClient } = require("../js/p2p.lib.client.js");
-const vue = require("../js/vue.min.js");
-
 const fakeAblyChannel = {
     published: [],
     subscribe: function(callback) { 
@@ -20,14 +14,9 @@ class AblyStub {
     channels = { get: function(chName) { return fakeAblyChannel; } }
 }
 
-global.Vue = vue;
-global.crypto = { getRandomValues: function() { return [ 123454373 ] } };
-global.Identity = Identity;
-global.PubSubClient = PubSubClient;
-global.DrawableCanvas = DrawableCanvas;
-global.P2PClient = P2PClient;
-global.P2PServer = P2PServer;
+global.Vue = require("../js/vue.min.js");
 global.Ably = { Realtime: { Promise: AblyStub } };
+global.crypto = { getRandomValues: function() { return [ 123454373 ] } };
 global.window = { location: { protocol: "https:", host: "localhost", pathname: "/bingo" } }
 
 const { app } = require("../index.js");

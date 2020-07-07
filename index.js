@@ -1,4 +1,9 @@
-var app = new Vue({
+import { DrawableCanvas } from "./js/painting.js";
+import { Identity, PubSubClient } from "./js/p2p.js"
+import { P2PClient } from "./js/p2p.lib.client.js"
+import { P2PServer } from "./js/p2p.lib.server.js"
+
+export var app = new Vue({
   el: '#app',
   data: {   
     p2pClient: null,
@@ -45,6 +50,9 @@ var app = new Vue({
       await this.p2pClient.connect();
       this.canvas = new DrawableCanvas("paintCanvas").registerPaletteElements("palette");
     },
+    startGame: async function(evt) {
+      this.p2pServer?.startGame();
+    },
     sendImage: async function(evt) {
       await this.p2pClient.sendImage(this.canvas);
     }
@@ -61,7 +69,3 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
     p2pClient?.onReceiveMessage(message);
   } 
 }
-
-try {
-  module.exports = { app };  
-} catch { }
