@@ -1,5 +1,5 @@
 import { scrawlHints, shuffle, Stack, StackItem } from "../js/scrawl.js";
-import { waitUntil } from "./jackbox.js";
+import { JackboxStateMachine, waitUntil } from "./jackbox.js";
 
 export class StartHandler {
     async execute(state) {
@@ -120,7 +120,7 @@ export class PassStacksAroundHandler {
 }
 
 export class GetUserScoresHandler {
-    async execute(state) {        
+    async execute(state) {     
 
         for (let stack of state.stacks) { 
             this.submitted = 0;
@@ -168,8 +168,7 @@ function createId() {
     });
 }
 
-
-export const game = {
+export const game = new JackboxStateMachine({
     steps: {
         "start": new StartHandler(), 
         "deal": new DealHandler(), 
@@ -179,4 +178,4 @@ export const game = {
         "getUserScores": new GetUserScoresHandler(),
         "end": new EndHandler()
     }
-};
+});

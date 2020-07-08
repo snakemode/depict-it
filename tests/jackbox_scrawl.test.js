@@ -1,12 +1,12 @@
-import { JackboxStateMachine, NullMessageChannel } from "../js/jackbox.js";
-import { game, StartHandler, DealHandler, GetUserDrawingHandler, GetUserCaptionHandler } from "../js/jackbox_scrawl.js";
+import { NullMessageChannel } from "../js/jackbox.js";
+import { game, StartHandler, DealHandler, GetUserDrawingHandler, GetUserCaptionHandler, PassStacksAroundHandler } from "../js/jackbox_scrawl.js";
 import { Identity } from "../js/p2p.js";
 import { Stack, StackItem } from "../js/scrawl.js";
 
 describe("JackboxStateMachine", () => {
     let sut;
     beforeEach(() => {
-        sut = new JackboxStateMachine(game);        
+        sut = game;        
         sut.state.players = [];
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));
@@ -152,6 +152,56 @@ describe("GetUserCaptionHandler", () => {
     });
 });
 
+describe("PassStacksAroundHandler", () => {
+    let step, state, p1, p2, channel;
+    beforeEach(() => {
+        p1 = new Identity("Some player");
+        p2 = new Identity("Some player");
+        channel = new NullMessageChannel();
+        state = {
+            players: [ p1, p2 ],
+            stacks: [ 
+                new Stack(p1.clientId, "hint1"),
+                new Stack(p2.clientId, "hint2"),
+            ],
+            hints: [ "hint1", "hint2" ],
+            channel: channel
+        };
+
+        step = new PassStacksAroundHandler();
+        state.stacks[0].add(new StackItem("image", "http://tempuri.org/img.png"));
+        state.stacks[1].add(new StackItem("image", "http://tempuri.org/img.png"));
+    });
+
+    it("execute, assigns players each others stacks", async () => {
+        step.execute(state);
+
+        expect(state.stacks[0].heldBy).toBe(p2.clientId);
+        expect(state.stacks[1].heldBy).toBe(p1.clientId);
+    });
+
+    it("execute, when original owners have their stacks again, redirects to getUserScores", async () => {
+        await step.execute(state);
+        const result = await step.execute(state);
+
+        expect(result.transitionTo).toBe("getUserScores");
+    });
+
+    it("execute, routes to getUserCaption when last card was an image", async () => {
+        const result = await step.execute(state);
+
+        expect(result.transitionTo).toBe("getUserCaption");
+    });
+
+    it("execute, routes to getUserDrawing when last card was a caption", async () => {
+        state.stacks[0].add(new StackItem("string", "blah blah"));
+        state.stacks[1].add(new StackItem("string", "bleh bleh"));
+
+        const result = await step.execute(state);
+
+        expect(result.transitionTo).toBe("getUserDrawing");
+    });
+});
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
