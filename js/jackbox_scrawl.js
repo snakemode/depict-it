@@ -1,4 +1,3 @@
-import { scrawlHints, shuffle, Stack, StackItem } from "../js/scrawl.js";
 import { JackboxStateMachine, waitUntil } from "./jackbox.js";
 
 export class StartHandler {
@@ -160,6 +159,69 @@ export class GetUserScoresHandler {
         }            
 
         this.submitted++;
+    }
+}
+
+
+export class Stack {
+    constructor(ownerId, openingHint) {
+        this.ownedBy = ownerId;
+        this.heldBy = ownerId;
+        this.items = [ new StackItem("string", openingHint) ];
+        this.items[0].author = "SYSTEM";
+        this.requires = "image";
+    }
+
+    add(item) {
+        this.items.push(item);
+        this.requires = item.type == "image" ? "string" : "image";
+    }
+}
+
+export class StackItem {
+    constructor(type, value) { // "string" | "image" && full text | url
+        this.type = type;
+        this.value = value;
+    }
+}
+
+export const scrawlHints = [
+    "Freezing your own head",
+    "Making friends with your tapeworm",
+    "A man who has lost his muffins",
+    "Lost in IKEA",
+    "Throwing the baby out with the bathwater",
+    "Going out in a blaze of glory",
+    "Burger nips",
+    "Trust excercises",
+    "DIY lobotomy",
+    "Sexting",
+    "Shaving the llama",
+    "Sculpting the cactus",
+    "Freestyle kazoo solo",
+    "Awkward hug",
+    "Butt chin",
+    "Spontanious human combustion",
+    "Bad babysitter",
+    "Sharknado",
+    "Fighting fire with fire",
+    "Tasering a sloth",
+    "Holiday in hell",
+    "Haunted oven",
+    "Dancing on someone's grave",
+    "The world's biggest sneeze",
+    "Putting make-up on an owl",
+    "Sore loser",
+    "Bronies",
+    "Cereal killer",
+    "Cleaning out your pipes",
+    "Moobs"
+];
+
+export function shuffle(collection) {
+    for (let i = collection.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [collection[i], collection[j]] = [collection[j], collection[i]];
     }
 }
 

@@ -6,10 +6,12 @@ import {
     GetUserDrawingHandler, 
     GetUserCaptionHandler, 
     PassStacksAroundHandler,
-    GetUserScoresHandler
+    GetUserScoresHandler,
+    EndHandler,
+    Stack,
+    StackItem
 } from "../js/jackbox_scrawl.js";
 import { Identity } from "../js/p2p.js";
-import { Stack, StackItem } from "../js/scrawl.js";
 
 describe("ScrawlGame", () => {
     let sut;
@@ -242,9 +244,35 @@ describe("GetUserScoresHandler", () => {
         expect(result.transitionTo).toBe("end");
         expect(result.error).not.toBeDefined();
     });
-
 });
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+describe("EndHandler", () => {
+    let step, state, p1, p2, channel;
+    beforeEach(() => {
+        p1 = new Identity("Some player");
+        channel = new NullMessageChannel();
+        state = {
+            players: [ p1 ],
+            stacks: [ new Stack(p1.clientId, "hint1") ],
+            hints: [ "hint1" ],
+            channel: channel
+        };
+
+        step = new EndHandler();
+    });
+
+    it("execute, completes the state machine", async () => {
+        const result = await step.execute(state);
+
+        expect(result.complete).toBe(true);
+    });
+
+    it("execute, sends a message to the clients to show the scoreboard", async () => {
+        const result = await step.execute(state);
+
+        expect(channel.sentMessages.length).toBe(1);
+        expect(channel.sentMessages[0].message.kind).toBe("instruction");
+        expect(channel.sentMessages[0].message.type).toBe("show-scores");
+        expect(channel.sentMessages[0].message.playerScores).toBeDefined();
+    });
+});
