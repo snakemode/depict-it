@@ -137,7 +137,7 @@ export class GetUserScoresHandler {
             }
         }
 
-        return { transitionTo: "end" };
+        return { transitionTo: "EndHandler" };
     }
     
     async handleInput(state, message) {
@@ -159,6 +159,13 @@ export class GetUserScoresHandler {
         }            
 
         this.submitted++;
+    }
+}
+
+export class EndHandler {
+    async execute(state) {
+        state.channel.sendMessage({ kind: "instruction", type: "show-scores", playerScores: state.players });
+        return { complete: true };
     }
 }
 
@@ -222,13 +229,6 @@ export function shuffle(collection) {
     for (let i = collection.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [collection[i], collection[j]] = [collection[j], collection[i]];
-    }
-}
-
-export class EndHandler {
-    async execute(state) {
-        state.channel.sendMessage({ kind: "instruction", type: "show-scores", playerScores: state.players });
-        return { complete: true };
     }
 }
 

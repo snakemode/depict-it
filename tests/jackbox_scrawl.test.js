@@ -241,7 +241,7 @@ describe("GetUserScoresHandler", () => {
 
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("end");
+        expect(result.transitionTo).toBe("EndHandler");
         expect(result.error).not.toBeDefined();
     });
 });

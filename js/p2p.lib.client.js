@@ -7,8 +7,7 @@ export class P2PClient {
       this.serverState = null;
       this.state = { 
         status: "disconnected",
-        lastInstruction: null,
-        pendingVotes: []
+        lastInstruction: null
        };
     }
 
@@ -28,7 +27,6 @@ export class P2PClient {
           this.state.status = "acknowledged"; 
           break;
         case "instruction":
-          console.log("updating last instruction", message);
           this.state.lastInstruction = message;
           break;
         default: { };
@@ -53,11 +51,6 @@ export class P2PClient {
 
     async logVote(id) {
       this.ably.sendMessage({ kind: "pick-one-response", id: id });
-    }
-
-    async sendVotes() {
-      this.ably.sendMessage({ kind: "client-votes", votes: this.state.pendingVotes });
-      this.state.pendingVotes = [];
     }
 
   }
