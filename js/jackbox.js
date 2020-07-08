@@ -16,7 +16,7 @@ export class JackboxStateMachine {
         };
 
         this.game = gameDefinition;
-        this.currentStepKey = "start";
+        this.currentStepKey = "StartHandler";
 
         this.msTracker = null;
     }
@@ -31,7 +31,7 @@ export class JackboxStateMachine {
         const currentStep = this.currentStep();
         const response = await currentStep.execute(this.state);
 
-        if (this.currentStepKey == "end" && (response == null || response.complete)) {            
+        if (this.currentStepKey == "EndHandler" && (response == null || response.complete)) {            
             return; // State machine exit signal
         }
 

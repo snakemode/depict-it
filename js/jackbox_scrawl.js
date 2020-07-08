@@ -5,7 +5,7 @@ export class StartHandler {
         state.stacks = [];
         state.hints = scrawlHints.slice();
         shuffle(state.hints);
-        return { transitionTo: "deal" };
+        return { transitionTo: "DealHandler" };
     }
 }
 
@@ -16,7 +16,7 @@ export class DealHandler {
             const stack = new Stack(player.clientId, hint);
             state.stacks.push(stack);
         }
-        return { transitionTo: "getUserDrawing" };
+        return { transitionTo: "GetUserDrawingHandler" };
     }   
 }
 
@@ -37,11 +37,11 @@ export class GetUserDrawingHandler {
 
         try { 
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
-            return { transitionTo: "passStacksAround" }; 
+            return { transitionTo: "PassStacksAroundHandler" }; 
         }
         catch (exception) {        
             console.log("Someone didn't send a drawing in time!");         
-            return { transitionTo: "passStacksAround", error: true }; // Do something to compensate for lack of drawing?
+            return { transitionTo: "PassStacksAroundHandler", error: true }; // Do something to compensate for lack of drawing?
         }
     }
 
@@ -75,11 +75,11 @@ export class GetUserCaptionHandler {
 
         try { 
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
-            return { transitionTo: "passStacksAround" }; 
+            return { transitionTo: "PassStacksAroundHandler" }; 
         }
         catch {   
             console.log("Someone didn't send a caption in time!");         
-            return { transitionTo: "passStacksAround", error: true };
+            return { transitionTo: "PassStacksAroundHandler", error: true };
         }         
     }
 
@@ -109,11 +109,11 @@ export class PassStacksAroundHandler {
         const stacksHeldByOriginalOwners = state.stacks[0].heldBy == state.players[0].clientId;
         
         if (stacksHeldByOriginalOwners) {
-            return { transitionTo: "getUserScores" }; 
+            return { transitionTo: "GetUserScoresHandler" }; 
         }
 
         const nextStackRequirement = state.stacks[0].requires;
-        const nextTransition = nextStackRequirement == "image" ? "getUserDrawing" : "getUserCaption";
+        const nextTransition = nextStackRequirement == "image" ? "GetUserDrawingHandler" : "GetUserCaptionHandler";
         return { transitionTo: nextTransition };
     }
 }
@@ -241,12 +241,12 @@ function createId() {
 
 export const ScrawlGame = new JackboxStateMachine({
     steps: {
-        "start": new StartHandler(), 
-        "deal": new DealHandler(), 
-        "getUserDrawing": new GetUserDrawingHandler(30_000), 
-        "getUserCaption": new GetUserCaptionHandler(30_000), 
-        "passStacksAround": new PassStacksAroundHandler(), 
-        "getUserScores": new GetUserScoresHandler(30_000),
-        "end": new EndHandler()
+        "StartHandler": new StartHandler(), 
+        "DealHandler": new DealHandler(), 
+        "GetUserDrawingHandler": new GetUserDrawingHandler(30_000), 
+        "GetUserCaptionHandler": new GetUserCaptionHandler(30_000), 
+        "PassStacksAroundHandler": new PassStacksAroundHandler(), 
+        "GetUserScoresHandler": new GetUserScoresHandler(30_000),
+        "EndHandler": new EndHandler()
     }
 });

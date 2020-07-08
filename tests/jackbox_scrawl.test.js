@@ -25,7 +25,7 @@ describe("ScrawlGame", () => {
     it("run, sets up the game and prompts users for their first drawing", async () => {
         await sut.run();
 
-        expect(sut.currentStepKey).toBe("getUserDrawing");
+        expect(sut.currentStepKey).toBe("GetUserDrawingHandler");
     });
 });
 
@@ -48,7 +48,7 @@ describe("StartHandler", () => {
 
     it("execute, triggers 'deal' step", async () => {
         const result = await step.execute(state);
-        expect(result.transitionTo).toBe("deal");
+        expect(result.transitionTo).toBe("DealHandler");
     });
 });
 
@@ -70,7 +70,7 @@ describe("DealHandler", () => {
     
     it("execute, triggers 'getUserDrawing' step to start game", async () => {
         const result = await step.execute(state);
-        expect(result.transitionTo).toBe("getUserDrawing");
+        expect(result.transitionTo).toBe("GetUserDrawingHandler");
     });
 });
 
@@ -97,22 +97,22 @@ describe("GetUserDrawingHandler", () => {
         expect(channel.sentMessages[0].message.value).toBe("hint1");
     });
     
-    it("execute, transitions to passStacksAround after all users have provided input", async () => {
+    it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
             step.handleInput(state, { kind: "drawing-response", imageUrl: "http://my/drawing.jpg", metadata: { clientId: identity.clientId } });
         }, 100);
 
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("passStacksAround");
+        expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).not.toBeDefined();
     });
 
-    it("execute, transitions to passStacksAround with error flag if users timeout.", async () => {
+    it("execute, transitions to PassStacksAroundHandler with error flag if users timeout.", async () => {
         step = new GetUserDrawingHandler(100);
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("passStacksAround");
+        expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
     });
 });
@@ -142,14 +142,14 @@ describe("GetUserCaptionHandler", () => {
         expect(channel.sentMessages[0].message.value).toBe("http://tempuri.org/img.png");
     });
     
-    it("execute, transitions to passStacksAround after all users have provided input", async () => {
+    it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
             step.handleInput(state, { kind: "caption-response", caption: "blah blah blah", metadata: { clientId: identity.clientId } });
         }, 100);
 
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("passStacksAround");
+        expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).not.toBeDefined();
     });
 
@@ -157,7 +157,7 @@ describe("GetUserCaptionHandler", () => {
         step = new GetUserCaptionHandler(100);
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("passStacksAround");
+        expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
     });
 });
@@ -194,13 +194,13 @@ describe("PassStacksAroundHandler", () => {
         await step.execute(state);
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("getUserScores");
+        expect(result.transitionTo).toBe("GetUserScoresHandler");
     });
 
     it("execute, routes to getUserCaption when last card was an image", async () => {
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("getUserCaption");
+        expect(result.transitionTo).toBe("GetUserCaptionHandler");
     });
 
     it("execute, routes to getUserDrawing when last card was a caption", async () => {
@@ -209,7 +209,7 @@ describe("PassStacksAroundHandler", () => {
 
         const result = await step.execute(state);
 
-        expect(result.transitionTo).toBe("getUserDrawing");
+        expect(result.transitionTo).toBe("GetUserDrawingHandler");
     });
 });
 
