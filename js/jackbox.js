@@ -57,13 +57,13 @@ export class JackboxStateMachine {
         this.state.msInCurrentStep = 0;
 
         const interval = 5;
-        this.msTracker = setInterval(() => { this.state.msInCurrentStep += interval; }, interval);
+        this.msTracker = setInterval(() => { 
+            this.state.msInCurrentStep += interval; 
+        }, interval);
     }
 }
 
-
-
-export const waitUntil = (condition, timeout) => {
+export function waitUntil(condition, timeout) {
     return new Promise((res, rej) => {
 
         if (condition()) {
@@ -72,21 +72,26 @@ export const waitUntil = (condition, timeout) => {
         }
 
         let elapsed = 0;
-        const pollFrequency = 5;
-        let interval = setInterval(() => {
+        const pollFrequency = 10;
+        let poll = setInterval(() => {
 
             if (condition()) {
-                clearInterval(interval);
+                clearInterval(poll);
                 res();
                 return;
             }
 
             elapsed += pollFrequency;  
 
-            if (timeout && elapsed >= timeout) {
-                clearInterval(interval);
+            if (!timeout) {
+                return;
+            }
+
+            if (elapsed >= timeout) {
+                clearInterval(poll);
                 rej("Timed out");
             }
-        }, pollFrequency);        
+        }, pollFrequency);
+        
     });
 }

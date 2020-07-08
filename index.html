@@ -64,7 +64,7 @@
             <div v-if="state?.lastInstruction?.type == 'pick-one'">
               <h1>Pick one!</h1>
 
-              <div v-for="item in state?.lastInstruction?.stack.items">
+              <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">
                   <span v-if="item.type == 'string'"    v-bind:data-id="item.id" v-on:click="sendVote"   style="width: 150px; height: 50px;">{{ item.value }}</span>
                   <img  v-else v-bind:data-id="item.id" v-bind:src="item.value"  v-on:click="sendVote"   style="width: 150px; height: 150px;" />
               </div>

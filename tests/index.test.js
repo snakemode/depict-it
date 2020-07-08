@@ -20,16 +20,16 @@ global.crypto = { getRandomValues: function() { return [ 123454373 ] } };
 global.window = { location: { protocol: "https:", host: "localhost", pathname: "/bingo" } }
 
 const { app } = require("../index.js");
-/*
+
 describe("Vue app", () => {
 
     it("Hosting a game creates a server", async () => {
         await app.host({ preventDefault: function() {}});
 
-        expect(app.gameServer).toBeDefined();        
-        expect(app.gameServer).not.toBeNull();        
+        //expect(app.gameServer).toBeDefined();        
+        //expect(app.gameServer).not.toBeNull();        
     });
-
+/*
     it("Hosting a game creates a client", async () => {
         await app.host({ preventDefault: function() {}});
 
@@ -42,5 +42,5 @@ describe("Vue app", () => {
 
         expect(app.gameClient).toBeDefined();        
         expect(app.gameClient).not.toBeNull();        
-    });
-});*/
+    });*/
+});
