@@ -1,5 +1,4 @@
-import { JackboxStateMachine } from "./jackbox.js";
-import { game } from "./jackbox_scrawl.js";
+import { ScrawlGame } from "./jackbox_scrawl.js";
 
 export class P2PServer {
     constructor(identity, uniqueId, ably) {
@@ -7,7 +6,7 @@ export class P2PServer {
       this.uniqueId = uniqueId;
       this.ably = ably;
 
-      this.stateMachine = new JackboxStateMachine(game);
+      this.stateMachine = ScrawlGame;
       this.stateMachine.state.channel = ably;
 
       this.state = { 

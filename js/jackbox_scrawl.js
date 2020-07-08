@@ -120,13 +120,22 @@ export class PassStacksAroundHandler {
 }
 
 export class GetUserScoresHandler {
+    constructor(waitForUsersFor) {
+        this.waitForUsersFor = waitForUsersFor;
+    }
+
     async execute(state) {     
 
         for (let stack of state.stacks) { 
             this.submitted = 0;
 
-            state.channel.sendMessage({ kind: "instruction", type: "pick-one", stack: stack });            
-            await waitUntil(() => { return this.submitted == state.players.length });
+            state.channel.sendMessage({ kind: "instruction", type: "pick-one", stack: stack });
+            
+            try { 
+                await waitUntil(() => { return this.submitted == state.players.length }, this.waitForUsersFor);
+            } catch {
+                console.log("Not all votes cast, shrug")
+            }
         }
 
         return { transitionTo: "end" };
@@ -140,7 +149,7 @@ export class GetUserScoresHandler {
         for (let stack of state.stacks) {
             for (let item of stack.items) {
                 if (item.id == message.id) {
-                    console.log("found voted item", item);
+
                     const author = state.players.filter(p => p.clientId == item.author)[0];
                     if(!author.score) {
                         author.score = 0;
@@ -168,14 +177,14 @@ function createId() {
     });
 }
 
-export const game = new JackboxStateMachine({
+export const ScrawlGame = new JackboxStateMachine({
     steps: {
         "start": new StartHandler(), 
         "deal": new DealHandler(), 
         "getUserDrawing": new GetUserDrawingHandler(30_000), 
         "getUserCaption": new GetUserCaptionHandler(30_000), 
         "passStacksAround": new PassStacksAroundHandler(), 
-        "getUserScores": new GetUserScoresHandler(),
+        "getUserScores": new GetUserScoresHandler(30_000),
         "end": new EndHandler()
     }
 });

@@ -1,12 +1,20 @@
 import { NullMessageChannel } from "../js/jackbox.js";
-import { game, StartHandler, DealHandler, GetUserDrawingHandler, GetUserCaptionHandler, PassStacksAroundHandler } from "../js/jackbox_scrawl.js";
+import { 
+    ScrawlGame, 
+    StartHandler, 
+    DealHandler, 
+    GetUserDrawingHandler, 
+    GetUserCaptionHandler, 
+    PassStacksAroundHandler,
+    GetUserScoresHandler
+} from "../js/jackbox_scrawl.js";
 import { Identity } from "../js/p2p.js";
 import { Stack, StackItem } from "../js/scrawl.js";
 
-describe("JackboxStateMachine", () => {
+describe("ScrawlGame", () => {
     let sut;
     beforeEach(() => {
-        sut = game;        
+        sut = ScrawlGame;        
         sut.state.players = [];
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));
@@ -201,6 +209,40 @@ describe("PassStacksAroundHandler", () => {
 
         expect(result.transitionTo).toBe("getUserDrawing");
     });
+});
+
+describe("GetUserScoresHandler", () => {
+    let step, state, p1, p2, channel;
+    beforeEach(() => {
+        p1 = new Identity("Some player");
+        channel = new NullMessageChannel();
+        state = {
+            players: [ p1 ],
+            stacks: [ 
+                new Stack(p1.clientId, "hint1"),
+            ],
+            hints: [ "hint1", "hint2" ],
+            channel: channel
+        };
+
+        step = new GetUserScoresHandler(5_000);
+        const item = new StackItem("image", "http://tempuri.org/img.png");
+        item.author = p1.clientId;
+        item.id = "1234";
+        state.stacks[0].items.push(item);
+    });
+
+    it("execute, requests players to vote for one card per stack", async () => {
+        setTimeout(async () => {
+            step.handleInput(state, { kind: "pick-one-response", id: "1234", metadata: { clientId: p1.clientId } });
+        }, 100);
+
+        const result = await step.execute(state);
+
+        expect(result.transitionTo).toBe("end");
+        expect(result.error).not.toBeDefined();
+    });
+
 });
 
 function sleep(ms) {
