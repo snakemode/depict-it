@@ -7,7 +7,7 @@ export class P2PClient {
       this.serverState = null;
       this.state = { 
         status: "disconnected",
-        lastImage: null
+        pendingVotes: []
        };
     }
 
@@ -49,6 +49,15 @@ export class P2PClient {
 
     async sendCaption(caption) {
       this.ably.sendMessage({ kind: "client-caption", caption: caption });
+    }
+
+    async logVote(id) {
+      this.state.pendingVotes.push(id);
+    }
+
+    async sendVotes() {
+      this.ably.sendMessage({ kind: "client-votes", votes: this.state.pendingVotes });
+      this.state.pendingVotes = [];
     }
 
   }

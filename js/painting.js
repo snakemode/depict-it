@@ -30,6 +30,7 @@ export class DrawableCanvas {
         this.cursorPoint.x = e.offsetX;
         this.cursorPoint.y = e.offsetY;
 
+        this.paintContext.lineWidth = 10;
         this.paintContext.beginPath();
         this.paintContext.moveTo(this.cursorPoint.x, this.cursorPoint.y);
         this.paintContext.strokeStyle = this.activeColour;

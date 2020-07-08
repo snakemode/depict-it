@@ -41,11 +41,6 @@
           </li>
         </ul> 
 
-        <div>
-          Current State Code: {{ transmittedServerState?.game?.state.code }} <br/>
-          Current State Reason: {{ transmittedServerState?.game?.state.reason }}
-        </div>
-
         <div v-if="transmittedServerState?.game?.state?.code == 0">
  
           <div>
@@ -66,6 +61,7 @@
               <span>{{ heldStackTopItem?.value }}</span>
 
               <div id="palette" class="palette">
+                <div style="background-color: white;"></div>
                 <div style="background-color: black;"></div>
                 <div style="background-color: red;"></div>
                 <div style="background-color: green;"></div>
@@ -96,6 +92,14 @@
 
           A carousel of each stack.
           Final panel is a "submit" button.
+
+          <div class="stack-debug" v-for="stack in transmittedServerState?.game?.stacks"> 
+            <div v-for="item in stack.items">
+              <span v-if="item.type == 'string'"    v-bind:data-id="item.id" v-on:click="logVote" style="width: 150px; height: 50px;">{{ item.value }}</span>
+              <img  v-else v-bind:data-id="item.id" v-bind:src="item.value"  v-on:click="logVote"   style="width: 150px; height: 150px;" />
+            </div>
+          </div>
+
         </div>
 
 
@@ -103,6 +107,12 @@
         <!--- Debug below here -->
 
         <div>
+
+          <div>
+            Current State Code: {{ transmittedServerState?.game?.state.code }} <br/>
+            Current State Reason: {{ transmittedServerState?.game?.state.reason }}
+          </div>
+
           <h2>Debug View of All Stacks</h2>
 
           <div class="stack-debug" style="display: flex; flex-direction: column;" v-for="stack in transmittedServerState?.game?.stacks"> 
