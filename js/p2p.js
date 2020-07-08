@@ -38,8 +38,6 @@ export class PubSubClient {
       throw "Client is not connected"; 
     }
 
-    console.log("Sending message", message, targetClientId);
-
     message.metadata = this.metadata;
     message.forClientId = targetClientId ? targetClientId : null;
     this.channel.publish({ name: "myMessageName", data: message});

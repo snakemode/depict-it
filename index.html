@@ -44,13 +44,31 @@
         <div>
  
           <div>
-            Last Message: {{ state?.lastMessage }}
+            Last Message: {{ state?.lastInstruction }}
           </div>
 
 
           <div> 
             <div v-if="state?.lastInstruction?.type == 'wait'">
               Wait for other players to finish.
+            </div>
+
+            <div v-if="state?.lastInstruction?.type == 'show-scores'">
+              <h1>Show Scores</h1>
+
+              <div v-for="player in state?.lastInstruction?.playerScores">
+                {{ player.friendlyName }}: {{ player.score }}
+              </div>
+            </div>
+
+            <div v-if="state?.lastInstruction?.type == 'pick-one'">
+              <h1>Pick one!</h1>
+
+              <div v-for="item in state?.lastInstruction?.stack.items">
+                  <span v-if="item.type == 'string'"    v-bind:data-id="item.id" v-on:click="sendVote"   style="width: 150px; height: 50px;">{{ item.value }}</span>
+                  <img  v-else v-bind:data-id="item.id" v-bind:src="item.value"  v-on:click="sendVote"   style="width: 150px; height: 150px;" />
+              </div>
+
             </div>
             
             <div v-if="state?.lastInstruction?.type == 'drawing-request'">
@@ -76,51 +94,11 @@
               <img v-bind:src="state?.lastInstruction?.value" />
 
               <input type="text" name="caption" v-model="caption">            
-              <button vv-on:click="sendCaption" class="form-button">Send Caption</button>
+              <button v-on:click="sendCaption" class="form-button">Send Caption</button>
             </div>
 
           </div>
           
-        </div>
-
-        <div v-if="transmittedServerState?.game?.state?.code == 1">
-          Scoring Screen.
-
-          A carousel of each stack.
-          Final panel is a "submit" button.
-
-          <div class="stack-debug" v-for="stack in transmittedServerState?.game?.stacks"> 
-            <div v-for="item in stack.items">
-              <span v-if="item.type == 'string'"    v-bind:data-id="item.id" v-on:click="logVote" style="width: 150px; height: 50px;">{{ item.value }}</span>
-              <img  v-else v-bind:data-id="item.id" v-bind:src="item.value"  v-on:click="logVote"   style="width: 150px; height: 150px;" />
-            </div>
-          </div>
-
-        </div>
-
-
-
-        <!--- Debug below here -->
-
-        <div>
-
-          <div>
-            Current State Code: {{ transmittedServerState?.game?.state.code }} <br/>
-            Current State Reason: {{ transmittedServerState?.game?.state.reason }}
-          </div>
-
-          <h2>Debug View of All Stacks</h2>
-
-          <div class="stack-debug" style="display: flex; flex-direction: column;" v-for="stack in transmittedServerState?.game?.stacks"> 
-            <span>Stack owner {{ stack.ownedBy  }}</span>      
-            <div style="display: flex; flex-direction: column; flex-grow: 0;">
-              <div style="border: 1px solid black;" class="stack-item-debug" v-for="item in stack.items">
-                <span v-if="item.type == 'string'"  style="width: 150px; height: 50px;">{{ item.value }}</span>
-                <img v-else v-bind:src="item.value" style="width: 150px; height: 150px;" />
-              </div>
-            </div>      
-          </div>
-
         </div>
 
 

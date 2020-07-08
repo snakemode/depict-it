@@ -66,12 +66,8 @@ export var app = new Vue({
       await this.p2pClient.sendCaption(this.caption);
       this.caption = "";
     },
-    logVote: async function(evt) {
-      console.log(evt);
-      await this.p2pClient.logVote(evt.target.id);
-    },
-    sendVotes: async function(evt) {
-      await this.p2pClient.sendVotes();
+    sendVote: async function(evt) {
+      await this.p2pClient.logVote(evt.target.getAttribute("data-id"));
     }
   }
 });

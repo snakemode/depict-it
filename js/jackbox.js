@@ -18,22 +18,29 @@ export class JackboxStateMachine {
         this.game = gameDefinition;
         this.currentStepKey = "start";
 
-        this.stateObserver = null;
         this.msTracker = null;
-        this.timeoutTracker = null;
     }
 
     currentStep() { return this.game.steps[this.currentStepKey]; }
 
     async run() {
-        console.log("Running", this.currentStepKey, this.state);
+        console.log("Invoking run()", this.currentStepKey);
 
         this.trackMilliseconds();
-        this.trackAnyTimeouts();
 
         const currentStep = this.currentStep();
-        await currentStep.execute(this.state);        
-        await this.observeStateChanges();
+        const response = await currentStep.execute(this.state);
+
+        if (this.currentStepKey == "end" && (response == null || response.complete)) {            
+            return; // State machine exit signal
+        }
+
+        if (response == null) {
+            throw "You must return a response from your execute functions so we know where to redirect to.";
+        }
+
+        this.currentStepKey = response.transitionTo; 
+        this.run();
     }
 
     async handleInput(input) {
@@ -45,29 +52,6 @@ export class JackboxStateMachine {
         } 
     }
 
-    async observeStateChanges() {    
-        const step = this.currentStep();
-      
-        let nextStep = null;
-        if (step.getStatus) {
-            const status = await step.getStatus(this.state);
-            if (status.complete) {
-                nextStep = status.transitionTo ?? this.selectNextStepInDefinitionOrder();
-            }
-        } else {
-            nextStep = this.selectNextStepInDefinitionOrder();
-        }
-
-        if (nextStep != null) {            
-            this.currentStepKey = nextStep;            
-            this.stopObservingChanges();
-            this.run();
-            return;
-        }
-
-        this.stateObserver = setTimeout(() => { this.observeStateChanges(); }, 25);
-    }
-
     trackMilliseconds() {
         clearTimeout(this.msTracker);        
         this.state.msInCurrentStep = 0;
@@ -75,34 +59,34 @@ export class JackboxStateMachine {
         const interval = 5;
         this.msTracker = setInterval(() => { this.state.msInCurrentStep += interval; }, interval);
     }
+}
 
-    trackAnyTimeouts() {
-        clearTimeout(this.timeoutTracker);
-        this.state.timedOut = false;
 
-        const step = this.currentStep(); 
-        if (!step.timeout) { 
-            return; 
+
+export const waitUntil = (condition, timeout) => {
+    return new Promise((res, rej) => {
+
+        if (condition()) {
+            res();
+            return;
         }
 
-        this.timeoutTracker = setTimeout(() => {
-            if (step.onTimeout) {
-                step.onTimeout(this.state);
-                this.state.timedOut = true;
-            }                
-        }, step.timeout);        
-    }
+        let elapsed = 0;
+        const pollFrequency = 5;
+        let interval = setInterval(() => {
 
-    selectNextStepInDefinitionOrder() {     
-        const stepDefinitions = Object.getOwnPropertyNames(this.game.steps);
-        const currentIndex = stepDefinitions.indexOf(this.currentStepKey);
-        
-        if (currentIndex == stepDefinitions.length -1) {
-            return null; // End of the line.
-        }
+            if (condition()) {
+                clearInterval(interval);
+                res();
+                return;
+            }
 
-        return stepDefinitions[currentIndex+1];   
-    }
+            elapsed += pollFrequency;  
 
-    stopObservingChanges() { clearTimeout(this.stateObserver); }
+            if (timeout && elapsed >= timeout) {
+                clearInterval(interval);
+                rej("Timed out");
+            }
+        }, pollFrequency);        
+    });
 }

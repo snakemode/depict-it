@@ -11,7 +11,8 @@ describe("JackboxStateMachine", () => {
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));
 
-        await sut.run();
+        sut.run();
+
         await sleep(1000);
 
         expect(sut.currentStepKey).toBe("getUserDrawing");

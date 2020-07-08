@@ -1,4 +1,5 @@
 import { scrawlHints, shuffle, Stack, StackItem } from "../js/scrawl.js";
+import { waitUntil } from "./jackbox.js";
 
 export const start = {
     execute: async function (state) {
@@ -8,9 +9,9 @@ export const start = {
         
         state.currentTick = 1;
         state.stacks = [];
-    },
-    
-    getStatus: async function(state) { return { complete: true, transitionTo: "deal" }; }
+
+        return { transitionTo: "deal" };
+    }
 }
 
 export const deal = {
@@ -22,9 +23,9 @@ export const deal = {
             const stack = new Stack(player.clientId, hint);
             state.stacks.push(stack);
         }
-    },
-    
-    getStatus: async function(state) { return { complete: true, transitionTo: "getUserDrawing" }; }
+
+        return { transitionTo: "getUserDrawing" };
+    }
 }
 
 export const getUserDrawing = {
@@ -35,6 +36,15 @@ export const getUserDrawing = {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length -1];
             state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value }, player.clientId);
+        }
+
+        try { 
+            await waitUntil(() => this.submitted == state.players.length, 30_000);
+            return { transitionTo: "passStacksAround" }; 
+        }
+        catch {   
+            console.log("Someone didn't send a drawing in time!");         
+            return { transitionTo: "passStacksAround" }; // Do something to compensate for lack of drawing?
         }
     },
 
@@ -49,16 +59,7 @@ export const getUserDrawing = {
 
             this.submitted++;
         }
-    },
-
-    getStatus: async function(state) {
-        if (this.submitted < state.players.length) {            
-            return { complete: false };
-        }
-
-        console.log("moving on from getUserDrawing");
-        return { complete: true, transitionTo: "passStacksAround" }; 
-    },
+    }
 }
 
 export const getUserCaption = {
@@ -70,11 +71,21 @@ export const getUserCaption = {
             const lastItem = stack.items[stack.items.length -1];
             state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value }, player.clientId);
         }
+
+        try { 
+            await waitUntil(() => this.submitted == state.players.length, 30_000);
+            return { transitionTo: "passStacksAround" }; 
+        }
+        catch {   
+            console.log("Someone didn't send a caption in time!");         
+            return { transitionTo: "passStacksAround" };
+        }         
     },
 
     handleInput: async function(state, message) {
 
-        if (message.kind == "caption-response") {           
+        if (message.kind == "caption-response") {  
+            console.log("got caption response");         
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
@@ -83,15 +94,7 @@ export const getUserCaption = {
 
             this.submitted++;
         }
-    },
-
-    getStatus: async function(state) {
-        if (this.submitted < state.players.length) {            
-            return { complete: false };
-        }
-
-        return { complete: true, transitionTo: "passStacksAround" }; 
-    },
+    }
 }
 
 export const passStacksAround = {
@@ -104,39 +107,62 @@ export const passStacksAround = {
         for (let stackIndex in state.stacks) {
             state.stacks[stackIndex].heldBy = holders[stackIndex];
         }
-    },
-
-    getStatus: async function(state) {
         
         const stacksHeldByOriginalOwners = state.stacks[0].heldBy == state.players[0].clientId;
-        if (stacksHeldByOriginalOwners) {            
-            return { complete: true, transitionTo: "getUserScores" }; 
+        
+        if (stacksHeldByOriginalOwners) {
+            return { transitionTo: "getUserScores" }; 
         }
 
         const nextStackRequirement = state.stacks[0].requires;
-        const nextTransition = nextStackRequirement == "image" ? "getUserDrawing" : "getUserCaption";                  
-        return { complete: true, transitionTo: nextTransition };
-    },
+        const nextTransition = nextStackRequirement == "image" ? "getUserDrawing" : "getUserCaption";  
+
+        return { transitionTo: nextTransition };
+    }
 }
 
 export const getUserScores = {
-    execute: async function (state) {
-        state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
-    },
+    execute: async function (state) {        
 
-    getStatus: async function(state) {
+        for (let stack of state.stacks) { 
 
+            console.log("Getting score for stack", stack);
+
+            this.submitted = 0;
+            state.channel.sendMessage({ kind: "instruction", type: "pick-one", stack: stack });
+            await waitUntil(() => this.submitted == state.players.length);
+        }
+
+        return { transitionTo: "end" };
     },
+    
+    handleInput: async function(state, message) {
+
+        if (message.kind == "pick-one-response") { 
+            
+            for (let stack of state.stacks) {
+                for (let item of stack.items) {
+                    if (item.id == message.id) {
+                        console.log("found voted item", item);
+                        const author = state.players.filter(p => p.clientId == item.author)[0];
+                        if(!author.score) {
+                            author.score = 0;
+                        }
+                        author.score++;
+                    }
+                }
+            }            
+
+            this.submitted++;
+        }
+    }
 }
 
 export const end = {
     execute: async function (state) {
-
-    },
-
-    getStatus: async function(state) {
-
-    },
+        state.channel.sendMessage({ kind: "instruction", type: "show-scores", playerScores: state.players });
+        return { complete: true };
+    }
 }
 
 function createId() {
