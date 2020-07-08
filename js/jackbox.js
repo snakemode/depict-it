@@ -1,12 +1,18 @@
 export class NullMessageChannel {
+    constructor() {
+        this.sentMessages = []
+    }
+
     sendMessage(message, targetClientId) {
+        this.sentMessages.push( { message, targetClientId });
     }
 }
 
 export class JackboxStateMachine {
     constructor(gameDefinition) {
         this.state = {
-            msInCurrentStep: 0, 
+            msInCurrentStep: 0,
+            channel: new NullMessageChannel()
         };
 
         this.game = gameDefinition;
@@ -20,6 +26,8 @@ export class JackboxStateMachine {
     currentStep() { return this.game.steps[this.currentStepKey]; }
 
     async run() {
+        console.log("Running", this.currentStepKey, this.state);
+
         this.trackMilliseconds();
         this.trackAnyTimeouts();
 
@@ -43,13 +51,15 @@ export class JackboxStateMachine {
         let nextStep = null;
         if (step.getStatus) {
             const status = await step.getStatus(this.state);
-            nextStep = status.transitionTo ?? null;
+            if (status.complete) {
+                nextStep = status.transitionTo ?? this.selectNextStepInDefinitionOrder();
+            }
         } else {
             nextStep = this.selectNextStepInDefinitionOrder();
         }
 
-        if (nextStep != null) {
-            this.currentStepKey = nextStep;
+        if (nextStep != null) {            
+            this.currentStepKey = nextStep;            
             this.stopObservingChanges();
             this.run();
             return;

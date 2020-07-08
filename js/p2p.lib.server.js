@@ -1,4 +1,6 @@
 import { ScrawlGame, StackItem } from "./scrawl.js";
+import { JackboxStateMachine } from "./jackbox.js";
+import { game } from "./jackbox_scrawl.js";
 
 export class P2PServer {
     constructor(identity, uniqueId, ably) {
@@ -6,10 +8,12 @@ export class P2PServer {
       this.uniqueId = uniqueId;
       this.ably = ably;
 
+      this.stateMachine = new JackboxStateMachine(game);
+      this.stateMachine.state.channel = ably;
+
       this.state = { 
-        players: [],
-        game: null
-       };
+        players: []
+      };
     }
      
     async connect() {
@@ -17,21 +21,17 @@ export class P2PServer {
     }
 
     async startGame() {
-      this.state.game = new ScrawlGame();      
-      for (let player of this.state.players) {
-        this.state.game.addPlayer(player);
-      }
-      this.state.game.dealStacks();
-
       this.ably.sendMessage({ kind: "game-start", serverState: this.state });
+      this.stateMachine.state.players = this.state.players;
+      await this.stateMachine.run();
     }
 
     onReceiveMessage(message) {
       switch(message.kind) {
         case "connected": this.onClientConnected(message); break;
-        case "client-drawing": this.onClientDrawing(message); break;
-        case "client-caption": this.onClientCaption(message); break;
-        default: () => { };
+        default: {
+          this.stateMachine.handleInput(message);
+        };
       }
     }
 

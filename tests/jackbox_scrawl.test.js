@@ -15,6 +15,8 @@ describe("JackboxStateMachine", () => {
         await sleep(1000);
 
         expect(sut.currentStepKey).toBe("getUserDrawing");
+
+        console.log(sut.state.channel.sentMessages);
     });
 });
 

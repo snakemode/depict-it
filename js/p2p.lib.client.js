@@ -7,6 +7,7 @@ export class P2PClient {
       this.serverState = null;
       this.state = { 
         status: "disconnected",
+        lastInstruction: null,
         pendingVotes: []
        };
     }
@@ -19,7 +20,6 @@ export class P2PClient {
 
     onReceiveMessage(message) {
       if (message.serverState) {
-        console.log("updated state");
         this.serverState = message.serverState; 
       }
 
@@ -27,11 +27,10 @@ export class P2PClient {
         case "connection-acknowledged": 
           this.state.status = "acknowledged"; 
           break;
-        case "drawing":
-          console.log(message.imageUrl);
-          this.state.lastImage = message.imageUrl;
+        case "instruction":
+          this.state.lastInstruction = message;
           break;
-        default: () => { };
+        default: { };
       }
     }
     
@@ -44,7 +43,7 @@ export class P2PClient {
       });
 
       const savedUrl = await result.json();
-      this.ably.sendMessage({ kind: "client-drawing", imageUrl: savedUrl.url });
+      this.ably.sendMessage({ kind: "drawing-response", imageUrl: savedUrl.url });
     }
 
     async sendCaption(caption) {
