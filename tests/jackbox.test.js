@@ -1,4 +1,4 @@
-import { JackboxStateMachine, waitUntil } from "../js/jackbox.js";
+import { JackboxStateMachine, waitUntil } from "../js/jackbox";
 
 describe("JackboxStateMachine", () => {
 

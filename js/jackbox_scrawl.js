@@ -1,4 +1,5 @@
-import { JackboxStateMachine, waitUntil } from "./jackbox.js";
+import { JackboxStateMachine, waitUntil } from "./jackbox";
+import { scrawlHints } from "./scrawlcards";
 
 export class StartHandler {
     async execute(state) {
@@ -175,7 +176,6 @@ export class EndHandler {
     }
 }
 
-
 export class Stack {
     constructor(ownerId, openingHint) {
         this.ownedBy = ownerId;
@@ -197,39 +197,6 @@ export class StackItem {
         this.value = value;
     }
 }
-
-export const scrawlHints = [
-    "Freezing your own head",
-    "Making friends with your tapeworm",
-    "A man who has lost his muffins",
-    "Lost in IKEA",
-    "Throwing the baby out with the bathwater",
-    "Going out in a blaze of glory",
-    "Burger nips",
-    "Trust excercises",
-    "DIY lobotomy",
-    "Sexting",
-    "Shaving the llama",
-    "Sculpting the cactus",
-    "Freestyle kazoo solo",
-    "Awkward hug",
-    "Butt chin",
-    "Spontanious human combustion",
-    "Bad babysitter",
-    "Sharknado",
-    "Fighting fire with fire",
-    "Tasering a sloth",
-    "Holiday in hell",
-    "Haunted oven",
-    "Dancing on someone's grave",
-    "The world's biggest sneeze",
-    "Putting make-up on an owl",
-    "Sore loser",
-    "Bronies",
-    "Cereal killer",
-    "Cleaning out your pipes",
-    "Moobs"
-];
 
 export function shuffle(collection) {
     for (let i = collection.length - 1; i > 0; i--) {

@@ -1,4 +1,4 @@
-import { NullMessageChannel } from "../js/jackbox.js";
+import { NullMessageChannel } from "../js/jackbox";
 import { 
     ScrawlGame, 
     StartHandler, 
@@ -10,8 +10,8 @@ import {
     EndHandler,
     Stack,
     StackItem
-} from "../js/jackbox_scrawl.js";
-import { Identity } from "../js/p2p.js";
+} from "../js/jackbox_scrawl";
+import { Identity } from "../js/p2p";
 
 describe("ScrawlGame", () => {
     let sut;
