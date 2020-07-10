@@ -2,6 +2,10 @@ import { DrawableCanvas } from "./js/painting.js";
 import { Identity, PubSubClient } from "./js/p2p.js";
 import { P2PClient } from "./js/p2p.lib.client.js";
 import { P2PServer } from "./js/p2p.lib.server.js";
+import { generateName } from "./js/dictionaries.js";
+
+const urlParams = new URLSearchParams(location.search);
+const queryGameId = urlParams.get("gameId");
 
 export var app = new Vue({
   el: '#app',
@@ -10,8 +14,8 @@ export var app = new Vue({
     p2pServer: null,
     
     identity: null,
-    friendlyName: "Player-" + crypto.getRandomValues(new Uint32Array(1))[0],
-    uniqueId: "Session-" + crypto.getRandomValues(new Uint32Array(1))[0],
+    friendlyName: generateName(2),
+    uniqueId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
 
     canvas: null,
     caption: ""

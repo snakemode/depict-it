@@ -34,7 +34,7 @@
         <h2>UniqueId: {{ uniqueId }}</h2>    
         <button v-if="iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
-        <h3>Active players: {{ transmittedServerState?.players?.length }}</h3>
+        <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
           <li class="player" v-for="user in transmittedServerState?.players">                
             <span>{{ user.friendlyName }}</span>
@@ -61,7 +61,7 @@
               </div>
             </div>
 
-            <div v-if="state?.lastInstruction?.type == 'pick-one'">
+            <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
               <h1>Pick one!</h1>
 
               <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">

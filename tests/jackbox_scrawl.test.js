@@ -237,9 +237,15 @@ describe("GetUserScoresHandler", () => {
     it("execute, requests players to vote for one card per stack", async () => {
         setTimeout(async () => {
             step.handleInput(state, { kind: "pick-one-response", id: "1234", metadata: { clientId: p1.clientId } });
+
+            expect(channel.sentMessages[1].message.kind).toBe("instruction");
+            expect(channel.sentMessages[1].message.type).toBe("wait");
         }, 100);
 
         const result = await step.execute(state);
+
+        expect(channel.sentMessages[0].message.kind).toBe("instruction");
+        expect(channel.sentMessages[0].message.type).toBe("pick-one-request");
 
         expect(result.transitionTo).toBe("EndHandler");
         expect(result.error).not.toBeDefined();

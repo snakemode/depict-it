@@ -128,7 +128,7 @@ export class GetUserScoresHandler {
         for (let stack of state.stacks) { 
             this.submitted = 0;
 
-            state.channel.sendMessage({ kind: "instruction", type: "pick-one", stack: stack });
+            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
             
             try { 
                 await waitUntil(() => { return this.submitted == state.players.length }, this.waitForUsersFor);
@@ -158,6 +158,7 @@ export class GetUserScoresHandler {
             }
         }            
 
+        state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
         this.submitted++;
     }
 }
@@ -243,8 +244,8 @@ export const ScrawlGame = new JackboxStateMachine({
     steps: {
         "StartHandler": new StartHandler(), 
         "DealHandler": new DealHandler(), 
-        "GetUserDrawingHandler": new GetUserDrawingHandler(30_000), 
-        "GetUserCaptionHandler": new GetUserCaptionHandler(30_000), 
+        "GetUserDrawingHandler": new GetUserDrawingHandler(180_000), 
+        "GetUserCaptionHandler": new GetUserCaptionHandler(60_000), 
         "PassStacksAroundHandler": new PassStacksAroundHandler(), 
         "GetUserScoresHandler": new GetUserScoresHandler(30_000),
         "EndHandler": new EndHandler()
