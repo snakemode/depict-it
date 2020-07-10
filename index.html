@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>P2P Example</title>
+    <title>Scrawl</title>
     
     <script src="//cdn.ably.io/lib/ably-1.js" defer></script>    
     <script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -14,7 +14,7 @@
 
 
     <div id="app">
-      <h1>P2P Host / Client Example</h1>
+      <h1>Scrawl</h1>
 
       <div class="debug">
         Client State: {{ state?.status == undefined ? "Disconnected" : state?.status }}
@@ -31,8 +31,8 @@
       </form>      
 
       <section v-else class="game-info">
-        <h2>UniqueId: {{ uniqueId }}</h2>    
-        <button v-if="iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
+        <h2>Game: {{ uniqueId }}</h2>    
+        <button v-if="transmittedServerState && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
         <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
@@ -41,12 +41,7 @@
           </li>
         </ul> 
 
-        <div>
- 
-          <div>
-            Last Message: {{ state?.lastInstruction }}
-          </div>
-
+        <div v-if="state?.lastInstruction">
 
           <div> 
             <div v-if="state?.lastInstruction?.type == 'wait'">

@@ -150,6 +150,11 @@ export class GetUserScoresHandler {
                 if (item.id == message.id) {
 
                     const author = state.players.filter(p => p.clientId == item.author)[0];
+
+                    if (!author) {
+                        continue; // They voted on the original phrase, what?!
+                    }
+
                     if(!author.score) {
                         author.score = 0;
                     }
