@@ -1,5 +1,5 @@
-import { JackboxStateMachine, waitUntil } from "./jackbox";
-import { scrawlHints } from "./scrawlcards";
+import { JackboxStateMachine, waitUntil } from "./jackbox.js";
+import { scrawlHints } from "./scrawlcards.js";
 
 export class StartHandler {
     async execute(state) {

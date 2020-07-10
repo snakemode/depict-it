@@ -1,8 +1,8 @@
-import { DrawableCanvas } from "./js/painting";
-import { Identity, PubSubClient } from "./js/p2p";
-import { P2PClient } from "./js/p2p.lib.client";
-import { P2PServer } from "./js/p2p.lib.server";
-import { generateName } from "./js/dictionaries";
+import { DrawableCanvas } from "./js/painting.js";
+import { Identity, PubSubClient } from "./js/p2p.js";
+import { P2PClient } from "./js/p2p.lib.client.js";
+import { P2PServer } from "./js/p2p.lib.server.js";
+import { generateName } from "./js/dictionaries.js";
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");

@@ -1,4 +1,4 @@
-import { ScrawlGame } from "./jackbox_scrawl";
+import { ScrawlGame } from "./jackbox_scrawl.js";
 
 export class P2PServer {
     constructor(identity, uniqueId, ably) {
