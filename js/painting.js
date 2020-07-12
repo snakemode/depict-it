@@ -31,12 +31,14 @@ export class DrawableCanvas {
         this.cursorPoint.y = e.offsetY;
 
         this.paintContext.lineWidth = 10;
+        this.paintContext.lineCap = 'round';
+        this.paintContext.filter = 'blur(2px)';
         this.paintContext.beginPath();
         this.paintContext.moveTo(this.cursorPoint.x, this.cursorPoint.y);
         this.paintContext.strokeStyle = this.activeColour;
     }
 
-    onMouseUpHandler() {
+    onMouseUpHandler(e) {
         this.dragging = false;
     }
 

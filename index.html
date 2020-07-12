@@ -48,7 +48,7 @@
               Wait for other players to finish.
             </div>
 
-            <div v-if="state?.lastInstruction?.type == 'show-scores'">
+            <div v-else-if="state?.lastInstruction?.type == 'show-scores'">
               <h1>Show Scores</h1>
 
               <div v-for="player in state?.lastInstruction?.playerScores">
@@ -56,7 +56,7 @@
               </div>
             </div>
 
-            <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
+            <div v-else-if="state?.lastInstruction?.type == 'pick-one-request'">
               <h1>Pick one!</h1>
 
               <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">
@@ -66,10 +66,10 @@
 
             </div>
             
-            <div v-if="state?.lastInstruction?.type == 'drawing-request'">
-              <h1>Draw your image here</h1>
+            <div v-else-if="state?.lastInstruction?.type == 'drawing-request'">
+              <h1>Draw Something!</h1>
           
-              <span>{{ state.lastInstruction.value }}</span>
+              <h2>Hint: {{ state.lastInstruction.value }}</h2>
 
               <div id="palette" class="palette">
                 <div style="background-color: white;"></div>
@@ -83,13 +83,17 @@
               <button v-on:click="sendImage" class="form-button">Send Image</button>
             </div>
 
-            <div v-if="state?.lastInstruction?.type == 'caption-request'">
+            <div v-else-if="state?.lastInstruction?.type == 'caption-request'">
               <h1>Caption this</h1>
               
               <img v-bind:src="state?.lastInstruction?.value" />
 
               <input type="text" name="caption" v-model="caption">            
               <button v-on:click="sendCaption" class="form-button">Send Caption</button>
+            </div>
+
+            <div v-else>
+              <h1>Last instruction not recognised. Ooops. {{ state?.lastInstruction?.value }}</h1>
             </div>
 
           </div>
