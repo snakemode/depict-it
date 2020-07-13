@@ -1,12 +1,7 @@
 import { GameStateMachine } from "./GameStateMachine.js";
-import {
-    StartHandler, 
-    DealHandler, 
-    GetUserDrawingHandler, 
-    GetUserCaptionHandler, 
-    PassStacksAroundHandler,
-    GetUserScoresHandler,
-    EndHandler
+import { 
+  StartHandler, DealHandler, GetUserDrawingHandler, GetUserCaptionHandler, PassStacksAroundHandler, 
+  GetUserScoresHandler, EndHandler 
 } from "./Scrawl.handlers.js";
 
 export const Scrawl = new GameStateMachine({
