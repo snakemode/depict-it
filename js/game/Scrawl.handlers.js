@@ -34,7 +34,7 @@ export class GetUserDrawingHandler {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length -1];
 
-            state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value }, player.clientId);
+            state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         try { 
@@ -71,7 +71,7 @@ export class GetUserCaptionHandler {
         for (let player of state.players) {   
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length -1];
-            state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value }, player.clientId);
+            state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         try { 
@@ -129,7 +129,7 @@ export class GetUserScoresHandler {
         for (let stack of state.stacks) { 
             this.submitted = 0;
 
-            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
+            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack, timeout: this.waitForUsersFor });
             
             try { 
                 await waitUntil(() => { return this.submitted == state.players.length }, this.waitForUsersFor);

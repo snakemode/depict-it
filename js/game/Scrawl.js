@@ -22,12 +22,10 @@ export class ScrawlClient {
         this.channel = channel;
     }
     
-    async sendImage(drawableCanvas) {
-        const asText = drawableCanvas.toString();
-        
+    async sendImage(base64EncodedImage) {        
         const result = await fetch("/api/storeImage", {
           method: "POST",
-          body: JSON.stringify({ gameId: this.gameId, imageData: asText })
+          body: JSON.stringify({ gameId: this.gameId, imageData: base64EncodedImage })
         });
       
         const savedUrl = await result.json();

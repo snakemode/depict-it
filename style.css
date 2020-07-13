@@ -107,7 +107,7 @@ button:hover {
   height: 50px;
 }
 
-#paintCanvas {
+.paintCanvas {
   width: 400px;
   height: 400px;
   background-color: #ffffff;

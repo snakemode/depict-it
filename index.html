@@ -39,67 +39,46 @@
           <li class="player" v-for="user in transmittedServerState?.players">                
             <span>{{ user.friendlyName }}</span>
           </li>
-        </ul> 
+        </ul>
+
+        <div v-if="state?.timeRemaining != null">
+          Time remaining: {{ state.timeRemaining }}
+        </div>
 
         <div v-if="state?.lastInstruction">
 
-          <div> 
             <div v-if="state?.lastInstruction?.type == 'wait'">
               Wait for other players to finish.
             </div>
 
-            <div v-else-if="state?.lastInstruction?.type == 'show-scores'">
+            <div v-if="state?.lastInstruction?.type == 'show-scores'">
               <h1>Show Scores</h1>
-
               <div v-for="player in state?.lastInstruction?.playerScores">
                 {{ player.friendlyName }}: {{ player.score }}
               </div>
             </div>
 
-            <div v-else-if="state?.lastInstruction?.type == 'pick-one-request'">
-              <h1>Pick one!</h1>
-
+            <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
+              <h1>Pick one!</h1>              
               <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">
-                  <span v-if="item.type == 'string'"    v-bind:data-id="item.id" v-on:click="sendVote"   style="width: 150px; height: 50px;">{{ item.value }}</span>
-                  <img  v-else v-bind:data-id="item.id" v-bind:src="item.value"  v-on:click="sendVote"   style="width: 150px; height: 150px;" />
+                <stack-item v-bind:item="item" v-on:click="sendVote"></stack-item>
               </div>
-
             </div>
             
-            <div v-else-if="state?.lastInstruction?.type == 'drawing-request'">
-              <h1>Draw Something!</h1>
-          
+            <div v-if="state?.lastInstruction?.type == 'drawing-request'">
+              <h1>Draw Something!</h1>          
               <h2>Hint: {{ state.lastInstruction.value }}</h2>
-
-              <div id="palette" class="palette">
-                <div style="background-color: white;"></div>
-                <div style="background-color: black;"></div>
-                <div style="background-color: red;"></div>
-                <div style="background-color: green;"></div>
-                <div style="background-color: blue;"></div>
-              </div>
-                      
-              <canvas id="paintCanvas" width="400" height="400"></canvas>
-              <button v-on:click="sendImage" class="form-button">Send Image</button>
+              <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
             </div>
 
-            <div v-else-if="state?.lastInstruction?.type == 'caption-request'">
-              <h1>Caption this</h1>
-              
+            <div v-if="state?.lastInstruction?.type == 'caption-request'">
+              <h1>Caption this</h1>              
               <img v-bind:src="state?.lastInstruction?.value" />
-
               <input type="text" name="caption" v-model="caption">            
               <button v-on:click="sendCaption" class="form-button">Send Caption</button>
             </div>
 
-            <div v-else>
-              <h1>Last instruction not recognised. Ooops. {{ state?.lastInstruction?.value }}</h1>
-            </div>
-
-          </div>
-          
         </div>
-
 
       </section>
     </div>

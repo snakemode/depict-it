@@ -1,16 +1,16 @@
 export class DrawableCanvas {
     constructor(canvasElementId) {
         this.canvasElementId = canvasElementId;
-        this.paintCanvas = document.getElementById("paintCanvas");
-        this.paintContext = paintCanvas.getContext("2d");
+        this.paintCanvas = document.getElementById(canvasElementId);
+        this.paintContext = this.paintCanvas.getContext("2d");
 
         this.activeColour = "black";
         this.dragging = false;
         this.cursorPoint = { x:0, y:0 };
 
-        paintCanvas.onmousedown = (e) => { this.onMouseDownHandler(e); };
-        paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
-        paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
+        this.paintCanvas.onmousedown = (e) => { this.onMouseDownHandler(e); };
+        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
+        this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
     }
 
     registerPaletteElements(paletteContainer) {

@@ -1,11 +1,15 @@
-import { DrawableCanvas } from "./js/painting.js";
 import { Identity, PubSubClient } from "./js/p2p.js";
 import { P2PClient } from "./js/p2p.lib.client.js";
 import { P2PServer } from "./js/p2p.lib.server.js";
 import { generateName } from "./js/dictionaries.js";
+import { DrawableCanvasComponent } from "./js/components/DrawableCanvasComponent.js";
+import { StackItem } from "./js/components/StackItemComponent.js";
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");
+
+Vue.component('drawable-canvas', DrawableCanvasComponent);
+Vue.component('stack-item', StackItem);
 
 export var app = new Vue({
   el: '#app',
@@ -16,15 +20,8 @@ export var app = new Vue({
     identity: null,
     friendlyName: generateName(2),
     uniqueId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
-
-    canvas: null,
+    
     caption: ""
-  }, 
-  updated: function () {
-    const element = document.getElementById("paintCanvas");
-    if (element) {
-      this.canvas = new DrawableCanvas("paintCanvas").registerPaletteElements("palette");
-    }
   },
   computed: {
     state: function() { return this.p2pClient?.state; },
@@ -62,16 +59,15 @@ export var app = new Vue({
     startGame: async function(evt) {
       this.p2pServer?.startGame();
     },
-    sendImage: async function(evt) {
-      await this.p2pClient.scrawl.sendImage(this.canvas);
-      this.canvas.clear();
+    sendImage: async function(base64EncodedImage) {
+      await this.p2pClient.scrawl.sendImage(base64EncodedImage);
     },
     sendCaption: async function(evt) {
       await this.p2pClient.scrawl.sendCaption(this.caption);
       this.caption = "";
     },
-    sendVote: async function(evt) {
-      await this.p2pClient.scrawl.logVote(evt.target.getAttribute("data-id"));
+    sendVote: async function(id) {
+      await this.p2pClient.scrawl.logVote(id);;
     }
   }
 });
