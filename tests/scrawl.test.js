@@ -1,4 +1,4 @@
-import { NullMessageChannel } from "../js/jackbox";
+import { NullMessageChannel } from "../js/game/GameStateMachine";
 import {
     StartHandler, 
     DealHandler, 
@@ -7,15 +7,15 @@ import {
     PassStacksAroundHandler,
     GetUserScoresHandler,
     EndHandler
-} from "../js/scrawl.handlers";
-import { Stack, StackItem } from "../js/scrawl.types";
-import { ScrawlGame } from "../js/scrawl";
+} from "../js/game/Scrawl.handlers";
+import { Stack, StackItem } from "../js/game/Scrawl.types";
+import { Scrawl } from "../js/game/Scrawl";
 import { Identity } from "../js/p2p";
 
-describe("ScrawlGame", () => {
+describe("Scrawl", () => {
     let sut;
     beforeEach(() => {
-        sut = ScrawlGame;        
+        sut = Scrawl;        
         sut.state.players = [];
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));

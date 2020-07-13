@@ -1,4 +1,4 @@
-import { JackboxStateMachine } from "./jackbox.js";
+import { GameStateMachine } from "./GameStateMachine.js";
 import {
     StartHandler, 
     DealHandler, 
@@ -7,9 +7,9 @@ import {
     PassStacksAroundHandler,
     GetUserScoresHandler,
     EndHandler
-} from "../js/scrawl.handlers.js";
+} from "./Scrawl.handlers.js";
 
-export const ScrawlGame = new JackboxStateMachine({
+export const Scrawl = new GameStateMachine({
     steps: {
         "StartHandler": new StartHandler(), 
         "DealHandler": new DealHandler(), 
@@ -29,7 +29,6 @@ export class ScrawlClient {
     
     async sendImage(drawableCanvas) {
         const asText = drawableCanvas.toString();
-        console.log(this.gameId);
         
         const result = await fetch("/api/storeImage", {
           method: "POST",

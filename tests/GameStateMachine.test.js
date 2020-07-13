@@ -1,11 +1,11 @@
-import { JackboxStateMachine, waitUntil } from "../js/jackbox";
+import { GameStateMachine, waitUntil } from "../js/game/GameStateMachine";
 
-describe("JackboxStateMachine", () => {
+describe("GameStateMachine", () => {
 
     it("run, triggers opening step", async () => {
         const game = twoStepGame();
 
-        const sut = new JackboxStateMachine(game);
+        const sut = new GameStateMachine(game);
         await sut.run();
 
         expect(sut.state.executeCalled).toBe(true);
@@ -14,7 +14,7 @@ describe("JackboxStateMachine", () => {
     it("run, opening step transition is executed", async () => {
         const game = twoStepGame();
 
-        const sut = new JackboxStateMachine(game);
+        const sut = new GameStateMachine(game);
         await sut.run();
 
         expect(sut.currentStepKey).toBe("EndHandler");
@@ -23,7 +23,7 @@ describe("JackboxStateMachine", () => {
     it("run, game that only proceeds with input, proceeds with input", async () => {
         const game = gameThatNeedsInputToProceed();
 
-        const sut = new JackboxStateMachine(game);
+        const sut = new GameStateMachine(game);
         sut.run();
         sut.handleInput("input");
 
@@ -35,7 +35,7 @@ describe("JackboxStateMachine", () => {
     it("run, step doesn't contain input handler when input received, nothing happens", async () => {
         const game = gameThatNeedsToWaitBetweenSteps();
 
-        const sut = new JackboxStateMachine(game);
+        const sut = new GameStateMachine(game);
         await sut.run();
 
         sut.handleInput("input");
@@ -57,7 +57,7 @@ describe("JackboxStateMachine", () => {
 
     it("run, steps execute returns navigable location, navigates using return value", async () => {
         const game = twoStepGame();
-        const sut = new JackboxStateMachine(game);
+        const sut = new GameStateMachine(game);
         
         await sut.run();
 

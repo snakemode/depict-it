@@ -8,7 +8,7 @@ export class NullMessageChannel {
     }
 }
 
-export class JackboxStateMachine {
+export class GameStateMachine {
     constructor(gameDefinition) {
         this.state = {
             msInCurrentStep: 0,
