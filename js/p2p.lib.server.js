@@ -1,4 +1,4 @@
-import { ScrawlGame } from "./jackbox_scrawl.js";
+import { ScrawlGame } from "./scrawl.js";
 
 export class P2PServer {
     constructor(identity, uniqueId, ably) {
@@ -21,7 +21,7 @@ export class P2PServer {
     async startGame() {
       this.ably.sendMessage({ kind: "game-start", serverState: this.state });
       this.stateMachine.state.players = this.state.players;
-      await this.stateMachine.run();
+      this.stateMachine.run();
     }
 
     onReceiveMessage(message) {

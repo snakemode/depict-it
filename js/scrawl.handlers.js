@@ -1,10 +1,11 @@
-import { JackboxStateMachine, waitUntil } from "./jackbox.js";
-import { scrawlHints } from "./scrawlcards.js";
+import { Stack, StackItem  } from "./scrawl.types.js";
+import { ScrawlCards } from "./scrawl.cards.js";
+import { waitUntil } from "./jackbox.js";
 
 export class StartHandler {
     async execute(state) {
         state.stacks = [];
-        state.hints = scrawlHints.slice();
+        state.hints = ScrawlCards.slice();
         shuffle(state.hints);
         return { transitionTo: "DealHandler" };
     }
@@ -40,14 +41,13 @@ export class GetUserDrawingHandler {
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
             return { transitionTo: "PassStacksAroundHandler" }; 
         }
-        catch (exception) {        
+        catch (exception) {
             console.log("Someone didn't send a drawing in time!");         
             return { transitionTo: "PassStacksAroundHandler", error: true }; // Do something to compensate for lack of drawing?
         }
     }
 
     async handleInput(state, message) {
-
         if (message.kind == "drawing-response") {        
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
@@ -176,29 +176,7 @@ export class EndHandler {
     }
 }
 
-export class Stack {
-    constructor(ownerId, openingHint) {
-        this.ownedBy = ownerId;
-        this.heldBy = ownerId;
-        this.items = [ new StackItem("string", openingHint) ];
-        this.items[0].author = "SYSTEM";
-        this.requires = "image";
-    }
-
-    add(item) {
-        this.items.push(item);
-        this.requires = item.type == "image" ? "string" : "image";
-    }
-}
-
-export class StackItem {
-    constructor(type, value) { // "string" | "image" && full text | url
-        this.type = type;
-        this.value = value;
-    }
-}
-
-export function shuffle(collection) {
+function shuffle(collection) {
     for (let i = collection.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [collection[i], collection[j]] = [collection[j], collection[i]];
@@ -211,15 +189,3 @@ function createId() {
       return v.toString(16);
     });
 }
-
-export const ScrawlGame = new JackboxStateMachine({
-    steps: {
-        "StartHandler": new StartHandler(), 
-        "DealHandler": new DealHandler(), 
-        "GetUserDrawingHandler": new GetUserDrawingHandler(180_000), 
-        "GetUserCaptionHandler": new GetUserCaptionHandler(60_000), 
-        "PassStacksAroundHandler": new PassStacksAroundHandler(), 
-        "GetUserScoresHandler": new GetUserScoresHandler(30_000),
-        "EndHandler": new EndHandler()
-    }
-});

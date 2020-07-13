@@ -1,9 +1,12 @@
+import { ScrawlClient } from "./scrawl.js";
+
 export class P2PClient {
     constructor(identity, uniqueId, ably) {
       this.identity = identity;
       this.uniqueId = uniqueId;
       this.ably = ably;
 
+      this.scrawl = null;
       this.serverState = null;
       this.state = { 
         status: "disconnected",
@@ -15,6 +18,7 @@ export class P2PClient {
       await this.ably.connect(this.identity, this.uniqueId);
       this.ably.sendMessage({ kind: "connected" });
       this.state.status = "awaiting-acknowledgement";
+      this.scrawl = new ScrawlClient(this.uniqueId, this.ably);
     }
 
     onReceiveMessage(message) {
@@ -32,25 +36,4 @@ export class P2PClient {
         default: { };
       }
     }
-    
-    async sendImage(drawableCanvas) {
-      const asText = drawableCanvas.toString();
-      
-      const result = await fetch("/api/storeImage", {
-        method: "POST",
-        body: JSON.stringify({ gameId: this.uniqueId, imageData: asText })
-      });
-
-      const savedUrl = await result.json();
-      this.ably.sendMessage({ kind: "drawing-response", imageUrl: savedUrl.url });
-    }
-
-    async sendCaption(caption) {
-      this.ably.sendMessage({ kind: "caption-response", caption: caption });
-    }
-
-    async logVote(id) {
-      this.ably.sendMessage({ kind: "pick-one-response", id: id });
-    }
-
   }

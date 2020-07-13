@@ -1,16 +1,15 @@
 import { NullMessageChannel } from "../js/jackbox";
-import { 
-    ScrawlGame, 
+import {
     StartHandler, 
     DealHandler, 
     GetUserDrawingHandler, 
     GetUserCaptionHandler, 
     PassStacksAroundHandler,
     GetUserScoresHandler,
-    EndHandler,
-    Stack,
-    StackItem
-} from "../js/jackbox_scrawl";
+    EndHandler
+} from "../js/scrawl.handlers";
+import { Stack, StackItem } from "../js/scrawl.types";
+import { ScrawlGame } from "../js/scrawl";
 import { Identity } from "../js/p2p";
 
 describe("ScrawlGame", () => {
@@ -282,3 +281,8 @@ describe("EndHandler", () => {
         expect(channel.sentMessages[0].message.playerScores).toBeDefined();
     });
 });
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

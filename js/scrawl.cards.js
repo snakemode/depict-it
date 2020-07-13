@@ -1,4 +1,4 @@
-export const scrawlHints = [
+export const ScrawlCards = [
     "Bum bongos",
     "Aztec sacrifice",
     "Making an onion cry",

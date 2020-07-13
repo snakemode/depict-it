@@ -63,15 +63,15 @@ export var app = new Vue({
       this.p2pServer?.startGame();
     },
     sendImage: async function(evt) {
-      await this.p2pClient.sendImage(this.canvas);
+      await this.p2pClient.scrawl.sendImage(this.canvas);
       this.canvas.clear();
     },
     sendCaption: async function(evt) {
-      await this.p2pClient.sendCaption(this.caption);
+      await this.p2pClient.scrawl.sendCaption(this.caption);
       this.caption = "";
     },
     sendVote: async function(evt) {
-      await this.p2pClient.logVote(evt.target.getAttribute("data-id"));
+      await this.p2pClient.scrawl.logVote(evt.target.getAttribute("data-id"));
     }
   }
 });
