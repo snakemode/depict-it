@@ -15,7 +15,9 @@
     "dev:server:acceptance": "run-p dev:server:test dev:api test:acceptance",
     "dev:server:quit": "npx kill-port 8080",
     "dev:api:quit": "npx kill-port 7071",
-    "acceptance": "run-s dev:server:acceptance dev:server:quit dev:api:quit"
+    "acceptance": "run-s dev:server:acceptance dev:server:quit dev:api:quit",
+
+    "build:azure": ""
   },
   "author": "",
   "dependencies": {},
