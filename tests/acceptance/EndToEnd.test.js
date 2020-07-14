@@ -1,4 +1,5 @@
-import { chromium  } from 'playwright';
+import { chromium  } from "playwright";
+import { ScrawlAppPageObject } from "./ScrawlAppPageObject";
 
 jest.setTimeout(30_000);
 
@@ -8,8 +9,7 @@ describe("Something", () => {
     beforeEach(async () => {
         browser = await chromium.launch({ headless: false });
         app = await ScrawlAppPageObject.create(browser);
-        cleanup = [];
-        cleanup.push(browser, app);
+        cleanup = [ browser, app ];
     });
 
     afterEach(async () => { cleanup.forEach(item => item.close()); });
@@ -42,66 +42,22 @@ describe("Something", () => {
         expect(connectedPlayers).toContain(player4.playerName);        
     });
 
+    it("Game is started - drawable canvas visible.", async () => {
+        await app.hostASession();
+
+        const player2 = await newPageObject();
+        await player2.joinASession(app.gameId);
+        
+        await app.clickStartGame();
+        await app.drawableCanvasIsVisible();     
+    });
+
     async function newPageObject() {
         const instance = await ScrawlAppPageObject.create(browser);
         cleanup.push(instance);
         return instance;
     }
 });
-
-class ScrawlAppPageObject {
-    static async create(browser) {
-        const page = await browser.newPage();
-        await page.goto('http://127.0.0.1:8080');
-        return new ScrawlAppPageObject(browser, page);
-    }    
-
-    constructor(browser, page) {
-        this.browser = browser;
-        this.page = page;
-    }
-
-    async hostASession() {
-        this.playerName = await this.getSessionId();
-        this.gameId = await this.getGameId();
-
-        await this.page.click('text=Host a Session');
-        await this.clickStartGame();
-        return this.gameId;
-    }
-
-    async joinASession(gameId) {
-        this.playerName = await this.getSessionId();
-
-        await this.enterGameId(gameId);
-        await this.page.click('text=Join a Session');
-    }
-
-    async clickStartGame() {
-        await this.page.waitForSelector('text=Start Game');
-    }
-
-    async enterGameId(id) {
-        await this.page.fill('[name=session-name]', id);
-    }
-
-    async getGameId() {
-        return await this.page.$eval('[name=session-name]', e => e.value);
-    }
-
-    async getSessionId() {
-        return await this.page.$eval('[name=name]', e => e.value);
-    }
-
-    async connectedPlayers() {
-        return await this.page.$eval('.players', e => e.innerHTML);
-    }
-
-    close() {        
-        this.page.close();
-    }
-}
-
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
