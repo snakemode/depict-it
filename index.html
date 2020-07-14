@@ -30,7 +30,7 @@
         <button v-on:click="join" class="form-button">Join a Session</button>
       </form>      
 
-      <section v-else class="game-info">
+      <section v-else id="activeGame" class="game-info">
         <h2>Game: {{ uniqueId }}</h2>    
         <button v-if="transmittedServerState && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 

@@ -24,9 +24,9 @@ export class PubSubClient {
     this.metadata = { uniqueId: uniqueId, ...identity };
 
     const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
-    this.channel = await ably.channels.get(`p2p-sample-${uniqueId}`, { params: { rewind: '1m' } });  
-
-    this.channel.subscribe((message) => {
+    this.channel = await ably.channels.get(`p2p-sample-${uniqueId}`, { params: { rewind: '1m' } });
+    
+    await this.channel.subscribe((message) => {
       this.onMessageReceivedCallback(message.data, this.metadata);
     });
 

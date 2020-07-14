@@ -13,6 +13,7 @@ module.exports = function (wallaby) {
 
         tests: [
             '/**/*.test.js',
+            '/tests/*.test.js',
             '!/tests/node_modules/**/*.js',
             '!/node_modules/**/*.js',
             '!/api/node_modules/**/*.js',
