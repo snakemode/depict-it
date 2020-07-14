@@ -9,8 +9,13 @@
     "test": "jest",
     "test:acceptance": "jest acceptance",
     "dev:server": "npx live-server --proxy=/api:http://127.0.0.1:7071/api",
+    "dev:server:test": "npx live-server --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
     "dev:api": "npm run start --prefix api",
-    "acceptance": "run-p start test:acceptance"
+
+    "dev:server:acceptance": "run-p dev:server:test dev:api test:acceptance",
+    "dev:server:quit": "npx kill-port 8080",
+    "dev:api:quit": "npx kill-port 7071",
+    "acceptance": "run-s dev:server:acceptance dev:server:quit dev:api:quit"
   },
   "author": "",
   "dependencies": {},
