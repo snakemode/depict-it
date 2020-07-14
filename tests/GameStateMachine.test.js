@@ -1,4 +1,4 @@
-import { GameStateMachine, waitUntil } from "../js/game/GameStateMachine";
+import { GameStateMachine, waitUntil } from "../app/js/game/GameStateMachine";
 
 describe("GameStateMachine", () => {
 

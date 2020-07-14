@@ -14,12 +14,12 @@ class AblyStub {
     channels = { get: function(chName) { return fakeAblyChannel; } }
 }
 
-global.Vue = require("../js/vue.min.js");
+global.Vue = require("../app/js/vue.min.js");
 global.Ably = { Realtime: { Promise: AblyStub } };
 global.crypto = { getRandomValues: function() { return [ 123454373 ] } };
 global.window = { location: { protocol: "https:", host: "localhost", pathname: "/bingo" } }
 
-const { app } = require("../index.js");
+const { app } = require("../app/index.js");
 
 describe("Vue app", () => {
 

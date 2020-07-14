@@ -8,8 +8,8 @@
     "start": "run-p dev:server dev:api",
     "test": "jest",
     "test:acceptance": "jest acceptance",
-    "dev:server": "npx live-server --proxy=/api:http://127.0.0.1:7071/api",
-    "dev:server:test": "npx live-server --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
+    "dev:server": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api",
+    "dev:server:test": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
     "dev:api": "npm run start --prefix api",
 
     "dev:server:acceptance": "run-p dev:server:test dev:api test:acceptance",
