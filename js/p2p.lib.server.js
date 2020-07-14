@@ -1,4 +1,4 @@
-import { Scrawl } from "./game/scrawl.js";
+import { Scrawl } from "./game/Scrawl.js";
 
 export class P2PServer {
     constructor(identity, uniqueId, ably) {
