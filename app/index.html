@@ -39,7 +39,7 @@
           </li>
         </ul>
 
-        <timer-bar v-if="state?.lastInstruction?.timeout != null" v-bind:countdown="state.lastInstruction.timeout"></timer-bar>
+        <timer-bar v-if="state?.lastInstruction?.timeout != null" v-bind:countdown="state?.lastInstruction?.timeout"></timer-bar>
 
         <div v-if="state?.timeRemaining != null">
           Time remaining: {{ state.timeRemaining }}
