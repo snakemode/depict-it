@@ -4,12 +4,14 @@ import { P2PServer } from "./js/p2p.lib.server.js";
 import { generateName } from "./js/dictionaries.js";
 import { DrawableCanvasComponent } from "./js/components/DrawableCanvasComponent.js";
 import { StackItem } from "./js/components/StackItemComponent.js";
+import { TimerBar } from "./js/components/TimerBar.js";
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");
 
 Vue.component('drawable-canvas', DrawableCanvasComponent);
 Vue.component('stack-item', StackItem);
+Vue.component('timer-bar', TimerBar);
 
 export var app = new Vue({
   el: '#app',
