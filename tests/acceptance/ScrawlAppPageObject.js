@@ -12,7 +12,7 @@ export class ScrawlAppPageObject {
 
     async hostASession() {
         this.playerName = await this.getSessionId();
-        await this.page.click('text=Host a Session');
+        await this.page.click('text=Create Game');
         await this.page.waitForSelector('text=Start Game');
 
         this.joinGameUrl = await this.getJoinGameUrl();
