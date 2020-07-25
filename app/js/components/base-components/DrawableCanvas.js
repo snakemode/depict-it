@@ -1,4 +1,4 @@
-import { DrawableCanvas as Dc } from "./DrawableCanvas.js";
+import { DrawableCanvasElement } from "./DrawableCanvasElement.js";
 
 export const DrawableCanvas = {
     data: function() {    
@@ -11,7 +11,7 @@ export const DrawableCanvas = {
     mounted: function () {
       const element = document.getElementById(this.canvasId);
       if (element && !this.canvas) {
-        this.canvas = new Dc(this.canvasId).registerPaletteElements(this.paletteId);
+        this.canvas = new DrawableCanvasElement(this.canvasId).registerPaletteElements(this.paletteId);
       }
     },
     template: `

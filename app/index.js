@@ -2,23 +2,15 @@ import { Identity, PubSubClient } from "./js/p2p.js";
 import { P2PClient } from "./js/p2p.lib.client.js";
 import { P2PServer } from "./js/p2p.lib.server.js";
 import { generateName } from "./js/dictionaries.js";
-import { DrawableCanvas } from "./js/components/DrawableCanvasComponent.js";
-import { CopyableTextbox } from "./js/components/CopyableTextBoxComponent.js";
-import { InviteLink } from "./js/components/InviteLinkComponent.js";
-import { StackItem } from "./js/components/StackItemComponent.js";
-import { TimerBar } from "./js/components/TimerBarComponent.js";
+import { default as configureVueComponents } from "./vue.config.js";
+
+configureVueComponents();
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");
 const queryMessage = urlParams.get("message");
 const isJoinLink = [...urlParams.keys()].indexOf("join") > -1;
 const isHostLink = [...urlParams.keys()].indexOf("host") > -1;
-
-Vue.component('drawable-canvas', DrawableCanvas);
-Vue.component('stack-item', StackItem);
-Vue.component('timer-bar', TimerBar);
-Vue.component('copyable-text-box', CopyableTextbox);
-Vue.component('invite-link', InviteLink);
 
 export var app = new Vue({
   el: '#app',
@@ -42,6 +34,7 @@ export var app = new Vue({
     joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
     iAmHost: function() { return this.p2pServer != null; },
     hasMessage: function () { return this.message != null; },
+    gameCanBeStarted: function() { return this.transmittedServerState && !this.transmittedServerState.started }
   },
   methods: {
     host: async function(evt) {

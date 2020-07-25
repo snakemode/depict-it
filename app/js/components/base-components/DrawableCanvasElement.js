@@ -1,4 +1,4 @@
-export class DrawableCanvas {
+export class DrawableCanvasElement {
     constructor(canvasElementId) {
         this.canvasElementId = canvasElementId;
         this.paintCanvas = document.getElementById(canvasElementId);

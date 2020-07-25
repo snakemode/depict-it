@@ -22,7 +22,7 @@
         <label for="name-name">Enter your name</label>
         <input type="text" name="name" v-model="friendlyName">          
 
-        <button v-if="!isJoinLink" v-on:click="host" class="form-button form-button--host">Host a Session</button>
+        <button v-if="!isJoinLink" v-on:click="host" class="form-button form-button--host">Create Game</button>
         <button v-if="isJoinLink" v-on:click="join" class="form-button">Join a Session</button>
       </form>      
 
@@ -40,10 +40,10 @@
             </div>
           </li>
         </ul>
-        
-        <button v-if="transmittedServerState && !transmittedServerState.started && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
-        <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout"></timer-bar>
+        <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame" />
+        
+        <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout" />
 
         <div v-if="state?.timeRemaining != null">
           Time remaining: {{ state.timeRemaining }}

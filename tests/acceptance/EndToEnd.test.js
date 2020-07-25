@@ -49,7 +49,7 @@ describe("Something", () => {
         await player2.followJoinLink(joinUrl);
 
         const pageBodyAsSeenByPlayerTwo = await player2.pageBody();
-        expect(pageBodyAsSeenByPlayerTwo).not.toContain("Host a Session");
+        expect(pageBodyAsSeenByPlayerTwo).not.toContain("Create Game");
     });
 
     it("Game is started - drawable canvas visible.", async () => {
