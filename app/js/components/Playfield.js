@@ -52,6 +52,6 @@ export const Playfield = {
           <input type="text" name="caption" v-model="caption">            
           <button v-on:click="sendCaption" class="form-button">Send Caption</button>
         </div>
-    <div>
+    </div>
 `
 };

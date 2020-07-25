@@ -10,7 +10,8 @@ export class P2PServer {
       this.stateMachine.state.channel = ably;
 
       this.state = { 
-        players: []
+        players: [],
+        started: false
       };
     }
      

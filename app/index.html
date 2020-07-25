@@ -21,26 +21,27 @@
       </section>
 
       <div v-if="!joinedOrHosting">
-        <create-game-form v-on:create="host" v-on:join="join" />
+        <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
       </div>
       <div v-else id="activeGame" class="game-info">
-
-        <div class="game-lobby">
-          <invite-link :game-id="gameId" />
-          <connected-players-summary :state="transmittedServerState" />
-          <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame" />
-        </div>        
+        
+        <div class="game-lobby" v-if="gameCanBeStarted"> 
+          <invite-link :game-id="gameId"></invite-link>
+          <connected-players-summary :state="transmittedServerState"></connected-players-summary>
+          <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame"></ready-or-waiting-prompt>
+        </div>
 
         <timer-bar 
           v-if="state?.lastInstruction?.timeout != null" 
           :countdown="state?.lastInstruction?.timeout" 
-        />
+        ></timer-bar>
 
         <playfield 
           v-if="state?.lastInstruction"
           :state="state"
           :client="p2pClient"
-        />
+        ></playfield>
+
 
       </div>
     </div>
