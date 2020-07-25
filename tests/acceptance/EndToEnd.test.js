@@ -6,17 +6,17 @@ const chromeOptions = { headless: false };
 
 describe("Behaviour of the app as a game host", () => {
     
-    let browser, app, cleanup;
+    let browser, host, cleanup;
     beforeEach(async () => {
         browser = await chromium.launch(chromeOptions);
-        app = await ScrawlAppPageObject.create(browser);
-        cleanup = [ browser, app ];
+        host = await ScrawlAppPageObject.create(browser);
+        cleanup = [ browser, host ];
     });
 
     afterEach(async () => { cleanup.forEach(item => item.close()); });
 
     it("Can start a lobby for a game", async () => {
-        const joinUrl = await app.hostASession();
+        const joinUrl = await host.hostASession();
 
         expect(joinUrl).not.toBeNull();
     });
@@ -30,12 +30,12 @@ describe("Behaviour of the app as a game host", () => {
 
 describe("Behaviour of the app as a game client", () => {
     
-    let browser, app, cleanup, joinUrl;
+    let browser, host, cleanup, joinUrl;
     beforeEach(async () => {
         browser = await chromium.launch(chromeOptions);
-        app = await ScrawlAppPageObject.create(browser);
-        joinUrl = await app.hostASession();
-        cleanup = [ browser, app ];
+        host = await ScrawlAppPageObject.create(browser);
+        joinUrl = await host.hostASession();
+        cleanup = [ browser, host ];
     });
 
     afterEach(async () => { cleanup.forEach(item => item.close()); });
@@ -52,9 +52,9 @@ describe("Behaviour of the app as a game client", () => {
 
         await sleep(2000);
 
-        const connectedPlayers = await app.connectedPlayers();
+        const connectedPlayers = await host.connectedPlayers();
 
-        expect(connectedPlayers).toContain(app.playerName);        
+        expect(connectedPlayers).toContain(host.playerName);        
         expect(connectedPlayers).toContain(player2.playerName);
         expect(connectedPlayers).toContain(player3.playerName);        
         expect(connectedPlayers).toContain(player4.playerName);        
@@ -82,9 +82,44 @@ describe("Behaviour of the app as a game client", () => {
         const player2 = await newPageObject();
         await player2.joinASession(joinUrl);
         
-        await app.clickStartGame();
-        await app.drawableCanvasIsVisible();     
+        await host.clickStartGame();
+        await host.drawableCanvasIsVisible();     
     });
+
+    it("Players can play multiple rounds of a game on the same gameId", async () => {
+        const player2 = await newPageObject();
+        await player2.joinASession(joinUrl);
+        await sleep(2000);
+
+        await host.clickStartGame();
+
+        // Drawing
+        await host.drawOnCanvas();
+        await player2.drawOnCanvas();
+        
+        // Caption
+        await host.captionImageReceivedFromServer("Some caption!");
+        await player2.captionImageReceivedFromServer("Some other caption!");
+
+        // Scores for each player
+        await host.voteForFirstStackItem();
+        await player2.voteForFirstStackItem();
+
+        await host.voteForFirstStackItem();
+        await player2.voteForFirstStackItem();
+        
+        // Scoreboard displayed
+        await host.waitForScores();
+
+        // Host can start next round
+        await host.clickNextRound();   
+        
+        // Is back in the drawing phase  
+        await host.waitForDrawingCanvasToAppear();
+        await player2.waitForDrawingCanvasToAppear();
+
+        // Total victory! A full game cycle!
+    });    
 
     async function newPageObject() {
         const instance = await ScrawlAppPageObject.create(browser);
@@ -92,7 +127,6 @@ describe("Behaviour of the app as a game client", () => {
         return instance;
     }
 });
-
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

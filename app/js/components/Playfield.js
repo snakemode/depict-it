@@ -31,20 +31,20 @@ export const Playfield = {
         </div>
 
         <div v-if="state?.lastInstruction?.type == 'show-scores'">
-          <h1>Show Scores</h1>
+          <h1>Scores</h1>
           <div v-for="player in state?.lastInstruction?.playerScores">
             {{ player.friendlyName }}: {{ player.score }}
           </div>
 
           <div v-if="isHost">
             <span>Next round</span>
-            <button v-on:click="emitNextRoundEvent" class="form-button">Next Round</button>
+            <button id="nextRoundButton" v-on:click="emitNextRoundEvent" class="form-button">Next Round</button>
           </div>
 
         </div>
 
         <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
-          <h1>Pick one!</h1>              
+          <h1>Pick one!</h1>
           <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">
             <stack-item :item="item" v-on:click="sendVote"></stack-item>
           </div>
