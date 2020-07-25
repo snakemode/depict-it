@@ -19,7 +19,7 @@ export const Playfield = {
         await this.client.scrawl.logVote(id);
       }      
     },
-        
+    
     template: `
     <div class="playfield">
         <div v-if="state?.lastInstruction?.type == 'wait'">

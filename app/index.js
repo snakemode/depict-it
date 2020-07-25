@@ -7,8 +7,6 @@ configureVueComponents();
 import { default as stubAbly } from "./stubs/ably.js";
 stubAbly();
 
-const queryMessage = new URLSearchParams(location.search).get("message");
-
 export var app = new Vue({
   el: '#app',
   data: {   
@@ -16,8 +14,7 @@ export var app = new Vue({
     p2pServer: null,
     
     gameId: null,
-    friendlyName: null,    
-    message: queryMessage || null,
+    friendlyName: null,
   },
   computed: {
     state: function() { return this.p2pClient?.state; },

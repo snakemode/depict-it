@@ -1,4 +1,4 @@
-import { LinkGenerator } from "../app/js/util";
+import { LinkGenerator } from "../app/js/LinkGenerator";
 
 describe("LinkGenerator", () => {
     let sut;
