@@ -2,12 +2,13 @@ import { chromium  } from "playwright";
 import { ScrawlAppPageObject } from "./ScrawlAppPageObject";
 
 jest.setTimeout(30_000);
+const chromeOptions = { headless: false };
 
-describe("Something", () => {
+describe("Behaviour of the app as a game host", () => {
     
     let browser, app, cleanup;
     beforeEach(async () => {
-        browser = await chromium.launch({ headless: false });
+        browser = await chromium.launch(chromeOptions);
         app = await ScrawlAppPageObject.create(browser);
         cleanup = [ browser, app ];
     });
@@ -20,9 +21,26 @@ describe("Something", () => {
         expect(joinUrl).not.toBeNull();
     });
 
-    it("Players can join a game", async () => {
-        const joinUrl = await app.hostASession();
+    async function newPageObject() {
+        const instance = await ScrawlAppPageObject.create(browser);
+        cleanup.push(instance);
+        return instance;
+    }
+});
 
+describe("Behaviour of the app as a game client", () => {
+    
+    let browser, app, cleanup, joinUrl;
+    beforeEach(async () => {
+        browser = await chromium.launch(chromeOptions);
+        app = await ScrawlAppPageObject.create(browser);
+        joinUrl = await app.hostASession();
+        cleanup = [ browser, app ];
+    });
+
+    afterEach(async () => { cleanup.forEach(item => item.close()); });
+
+    it("Players can join a game", async () => {
         const player2 = await newPageObject();
         await player2.joinASession(joinUrl);
 
@@ -43,8 +61,6 @@ describe("Something", () => {
     });
 
     it("Players follow a join link, there is no host button available to them.", async () => {
-        const joinUrl = await app.hostASession();
-
         const player2 = await newPageObject();
         await player2.followJoinLink(joinUrl);
 
@@ -52,9 +68,17 @@ describe("Something", () => {
         expect(pageBodyAsSeenByPlayerTwo).not.toContain("Create Game");
     });
 
-    it("Game is started - drawable canvas visible.", async () => {
-        const joinUrl = await app.hostASession();
+    it("Players follow a join link, they are told they are waiting on the host.", async () => {
+        const player2 = await newPageObject();
+        await player2.joinASession(joinUrl);
 
+        const waitMessage = await player2.youAreWaitingMessage();
+
+        expect(waitMessage).toContain("Waiting for ");
+        expect(waitMessage).toContain(" to start the game.");
+    });
+
+    it("Game is started - drawable canvas visible.", async () => {
         const player2 = await newPageObject();
         await player2.joinASession(joinUrl);
         
@@ -68,6 +92,7 @@ describe("Something", () => {
         return instance;
     }
 });
+
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

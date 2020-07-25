@@ -11,6 +11,7 @@ export class P2PServer {
 
       this.state = { 
         players: [],
+        hostIdentity: this.identity,
         started: false
       };
     }
@@ -21,6 +22,7 @@ export class P2PServer {
 
     async startGame() {
       this.state.started = true;
+
       this.ably.sendMessage({ kind: "game-start", serverState: this.state });
       this.stateMachine.state.players = this.state.players;
       this.stateMachine.run();

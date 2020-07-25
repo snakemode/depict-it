@@ -43,6 +43,11 @@ export class ScrawlAppPageObject {
         return await this.page.$eval('.players', e => e.innerHTML);
     }
 
+    async youAreWaitingMessage() {        
+        await this.page.waitForSelector('#wait-message');
+        return await this.page.$eval('#wait-message', e => e.innerHTML);
+    }
+
     async pageBody() {
         return await this.page.$eval('body', e => e.innerHTML);
     }

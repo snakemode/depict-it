@@ -1,12 +1,12 @@
 export const ReadyOrWaitingPrompt = {
-    props: [ 'isHost', 'gameReady' ],
+    props: [ 'isHost', 'gameReady', 'state' ],
 
     methods: {
       emitStartGameEvent: async function() {
         this.$emit('startgame');
       }
     },
-        
+
     template: `
     <div v-if="gameReady" class="ready-or-waiting-prompt">
         <div v-if="isHost">
@@ -15,7 +15,7 @@ export const ReadyOrWaitingPrompt = {
         </div>
 
         <div v-if="!isHost">
-            <span>Waiting for #name to start the game.</span>
+            <span id="wait-message">Waiting for {{ state?.hostIdentity?.friendlyName }} to start the game.</span>
         </div>
     </div>
 `

@@ -16,7 +16,7 @@
         {{ state?.status == undefined ? "disconnected" : state?.status }}
       </div>
 
-      <section>
+      <section class="header">
         <h1>Depict-it</h1>        
       </section>
 
@@ -28,7 +28,11 @@
         <div class="game-lobby" v-if="gameCanBeStarted"> 
           <invite-link :game-id="gameId"></invite-link>
           <connected-players-summary :state="transmittedServerState"></connected-players-summary>
-          <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame"></ready-or-waiting-prompt>
+          <ready-or-waiting-prompt 
+            :is-host="iAmHost" 
+            :game-ready="gameCanBeStarted" 
+            :state="transmittedServerState"
+            v-on:startgame="startGame"></ready-or-waiting-prompt>            
         </div>
 
         <timer-bar 

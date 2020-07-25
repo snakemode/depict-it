@@ -5,7 +5,7 @@ import { default as configureVueComponents } from "./vue.config.js";
 configureVueComponents();
 
 import { default as stubAbly } from "./stubs/ably.js";
-stubAbly();
+//stubAbly();
 
 export var app = new Vue({
   el: '#app',

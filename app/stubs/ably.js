@@ -3,9 +3,7 @@ const fakeAblyChannel = {
   subscribe: function(callback) { 
       this.callback = callback 
   },
-  publish: function(message, targetClientId) { 
-      message.metadata = this.metadata;
-      message.forClientId = targetClientId ? targetClientId : null;
+  publish: function(message) {
       this.published.push(message); 
       this.callback(message);
   }
