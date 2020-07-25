@@ -7,7 +7,7 @@ export const TimerBar = {
         countdownTimer: null,
         hasCountdown: false
       }
-    },  
+    },
     
     computed: {
       seconds: function() { return Math.floor(this.timeRemaining / 1000); },

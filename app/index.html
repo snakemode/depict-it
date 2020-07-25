@@ -30,12 +30,8 @@
 
       <section v-else id="activeGame" class="game-info">
         <h2>Game: {{ gameId }}</h2>
-        
-        <div>
-          <h3>Share this link to invite people to play</h3>
-          <input id="copyLinkInputBox" type="text" v-bind:value="inviteLink" />
-          <input v-on:click="copyLink" type="button" value="Copy Link">
-        </div>
+
+        <invite-link :game-id="gameId"></invite-link>
 
         <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
@@ -49,7 +45,7 @@
         
         <button v-if="transmittedServerState && !transmittedServerState.started && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
-        <timer-bar v-if="state?.lastInstruction?.timeout != null" v-bind:countdown="state?.lastInstruction?.timeout"></timer-bar>
+        <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout"></timer-bar>
 
         <div v-if="state?.timeRemaining != null">
           Time remaining: {{ state.timeRemaining }}
@@ -71,7 +67,7 @@
             <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
               <h1>Pick one!</h1>              
               <div v-for="item in state?.lastInstruction?.stack.items" style="border: 1px solid black;">
-                <stack-item v-bind:item="item" v-on:click="sendVote"></stack-item>
+                <stack-item :item="item" v-on:click="sendVote"></stack-item>
               </div>
             </div>
             
@@ -83,7 +79,7 @@
 
             <div v-if="state?.lastInstruction?.type == 'caption-request'">
               <h1>Caption this</h1>              
-              <img v-bind:src="state?.lastInstruction?.value" />
+              <img :src="state?.lastInstruction?.value" />
               <input type="text" name="caption" v-model="caption">            
               <button v-on:click="sendCaption" class="form-button">Send Caption</button>
             </div>

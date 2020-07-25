@@ -1,6 +1,6 @@
-import { DrawableCanvas } from "./DrawableCanvas.js";
+import { DrawableCanvas as Dc } from "./DrawableCanvas.js";
 
-export const DrawableCanvasComponent = {
+export const DrawableCanvas = {
     data: function() {    
       return {
         canvasId: "canvas-" + crypto.getRandomValues(new Uint32Array(1))[0],
@@ -11,7 +11,7 @@ export const DrawableCanvasComponent = {
     mounted: function () {
       const element = document.getElementById(this.canvasId);
       if (element && !this.canvas) {
-        this.canvas = new DrawableCanvas(this.canvasId).registerPaletteElements(this.paletteId);
+        this.canvas = new Dc(this.canvasId).registerPaletteElements(this.paletteId);
       }
     },
     template: `
