@@ -16,14 +16,16 @@ export const DrawableCanvas = {
     },
     template: `
   <div class="drawable-canvas">
-    <div v-bind:id="paletteId" class="palette">
-      <div style="background-color: white;"></div>
-      <div style="background-color: black;"></div>
-      <div style="background-color: red;"></div>
-      <div style="background-color: green;"></div>
-      <div style="background-color: blue;"></div>
-    </div>        
-    <canvas v-bind:id="canvasId" class="paintCanvas" width="400" height="400"></canvas>  
+    <div class="canvas-and-paints">
+      <canvas v-bind:id="canvasId" class="image-frame paint-canvas" width="400" height="400"></canvas>  
+      <div v-bind:id="paletteId" class="palette">
+        <div style="background-color: black;"></div>
+        <div style="background-color: red;"></div>
+        <div style="background-color: green;"></div>
+        <div style="background-color: blue;"></div>
+        <div style="background-color: white;"></div>
+      </div>
+    </div>
     <button v-on:click="$emit('drawing-finished', canvas.toString())" class="form-button">Done!</button>
   </div>`
 };

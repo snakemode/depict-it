@@ -102,19 +102,49 @@ button:hover {
 
 
 /* drawing */
+.drawable-canvas {
+  /* center align the button plz 🖤 */
+}
+
+.drawing-hint {
+  background-color: #be4eb7;
+  width: 50%;
+  font-size: 18pt;
+  font-weight: bolder;
+  padding: 25px 25px 25px 25px;
+  margin-bottom: 30px;
+  text-align: center;
+
+}
+
 .palette {
   display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+  padding-left: 20px;
 }
 
-.palette div{
+.palette div {
   width: 50px;
   height: 50px;
+  border-radius: 50%;
+  border: 5px solid black;
+  margin: 10px;
 }
 
-.paintCanvas {
+.image-frame {
   width: 400px;
   height: 400px;
   background-color: #ffffff;
-  border: 1px solid black;
+  border: 1px solid black;  
+  border-radius: 5%;
+  filter: drop-shadow(5px 5px 12px);
+}
+
+.paint-canvas {
   cursor: crosshair;
+}
+
+.canvas-and-paints {
+  display: flex;
 }

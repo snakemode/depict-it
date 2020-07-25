@@ -55,6 +55,9 @@ export var app = new Vue({
     },
     startGame: async function(evt) {
       this.p2pServer?.startGame();
+    },
+    nextRound: async function(evt) {
+      this.p2pServer?.nextRound();
     }
   }
 });

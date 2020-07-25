@@ -1,5 +1,11 @@
 export const ReadyOrWaitingPrompt = {
-    props: [ 'isHost', 'gameReady', 'state' ],
+    props: [ 'isHost', 'state' ],
+
+    computed: {
+      gameReady: function() { 
+        return this.state && !this.state.started 
+      }
+    },
 
     methods: {
       emitStartGameEvent: async function() {

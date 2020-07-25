@@ -1,5 +1,5 @@
 export const Playfield = {
-    props: [ 'state', 'client' ],
+    props: [ 'state', 'client', 'isHost' ],
 
     data: function() {
       return {
@@ -7,7 +7,11 @@ export const Playfield = {
       }
     },
 
-    methods: {
+    methods: {      
+      emitNextRoundEvent: async function() {
+        this.$emit('nextround');
+      },
+
       sendImage: async function(base64EncodedImage) {
         await this.client.scrawl.sendImage(base64EncodedImage);
       },
@@ -19,7 +23,7 @@ export const Playfield = {
         await this.client.scrawl.logVote(id);
       }      
     },
-    
+
     template: `
     <div class="playfield">
         <div v-if="state?.lastInstruction?.type == 'wait'">
@@ -31,6 +35,12 @@ export const Playfield = {
           <div v-for="player in state?.lastInstruction?.playerScores">
             {{ player.friendlyName }}: {{ player.score }}
           </div>
+
+          <div v-if="isHost">
+            <span>Next round</span>
+            <button v-on:click="emitNextRoundEvent" class="form-button">Next Round</button>
+          </div>
+
         </div>
 
         <div v-if="state?.lastInstruction?.type == 'pick-one-request'">
@@ -41,14 +51,14 @@ export const Playfield = {
         </div>
         
         <div v-if="state?.lastInstruction?.type == 'drawing-request'">
-          <h1>Draw Something!</h1>          
-          <h2>Hint: {{ state.lastInstruction.value }}</h2>
-          <drawable-canvas v-on:drawing-finished="sendImage" />
+          <h1>Drawing time!</h1>          
+          <div class="drawing-hint">{{ state.lastInstruction.value }}</div>
+          <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
         </div>
 
         <div v-if="state?.lastInstruction?.type == 'caption-request'">
           <h1>Caption this</h1>              
-          <img :src="state?.lastInstruction?.value" />
+          <img class="image-frame" :src="state?.lastInstruction?.value" />
           <input type="text" name="caption" v-model="caption">            
           <button v-on:click="sendCaption" class="form-button">Send Caption</button>
         </div>

@@ -10,14 +10,17 @@ export class NullMessageChannel {
 
 export class GameStateMachine {
     constructor(gameDefinition) {
+        this.game = gameDefinition;
         this.state = {
             msInCurrentStep: 0,
             channel: new NullMessageChannel()
         };
 
-        this.game = gameDefinition;
-        this.currentStepKey = "StartHandler";
+        this.resetCurrentStepKeepingState();
+    }
 
+    resetCurrentStepKeepingState() {
+        this.currentStepKey = "StartHandler";
         this.msTracker = null;
     }
 

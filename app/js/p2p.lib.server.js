@@ -28,6 +28,11 @@ export class P2PServer {
       this.stateMachine.run();
     }
 
+    async nextRound() {
+      this.stateMachine.resetCurrentStepKeepingState();
+      this.stateMachine.run();
+    }
+
     onReceiveMessage(message) {
       switch(message.kind) {
         case "connected": this.onClientConnected(message); break;

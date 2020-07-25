@@ -20,6 +20,20 @@ describe("GameStateMachine", () => {
         expect(sut.currentStepKey).toBe("EndHandler");
     });
 
+    it("resetCurrentStepKeepingState, allows games to proceed to a 'next round' without resetting state object.", async () => {
+        const game = twoStepGame();
+        const sut = new GameStateMachine(game);
+
+        await sut.run();
+        sut.state.foo = "bar";
+        expect(sut.currentStepKey).toBe("EndHandler");
+
+        await sut.resetCurrentStepKeepingState();
+        
+        expect(sut.state.foo).toBe("bar");
+        expect(sut.currentStepKey).toBe("StartHandler");
+    });
+
     it("run, game that only proceeds with input, proceeds with input", async () => {
         const game = gameThatNeedsInputToProceed();
 

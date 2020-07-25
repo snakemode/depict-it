@@ -29,8 +29,7 @@
           <invite-link :game-id="gameId"></invite-link>
           <connected-players-summary :state="transmittedServerState"></connected-players-summary>
           <ready-or-waiting-prompt 
-            :is-host="iAmHost" 
-            :game-ready="gameCanBeStarted" 
+            :is-host="iAmHost"
             :state="transmittedServerState"
             v-on:startgame="startGame"></ready-or-waiting-prompt>            
         </div>
@@ -44,6 +43,8 @@
           v-if="state?.lastInstruction"
           :state="state"
           :client="p2pClient"
+          :is-host="iAmHost"
+          v-on:nextround="nextRound"
         ></playfield>
 
 
