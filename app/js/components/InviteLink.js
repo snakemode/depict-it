@@ -11,9 +11,9 @@ export const InviteLink = {
     }, 
         
     template: `
-    <div>
+    <div class="invite-link">
       <h3>Share this link to invite people to play</h3>
-      <copyable-text-box :value="inviteLink"></copyable-text-box>
+      <copyable-text-box :value="inviteLink" />
     </div>
 `
 };

@@ -1,16 +1,21 @@
 import { DrawableCanvas } from "./js/components/base-components/DrawableCanvas.js";
-import { CopyableTextbox } from "./js/components/base-components/CopyableTextBox.js";
+import { CopyableTextBox } from "./js/components/base-components/CopyableTextBox.js";
 
 import { InviteLink } from "./js/components/InviteLink.js";
 import { StackItem } from "./js/components/StackItem.js";
 import { TimerBar } from "./js/components/TimerBar.js";
+
 import { ReadyOrWaitingPrompt } from "./js/components/ReadyOrWaitingPrompt.js";
+import { ConnectedPlayersSummary } from "./js/components/ConnectedPlayersSummary.js";
+import { CreateGameForm } from "./js/components/CreateGameForm.js";
 
 export default function() {
-    Vue.component('drawable-canvas', DrawableCanvas);
-    Vue.component('stack-item', StackItem);
-    Vue.component('timer-bar', TimerBar);
-    Vue.component('copyable-text-box', CopyableTextbox);
-    Vue.component('invite-link', InviteLink);
-    Vue.component('ready-or-waiting-prompt', ReadyOrWaitingPrompt);
+    Vue.component('DrawableCanvas', DrawableCanvas);
+    Vue.component('StackItem', StackItem);
+    Vue.component('TimerBar', TimerBar);
+    Vue.component('CopyableTextBox', CopyableTextBox);
+    Vue.component('InviteLink', InviteLink);
+    Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
+    Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
+    Vue.component('CreateGameForm', CreateGameForm);
 }

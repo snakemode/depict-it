@@ -18,30 +18,16 @@
         Client State: {{ state?.status == undefined ? "Disconnected" : state?.status }}
       </div>
 
-      <form class="form" v-if="!joinedOrHosting">
-        <label for="name-name">Enter your name</label>
-        <input type="text" name="name" v-model="friendlyName">          
+      <div v-if="!joinedOrHosting">
+        <create-game-form v-on:create="host" v-on:join="join" />
+      </div>
+      <div v-else id="activeGame" class="game-info">
 
-        <button v-if="!isJoinLink" v-on:click="host" class="form-button form-button--host">Create Game</button>
-        <button v-if="isJoinLink" v-on:click="join" class="form-button">Join a Session</button>
-      </form>      
-
-      <section v-else id="activeGame" class="game-info">
-        <h2>Game: {{ gameId }}</h2>
-
-        <invite-link :game-id="gameId"></invite-link>
-
-        <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
-        <ul class="players">
-          <li class="player" v-for="user in transmittedServerState?.players">
-            <div>
-              <div class="player-icon">👩‍🦱</div>            
-              <div>{{ user.friendlyName }}</div>
-            </div>
-          </li>
-        </ul>
-
-        <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame" />
+        <div class="game-lobby">
+          <invite-link :game-id="gameId" />
+          <connected-players-summary :state="transmittedServerState" />
+          <ready-or-waiting-prompt :is-host="iAmHost" :game-ready="gameCanBeStarted" v-on:startgame="startGame" />
+        </div>
         
         <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout" />
 
@@ -72,7 +58,7 @@
             <div v-if="state?.lastInstruction?.type == 'drawing-request'">
               <h1>Draw Something!</h1>          
               <h2>Hint: {{ state.lastInstruction.value }}</h2>
-              <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
+              <drawable-canvas v-on:drawing-finished="sendImage" />
             </div>
 
             <div v-if="state?.lastInstruction?.type == 'caption-request'">
@@ -84,7 +70,7 @@
 
         </div>
 
-      </section>
+      </div>
     </div>
   </body>
 </html>

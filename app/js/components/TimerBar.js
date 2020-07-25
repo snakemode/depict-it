@@ -30,7 +30,7 @@ export const TimerBar = {
     },   
 
     template: `
-<div v-if="hasCountdown">
+<div v-if="hasCountdown" class="timer-bar">
   Time left: {{ seconds }} <br />
   <div style="width: 100%; background-color: black; padding: 5px;">
     <div v-bind:style="{ width: percentage + '%', backgroundColor: 'red' }">

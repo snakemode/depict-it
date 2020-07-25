@@ -1,16 +1,11 @@
 import { Identity, PubSubClient } from "./js/p2p.js";
 import { P2PClient } from "./js/p2p.lib.client.js";
 import { P2PServer } from "./js/p2p.lib.server.js";
-import { generateName } from "./js/dictionaries.js";
 import { default as configureVueComponents } from "./vue.config.js";
 
 configureVueComponents();
 
-const urlParams = new URLSearchParams(location.search);
-const queryGameId = urlParams.get("gameId");
-const queryMessage = urlParams.get("message");
-const isJoinLink = [...urlParams.keys()].indexOf("join") > -1;
-const isHostLink = [...urlParams.keys()].indexOf("host") > -1;
+const queryMessage = new URLSearchParams(location.search).get("message");
 
 export var app = new Vue({
   el: '#app',
@@ -18,13 +13,9 @@ export var app = new Vue({
     p2pClient: null,
     p2pServer: null,
     
-    identity: null,
-    friendlyName: generateName(2),
-    gameId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
-    
-    message: queryMessage || null,    
-    isJoinLink: isJoinLink,
-    isHostLink: isHostLink,
+    gameId: null,
+    friendlyName: null,    
+    message: queryMessage || null,
 
     caption: ""
   },
@@ -37,29 +28,31 @@ export var app = new Vue({
     gameCanBeStarted: function() { return this.transmittedServerState && !this.transmittedServerState.started }
   },
   methods: {
-    host: async function(evt) {
-      evt.preventDefault();
+    host: async function(context) {
+      this.gameId = context.gameId;
+      this.friendlyName = context.friendlyName;
 
       const pubSubClient = new PubSubClient((message, metadata) => { 
         handleMessagefromAbly(message, metadata, this.p2pClient, this.p2pServer); 
       });
 
-      this.identity = new Identity(this.friendlyName);
-      this.p2pServer = new P2PServer(this.identity, this.gameId, pubSubClient);
-      this.p2pClient = new P2PClient(this.identity, this.gameId, pubSubClient);
+      const identity = new Identity(this.friendlyName);
+      this.p2pServer = new P2PServer(identity, this.gameId, pubSubClient);
+      this.p2pClient = new P2PClient(identity, this.gameId, pubSubClient);
       
       await this.p2pServer.connect();
       await this.p2pClient.connect();
     },
-    join: async function(evt) { 
-      evt.preventDefault();
+    join: async function(context) { 
+      this.gameId = context.gameId;
+      this.friendlyName = context.friendlyName;
 
       const pubSubClient = new PubSubClient((message, metadata) => { 
         handleMessagefromAbly(message, metadata, this.p2pClient, this.p2pServer); 
       });
       
-      this.identity = new Identity(this.friendlyName);
-      this.p2pClient = new P2PClient(this.identity, this.gameId, pubSubClient);
+      const identity = new Identity(this.friendlyName);
+      this.p2pClient = new P2PClient(identity, this.gameId, pubSubClient);
 
       await this.p2pClient.connect();
     },

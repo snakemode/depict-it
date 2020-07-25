@@ -1,4 +1,4 @@
-export const CopyableTextbox = {
+export const CopyableTextBox = {
     props: ['value'], 
 
     data: function() {
