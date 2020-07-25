@@ -25,12 +25,11 @@
         <input type="text" name="name" v-model="friendlyName">          
 
         <button v-on:click="host" class="form-button form-button--host">Host a Session</button>
-        <button v-on:click="join" class="form-button">Join a Session</button>
+        <button v-if="isJoinLink" v-on:click="join" class="form-button">Join a Session</button>
       </form>      
 
       <section v-else id="activeGame" class="game-info">
         <h2>Game: {{ uniqueId }}</h2>    
-        <button v-if="transmittedServerState && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
         <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
@@ -38,6 +37,8 @@
             <span>{{ user.friendlyName }}</span>
           </li>
         </ul>
+        
+        <button v-if="transmittedServerState && !transmittedServerState.started && iAmHost" v-on:click="startGame" class="form-button">Start Game</button>     
 
         <timer-bar v-if="state?.lastInstruction?.timeout != null" v-bind:countdown="state?.lastInstruction?.timeout"></timer-bar>
 

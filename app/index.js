@@ -8,6 +8,9 @@ import { TimerBar } from "./js/components/TimerBar.js";
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");
+const queryMessage = urlParams.get("message");
+const isJoinLink = [...urlParams.keys()].indexOf("join") > -1;
+const isHostLink = [...urlParams.keys()].indexOf("host") > -1;
 
 Vue.component('drawable-canvas', DrawableCanvasComponent);
 Vue.component('stack-item', StackItem);
@@ -23,6 +26,10 @@ export var app = new Vue({
     friendlyName: generateName(2),
     uniqueId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
     
+    message: queryMessage || null,    
+    isJoinLink: isJoinLink,
+    isHostLink: isHostLink,
+
     caption: ""
   },
   computed: {
@@ -30,6 +37,7 @@ export var app = new Vue({
     transmittedServerState: function() { return this.p2pClient?.serverState; },
     joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
     iAmHost: function() { return this.p2pServer != null; },
+    hasMessage: function () { return this.message != null; },
   },
   methods: {
     host: async function(evt) {
@@ -83,4 +91,22 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
     p2pServer?.onReceiveMessage(message);  
     p2pClient?.onReceiveMessage(message);
   } 
+}
+
+
+export class LinkGenerator {
+  constructor(windowLocation) {
+    this.urlRoot = `${windowLocation.protocol}//${windowLocation.host}${windowLocation.pathname}`;
+  }
+
+  linkTo(params) {
+    params = params || {};
+    const qsParams = Object.getOwnPropertyNames(params).map(propName => `${propName}=` + encodeURI(params[propName]));
+    if (qsParams.length == 0) {
+      return this.urlRoot;
+    }
+
+    const qsParamsJoined = qsParams.join("&");    
+    return this.urlRoot + "?" + qsParamsJoined;
+  }
 }
