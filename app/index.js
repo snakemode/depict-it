@@ -5,8 +5,10 @@ import { generateName } from "./js/dictionaries.js";
 import { DrawableCanvasComponent } from "./js/components/DrawableCanvasComponent.js";
 import { StackItem } from "./js/components/StackItemComponent.js";
 import { TimerBar } from "./js/components/TimerBar.js";
+import { LinkGenerator } from "./js/util.js";
 
 const urlParams = new URLSearchParams(location.search);
+const linkGenerator = new LinkGenerator(window.location);
 const queryGameId = urlParams.get("gameId");
 const queryMessage = urlParams.get("message");
 const isJoinLink = [...urlParams.keys()].indexOf("join") > -1;
@@ -24,7 +26,7 @@ export var app = new Vue({
     
     identity: null,
     friendlyName: generateName(2),
-    uniqueId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
+    gameId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
     
     message: queryMessage || null,    
     isJoinLink: isJoinLink,
@@ -38,6 +40,7 @@ export var app = new Vue({
     joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
     iAmHost: function() { return this.p2pServer != null; },
     hasMessage: function () { return this.message != null; },
+    inviteLink: function () { return linkGenerator.linkTo({ gameId: this.gameId, join: true }); },
   },
   methods: {
     host: async function(evt) {
@@ -48,8 +51,8 @@ export var app = new Vue({
       });
 
       this.identity = new Identity(this.friendlyName);
-      this.p2pServer = new P2PServer(this.identity, this.uniqueId, pubSubClient);
-      this.p2pClient = new P2PClient(this.identity, this.uniqueId, pubSubClient);
+      this.p2pServer = new P2PServer(this.identity, this.gameId, pubSubClient);
+      this.p2pClient = new P2PClient(this.identity, this.gameId, pubSubClient);
       
       await this.p2pServer.connect();
       await this.p2pClient.connect();
@@ -62,7 +65,7 @@ export var app = new Vue({
       });
       
       this.identity = new Identity(this.friendlyName);
-      this.p2pClient = new P2PClient(this.identity, this.uniqueId, pubSubClient);
+      this.p2pClient = new P2PClient(this.identity, this.gameId, pubSubClient);
 
       await this.p2pClient.connect();
     },
@@ -77,7 +80,10 @@ export var app = new Vue({
       this.caption = "";
     },
     sendVote: async function(id) {
-      await this.p2pClient.scrawl.logVote(id);;
+      await this.p2pClient.scrawl.logVote(id);
+    },
+    copyLink: async function() {
+      navigator.clipboard.writeText(this.inviteLink);
     }
   }
 });
@@ -93,20 +99,3 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
   } 
 }
 
-
-export class LinkGenerator {
-  constructor(windowLocation) {
-    this.urlRoot = `${windowLocation.protocol}//${windowLocation.host}${windowLocation.pathname}`;
-  }
-
-  linkTo(params) {
-    params = params || {};
-    const qsParams = Object.getOwnPropertyNames(params).map(propName => `${propName}=` + encodeURI(params[propName]));
-    if (qsParams.length == 0) {
-      return this.urlRoot;
-    }
-
-    const qsParamsJoined = qsParams.join("&");    
-    return this.urlRoot + "?" + qsParamsJoined;
-  }
-}

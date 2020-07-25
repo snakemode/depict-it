@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Scrawl</title>
+    <title>Depict-it</title>
     
     <script src="//cdn.ably.io/lib/ably-1.js" defer></script>    
     <script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -12,7 +12,7 @@
   </head>
   <body>
     <div id="app">
-      <h1>Scrawl</h1>
+      <h1>Depict-it</h1>
 
       <div class="debug">
         Client State: {{ state?.status == undefined ? "Disconnected" : state?.status }}
@@ -20,21 +20,30 @@
 
       <form class="form" v-if="!joinedOrHosting">
         <label for="session-name">Enter a name for your session</label>
-        <input type="text" name="session-name" v-model="uniqueId">
+        <input type="text" name="session-name" v-model="gameId">
         <label for="name-name">Enter your name</label>
         <input type="text" name="name" v-model="friendlyName">          
 
-        <button v-on:click="host" class="form-button form-button--host">Host a Session</button>
+        <button v-if="!isJoinLink" v-on:click="host" class="form-button form-button--host">Host a Session</button>
         <button v-if="isJoinLink" v-on:click="join" class="form-button">Join a Session</button>
       </form>      
 
       <section v-else id="activeGame" class="game-info">
-        <h2>Game: {{ uniqueId }}</h2>    
+        <h2>Game: {{ gameId }}</h2>
+        
+        <div>
+          <h3>Share this link to invite people to play</h3>
+          <input id="copyLinkInputBox" type="text" v-bind:value="inviteLink" />
+          <input v-on:click="copyLink" type="button" value="Copy Link">
+        </div>
 
         <h3>Players: {{ transmittedServerState?.players?.length }}</h3>
         <ul class="players">
-          <li class="player" v-for="user in transmittedServerState?.players">                
-            <span>{{ user.friendlyName }}</span>
+          <li class="player" v-for="user in transmittedServerState?.players">
+            <div>
+              <div class="player-icon">👩‍🦱</div>            
+              <div>{{ user.friendlyName }}</div>
+            </div>
           </li>
         </ul>
         

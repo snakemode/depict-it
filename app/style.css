@@ -83,17 +83,21 @@ button:hover {
 .players {
     margin: 10px 0 40px;
     padding: 0;
-    border: 1px solid #ccc;
     border-radius: 4px;
 }
 
 .player {
+  display: inline;
+  display: inline-block;
+
   list-style: none;
   padding: 10px;
 }
 
-.player:nth-child(even) {
-  background-color: #f1f1f1;
+.player-icon {
+  font-size: 45px;
+  text-align: center;
+  padding-bottom: 20px;
 }
 
 

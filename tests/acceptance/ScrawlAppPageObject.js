@@ -12,17 +12,18 @@ export class ScrawlAppPageObject {
 
     async hostASession() {
         this.playerName = await this.getSessionId();
-        this.gameId = await this.getGameId();
-
         await this.page.click('text=Host a Session');
         await this.page.waitForSelector('text=Start Game');
-        return this.gameId;
+
+        this.joinGameUrl = await this.getJoinGameUrl();
+        return this.joinGameUrl;
     }
 
-    async joinASession(gameId) {
-        this.playerName = await this.getSessionId();
+    async followJoinLink(joinUrl) { await this.page.goto(joinUrl); }
 
-        await this.enterGameId(gameId);
+    async joinASession(joinUrl) {
+        await this.followJoinLink(joinUrl);
+        this.playerName = await this.getSessionId();
         await this.page.click('text=Join a Session');
     }
 
@@ -30,12 +31,8 @@ export class ScrawlAppPageObject {
         await this.page.click('text=Start Game');
     }
 
-    async enterGameId(id) {
-        await this.page.fill('[name=session-name]', id);
-    }
-
-    async getGameId() {
-        return await this.page.$eval('[name=session-name]', e => e.value);
+    async getJoinGameUrl() {
+        return await this.page.$eval('#copyLinkInputBox', e => e.value);
     }
 
     async getSessionId() {
@@ -44,6 +41,10 @@ export class ScrawlAppPageObject {
 
     async connectedPlayers() {
         return await this.page.$eval('.players', e => e.innerHTML);
+    }
+
+    async pageBody() {
+        return await this.page.$eval('body', e => e.innerHTML);
     }
 
     async drawableCanvasIsVisible() {        

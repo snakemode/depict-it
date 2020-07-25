@@ -15,38 +15,48 @@ describe("Something", () => {
     afterEach(async () => { cleanup.forEach(item => item.close()); });
 
     it("Can start a lobby for a game", async () => {
-        const gameId = await app.hostASession();
+        const joinUrl = await app.hostASession();
 
-        expect(gameId).not.toBeNull();
+        expect(joinUrl).not.toBeNull();
     });
 
     it("Players can join a game", async () => {
-        const gameId = await app.hostASession();
+        const joinUrl = await app.hostASession();
 
         const player2 = await newPageObject();
-        await player2.joinASession(gameId);
+        await player2.joinASession(joinUrl);
 
         const player3 = await newPageObject();
-        await player3.joinASession(gameId);
+        await player3.joinASession(joinUrl);
 
         const player4 = await newPageObject();
-        await player4.joinASession(gameId);
+        await player4.joinASession(joinUrl);
 
         await sleep(2000);
 
         const connectedPlayers = await app.connectedPlayers();
 
         expect(connectedPlayers).toContain(app.playerName);        
-        expect(connectedPlayers).toContain(player2.playerName);        
+        expect(connectedPlayers).toContain(player2.playerName);
         expect(connectedPlayers).toContain(player3.playerName);        
         expect(connectedPlayers).toContain(player4.playerName);        
     });
 
-    it("Game is started - drawable canvas visible.", async () => {
-        await app.hostASession();
+    it("Players follow a join link, there is no host button available to them.", async () => {
+        const joinUrl = await app.hostASession();
 
         const player2 = await newPageObject();
-        await player2.joinASession(app.gameId);
+        await player2.followJoinLink(joinUrl);
+
+        const pageBodyAsSeenByPlayerTwo = await player2.pageBody();
+        expect(pageBodyAsSeenByPlayerTwo).not.toContain("Host a Session");
+    });
+
+    it("Game is started - drawable canvas visible.", async () => {
+        const joinUrl = await app.hostASession();
+
+        const player2 = await newPageObject();
+        await player2.joinASession(joinUrl);
         
         await app.clickStartGame();
         await app.drawableCanvasIsVisible();     
