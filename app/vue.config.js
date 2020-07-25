@@ -8,6 +8,7 @@ import { TimerBar } from "./js/components/TimerBar.js";
 import { ReadyOrWaitingPrompt } from "./js/components/ReadyOrWaitingPrompt.js";
 import { ConnectedPlayersSummary } from "./js/components/ConnectedPlayersSummary.js";
 import { CreateGameForm } from "./js/components/CreateGameForm.js";
+import { Playfield } from "./js/components/Playfield.js";
 
 export default function() {
     Vue.component('DrawableCanvas', DrawableCanvas);
@@ -18,4 +19,5 @@ export default function() {
     Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
     Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
     Vue.component('CreateGameForm', CreateGameForm);
+    Vue.component('Playfield', Playfield);
 }

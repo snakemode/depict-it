@@ -16,8 +16,6 @@ export var app = new Vue({
     gameId: null,
     friendlyName: null,    
     message: queryMessage || null,
-
-    caption: ""
   },
   computed: {
     state: function() { return this.p2pClient?.state; },
@@ -58,16 +56,6 @@ export var app = new Vue({
     },
     startGame: async function(evt) {
       this.p2pServer?.startGame();
-    },
-    sendImage: async function(base64EncodedImage) {
-      await this.p2pClient.scrawl.sendImage(base64EncodedImage);
-    },
-    sendCaption: async function(evt) {
-      await this.p2pClient.scrawl.sendCaption(this.caption);
-      this.caption = "";
-    },
-    sendVote: async function(id) {
-      await this.p2pClient.scrawl.logVote(id);
     }
   }
 });
