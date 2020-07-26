@@ -1,4 +1,4 @@
-import { generateName } from "../dictionaries.js";
+import { generateName } from "../util/GenerateName.js";
 
 const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");

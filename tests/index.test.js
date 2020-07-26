@@ -1,5 +1,4 @@
-import { sleep } from "./sleep";
-import { default as stubAbly } from "../app/stubs/ably";
+import { default as stubAbly } from "./stubs/ably";
 const ablyStub = stubAbly();
 
 global.Ably = ablyStub;

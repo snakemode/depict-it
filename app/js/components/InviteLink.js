@@ -1,4 +1,4 @@
-import { LinkGenerator } from "../LinkGenerator.js";
+import { LinkGenerator } from "../util/LinkGenerator.js";
 
 export const InviteLink = {
     props: ['gameId' ],
