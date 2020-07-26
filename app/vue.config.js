@@ -15,7 +15,7 @@ import { PlayfieldCaption } from "./js/components/PlayfieldCaption.js";
 import { PlayfieldPickOne } from "./js/components/PlayfieldPickOne.js";
 import { PlayfieldDrawing } from "./js/components/PlayfieldDrawing.js";
 
-export default function() {
+export function configureVueComponents() {
     Vue.component('DrawableCanvas', DrawableCanvas);
     Vue.component('StackItem', StackItem);
     Vue.component('TimerBar', TimerBar);

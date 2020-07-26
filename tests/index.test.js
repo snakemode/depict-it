@@ -41,7 +41,7 @@ describe("Vue app", () => {
 
     // This test is flickering because of callbacks and async / await.
     // It makes me feel nervous.
-    x_it("Starting a next round tells the p2pServer to trigger a next round", async () => {        
+    /*it("Starting a next round tells the p2pServer to trigger a next round", async () => {        
         await app.host({ preventDefault: function() {}});
         
         await app.startGame();
@@ -51,5 +51,5 @@ describe("Vue app", () => {
         await sleep(200);
         
         expect(app.p2pServer.stateMachine.currentStepKey).toBe("GetUserDrawingHandler");
-    });
+    });*/
 });

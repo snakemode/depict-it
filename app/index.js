@@ -1,7 +1,8 @@
-import { Identity, PubSubClient } from "./js/p2p.js";
-import { P2PClient } from "./js/p2p.lib.client.js";
-import { P2PServer } from "./js/p2p.lib.server.js";
-import { default as configureVueComponents } from "./vue.config.js";
+import { Identity } from "./js/Identity.js";
+import { PubSubClient } from "./js/PubSubClient.js";
+import { P2PClient } from "./js/P2PClient.js";
+import { P2PServer } from "./js/P2PServer.js";
+import { configureVueComponents } from "./vue.config.js";
 
 configureVueComponents();
 
