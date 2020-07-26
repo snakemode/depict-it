@@ -25,6 +25,11 @@ export class ScrawlAppPageObject {
         await this.followJoinLink(joinUrl);
         this.playerName = await this.getSessionId();
         await this.page.click('text=Join a Session');
+        await this.waitForGameLobbyToBeVisible();
+    }
+
+    async waitForGameLobbyToBeVisible() {
+        await this.page.waitForSelector(".game-lobby");
     }
 
     async clickStartGame() {
@@ -91,4 +96,8 @@ export class ScrawlAppPageObject {
     close() {        
         this.page.close();
     }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -86,6 +86,20 @@ describe("Behaviour of the app as a game client", () => {
         await host.drawableCanvasIsVisible();     
     });
 
+    it("Player can draw on a canvas, and will be prompted to wait for other players", async () => {
+        const player2 = await newPageObject();
+        await player2.joinASession(joinUrl);
+        
+        await host.clickStartGame();
+        await host.drawableCanvasIsVisible();       
+        
+        await player2.drawOnCanvas();
+        await sleep(2000);
+
+        const pageBodyAsSeenByPlayerTwo = await player2.pageBody();
+        expect(pageBodyAsSeenByPlayerTwo).toContain("Wait for other players to finish.")
+    });
+
     it("Players can play multiple rounds of a game on the same gameId", async () => {
         const player2 = await newPageObject();
         await player2.joinASession(joinUrl);
