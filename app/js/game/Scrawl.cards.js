@@ -1,4 +1,5 @@
 export const ScrawlCards = [
+    "Screaming inside your heart",
     "Bum bongos",
     "Aztec sacrifice",
     "Making an onion cry",

@@ -19,4 +19,5 @@ const globalAblyObject = { Realtime: { Promise: AblyStub } };
 
 export default function() {
     window.Ably = globalAblyObject;
+    return globalAblyObject;
 }
