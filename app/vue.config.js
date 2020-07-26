@@ -15,19 +15,17 @@ import { PlayfieldCaption } from "./js/components/PlayfieldCaption.js";
 import { PlayfieldPickOne } from "./js/components/PlayfieldPickOne.js";
 import { PlayfieldDrawing } from "./js/components/PlayfieldDrawing.js";
 
-export function configureVueComponents() {
-    Vue.component('DrawableCanvas', DrawableCanvas);
-    Vue.component('StackItem', StackItem);
-    Vue.component('TimerBar', TimerBar);
-    Vue.component('CopyableTextBox', CopyableTextBox);
-    Vue.component('InviteLink', InviteLink);
-    Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
-    Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
-    Vue.component('CreateGameForm', CreateGameForm);
-    
-    Vue.component('PlayfieldWaitForOthers', PlayfieldWaitForOthers);
-    Vue.component('PlayfieldShowScores', PlayfieldShowScores);
-    Vue.component('PlayfieldCaption', PlayfieldCaption);
-    Vue.component('PlayfieldPickOne', PlayfieldPickOne);
-    Vue.component('PlayfieldDrawing', PlayfieldDrawing);
-}
+Vue.component('DrawableCanvas', DrawableCanvas);
+Vue.component('StackItem', StackItem);
+Vue.component('TimerBar', TimerBar);
+Vue.component('CopyableTextBox', CopyableTextBox);
+Vue.component('InviteLink', InviteLink);
+Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
+Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
+Vue.component('CreateGameForm', CreateGameForm);
+
+Vue.component('PlayfieldWaitForOthers', PlayfieldWaitForOthers);
+Vue.component('PlayfieldShowScores', PlayfieldShowScores);
+Vue.component('PlayfieldCaption', PlayfieldCaption);
+Vue.component('PlayfieldPickOne', PlayfieldPickOne);
+Vue.component('PlayfieldDrawing', PlayfieldDrawing);

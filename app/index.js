@@ -2,9 +2,8 @@ import { Identity } from "./js/Identity.js";
 import { PubSubClient } from "./js/PubSubClient.js";
 import { P2PClient } from "./js/P2PClient.js";
 import { P2PServer } from "./js/P2PServer.js";
-import { configureVueComponents } from "./vue.config.js";
 
-configureVueComponents();
+import "./vue.config.js";
 
 export var app = new Vue({
   el: '#app',
