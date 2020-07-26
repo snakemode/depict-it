@@ -3,7 +3,7 @@ export const PlayfieldPickOne = {
 
   methods: {      
     sendVote: async function(id) {
-      await this.client.scrawl.logVote(id);
+      await this.client.logVote(id);
     }      
   },
 

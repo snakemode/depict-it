@@ -3,7 +3,7 @@ export const PlayfieldDrawing = {
 
   methods: {      
     sendImage: async function(base64EncodedImage) {
-      await this.client.scrawl.sendImage(base64EncodedImage);
+      await this.client.sendImage(base64EncodedImage);
     }     
   },
 

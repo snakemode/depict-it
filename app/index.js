@@ -2,10 +2,8 @@ import { Identity, PubSubClient } from "./js/p2p.js";
 import { P2PClient } from "./js/p2p.lib.client.js";
 import { P2PServer } from "./js/p2p.lib.server.js";
 import { default as configureVueComponents } from "./vue.config.js";
-configureVueComponents();
 
-import { default as stubAbly } from "./stubs/ably.js";
-//stubAbly();
+configureVueComponents();
 
 export var app = new Vue({
   el: '#app',
@@ -20,9 +18,10 @@ export var app = new Vue({
     state: function() { return this.p2pClient?.state; },
     transmittedServerState: function() { return this.p2pClient?.serverState; },
     joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
-    iAmHost: function() { return this.p2pServer != null; },
+    isHost: function() { return this.p2pServer != null; },
     hasMessage: function () { return this.message != null; },
-    gameCanBeStarted: function() { return this.transmittedServerState && !this.transmittedServerState.started }
+    gameCanBeStarted: function() { return this.transmittedServerState && !this.transmittedServerState.started },
+    scrawlClient: function() { return this.p2pClient?.scrawl; }
   },
   methods: {
     host: async function(context) {
