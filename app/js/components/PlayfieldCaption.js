@@ -1,6 +1,12 @@
 export const PlayfieldCaption = {
   props: [ 'state', 'client' ],
 
+  data: function() {
+    return {
+      caption: "",
+    }
+  },
+  
   methods: {      
     sendCaption: async function(evt) {
       await this.client.scrawl.sendCaption(this.caption);
