@@ -8,7 +8,12 @@ import { TimerBar } from "./js/components/TimerBar.js";
 import { ReadyOrWaitingPrompt } from "./js/components/ReadyOrWaitingPrompt.js";
 import { ConnectedPlayersSummary } from "./js/components/ConnectedPlayersSummary.js";
 import { CreateGameForm } from "./js/components/CreateGameForm.js";
-import { Playfield } from "./js/components/Playfield.js";
+
+import { PlayfieldWaitForOthers } from "./js/components/PlayfieldWaitForOthers.js";
+import { PlayfieldShowScores } from "./js/components/PlayfieldShowScores.js";
+import { PlayfieldCaption } from "./js/components/PlayfieldCaption.js";
+import { PlayfieldPickOne } from "./js/components/PlayfieldPickOne.js";
+import { PlayfieldDrawing } from "./js/components/PlayfieldDrawing.js";
 
 export default function() {
     Vue.component('DrawableCanvas', DrawableCanvas);
@@ -19,5 +24,10 @@ export default function() {
     Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
     Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
     Vue.component('CreateGameForm', CreateGameForm);
-    Vue.component('Playfield', Playfield);
+    
+    Vue.component('PlayfieldWaitForOthers', PlayfieldWaitForOthers);
+    Vue.component('PlayfieldShowScores', PlayfieldShowScores);
+    Vue.component('PlayfieldCaption', PlayfieldCaption);
+    Vue.component('PlayfieldPickOne', PlayfieldPickOne);
+    Vue.component('PlayfieldDrawing', PlayfieldDrawing);
 }
