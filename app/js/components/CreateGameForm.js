@@ -28,7 +28,7 @@ export const CreateGameForm = {
     template: `
   <form class="create-game-form form">
     <label for="name-name">Enter your name</label>
-    <input type="text" name="name" v-model="friendlyName">          
+    <input type="text" name="name" v-model="friendlyName" class="input">          
 
     <button v-if="!isJoinLink" v-on:click="emitCreateGameEvent" class="form-button form-button--host">Create Game</button>
     <button v-if="isJoinLink" v-on:click="emitJoinGameEvent" class="form-button">Join a Session</button>

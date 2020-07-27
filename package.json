@@ -1,33 +1,29 @@
 {
-  "name": "static-app",
-  "version": "",
-  "description": "",
-  "repository": "http://tempuri.org",
-  "license": "http://tempuri.org",
-  "scripts": {
-    "start": "run-p dev:api dev:server",
-
-    "test": "jest",
-    "test:acceptance": "jest acceptance",
-
-    "dev:api": "npm run start --prefix api",
-    "dev:server": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api",
-    "dev:server:test": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
-
-    "acceptance": "run-p dev:server:test dev:api test:acceptance",
-
-    "build:azure": ""
-  },
-  "author": "",
-  "dependencies": {},
-  "devDependencies": {
-    "@babel/cli": "^7.10.4",
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "jest": "^26.1.0",
-    "jest-cli": "^26.1.0",
-    "live-server": "^1.2.1",
-    "npm-run-all": "^4.1.5",
-    "playwright": "^1.2.1"
-  }
+    "name": "static-app",
+    "version": "",
+    "description": "",
+    "repository": "http://tempuri.org",
+    "license": "http://tempuri.org",
+    "scripts": {
+        "start": "run-p dev:api dev:server",
+        "test": "jest",
+        "test:acceptance": "jest acceptance",
+        "dev:api": "npm run start --prefix api",
+        "dev:server": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api",
+        "dev:server:test": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
+        "acceptance": "run-p dev:server:test dev:api test:acceptance",
+        "build:azure": ""
+    },
+    "author": "",
+    "dependencies": {},
+    "devDependencies": {
+        "@babel/cli": "^7.10.4",
+        "@babel/core": "^7.10.4",
+        "@babel/preset-env": "^7.10.4",
+        "jest": "^26.1.0",
+        "jest-cli": "^26.1.0",
+        "live-server": "^1.2.1",
+        "npm-run-all": "^4.1.5",
+        "playwright": "^1.2.1"
+    }
 }

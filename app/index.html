@@ -8,6 +8,7 @@
     <script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
  
     <script src="/index.js" type="module"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
@@ -16,13 +17,14 @@
         {{ state?.status == undefined ? "disconnected" : state?.status }}
       </div>
 
-      <section class="header">
+      <header class="header">
         <h1>Depict-it</h1>        
-      </section>
-
-      <div v-if="!joinedOrHosting">
+      </header>
+      
+      <section v-if="!joinedOrHosting" class="join-container">
+        <h2 class="section-heading">Start a new game:</h2>
         <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
-      </div>
+      </section>
       <div v-else id="activeGame" class="game-info">
         
         <div class="game-lobby" v-if="gameCanBeStarted"> 
