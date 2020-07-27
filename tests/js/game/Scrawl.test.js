@@ -1,4 +1,4 @@
-import { NullMessageChannel } from "../app/js/game/GameStateMachine";
+import { NullMessageChannel } from "../../../app/js/game/GameStateMachine";
 import {
     StartHandler, 
     DealHandler, 
@@ -7,10 +7,10 @@ import {
     PassStacksAroundHandler,
     GetUserScoresHandler,
     EndHandler
-} from "../app/js/game/Scrawl.handlers";
-import { Stack, StackItem } from "../app/js/game/Scrawl.types";
-import { Scrawl } from "../app/js/game/Scrawl";
-import { Identity } from "../app/js/p2p";
+} from "../../../app/js/game/Scrawl.handlers";
+import { Stack, StackItem } from "../../../app/js/game/Scrawl.types";
+import { Scrawl } from "../../../app/js/game/Scrawl";
+import { Identity } from "../../../app/js/Identity";
 
 describe("Scrawl", () => {
     let sut;

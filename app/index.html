@@ -17,11 +17,9 @@
         {{ state?.status == undefined ? "disconnected" : state?.status }}
       </div>
 
-      <header class="header">
-        <h1>Depict-it</h1>        
-      </header>
-      
-      <section v-if="!joinedOrHosting" class="join-container">
+      <h1>Depict-it</h1>
+
+      <div v-if="!joinedOrHosting">
         <h2 class="section-heading">Start a new game:</h2>
         <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
       </section>
@@ -31,7 +29,7 @@
           <invite-link :game-id="gameId"></invite-link>
           <connected-players-summary :state="transmittedServerState"></connected-players-summary>
           <ready-or-waiting-prompt 
-            :is-host="iAmHost"
+            :is-host="isHost"
             :state="transmittedServerState"
             v-on:startgame="startGame"></ready-or-waiting-prompt>            
         </div>
@@ -44,11 +42,11 @@
         <div v-if="state?.lastInstruction" class="playfield">
           <playfield-wait-for-others :state="state"></playfield-wait-for-others>     
 
-          <playfield-drawing :state="state" :client="p2pClient"></playfield-drawing>        
-          <playfield-caption :state="state" :client="p2pClient"></playfield-caption>
+          <playfield-drawing  :state="state" :client="scrawlClient"></playfield-drawing>        
+          <playfield-caption  :state="state" :client="scrawlClient"></playfield-caption>
+          <playfield-pick-one :state="state" :client="scrawlClient"></playfield-pick-one>
 
-          <playfield-pick-one :state="state" :client="p2pClient"></playfield-pick-one>
-          <playfield-show-scores :state="state" :is-host="iAmHost" v-on:nextround="nextRound"></playfield-show-scores>
+          <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
         </div>
 
       </div>

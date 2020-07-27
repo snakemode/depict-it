@@ -1,3 +1,21 @@
+export function generateName(wordNumber, divider = " ") {
+    const allOptions = animals.join(" ");
+    const singleWords = allOptions.split(" ");
+
+    const names = [];
+    while(names.length < wordNumber) {
+        const random = randomFrom(singleWords);
+        const capped = random.substr(0, 1).toUpperCase() + random.substr(1);
+        names.push(capped);
+    }
+    
+    return names.join(divider);
+}
+
+function randomFrom(collection) {
+    return collection[Math.floor(Math.random() * collection.length) + 0];
+}
+
 const animals = [
     "Canidae",
     "Felidae",
@@ -489,21 +507,3 @@ const animals = [
     "Yak",
     "Water buffalo",
 ];
-
-function randomFrom(collection) {
-    return collection[Math.floor(Math.random() * collection.length) + 0];
-}
-
-export function generateName(wordNumber, divider = " ") {
-    const allOptions = animals.join(" ");
-    const singleWords = allOptions.split(" ");
-
-    const names = [];
-    while(names.length < wordNumber) {
-        const random = randomFrom(singleWords);
-        const capped = random.substr(0, 1).toUpperCase() + random.substr(1);
-        names.push(capped);
-    }
-    
-    return names.join(divider);
-}

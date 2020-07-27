@@ -9,7 +9,7 @@ export const PlayfieldCaption = {
   
   methods: {      
     sendCaption: async function(evt) {
-      await this.client.scrawl.sendCaption(this.caption);
+      await this.client.sendCaption(this.caption);
       this.caption = "";
     }    
   },
