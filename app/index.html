@@ -22,7 +22,7 @@
       <div v-if="!joinedOrHosting">
         <h2 class="section-heading">Start a new game:</h2>
         <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
-      </section>
+      </div>
       <div v-else id="activeGame" class="game-info">
         
         <div class="game-lobby" v-if="gameCanBeStarted"> 
