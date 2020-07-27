@@ -30,12 +30,8 @@ export const TimerBar = {
     },   
 
     template: `
-<div class="timer-bar">
-  <div style="width: 100%; background-color: black; padding: 5px;">
-    <div v-bind:style="{ width: percentage + '%', backgroundColor: 'red' }">
-      &nbsp;
+    <div class="timer">
+      <div v-bind:style="{ height: percentage + '%'}" class="timer-bar"></div>
     </div>
-  </div>
-</div>
 `
 };

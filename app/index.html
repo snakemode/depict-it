@@ -12,19 +12,17 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div id="app">
+    <main id="app">
       <div class="debug">
         {{ state?.status == undefined ? "disconnected" : state?.status }}
       </div>
 
       <h1>Depict-it</h1>
 
-      <div v-if="!joinedOrHosting">
-        <h2 class="section-heading">Start a new game:</h2>
+      <div v-if="!joinedOrHosting" class="join-container">
         <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
       </div>
       <div v-else id="activeGame" class="game-info">
-        
         <div class="game-lobby" v-if="gameCanBeStarted"> 
           <invite-link :game-id="gameId"></invite-link>
           <connected-players-summary :state="transmittedServerState"></connected-players-summary>
@@ -50,6 +48,6 @@
         </div>
 
       </div>
-    </div>
+    </main>
   </body>
 </html>

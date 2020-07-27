@@ -16,7 +16,7 @@ export const ReadyOrWaitingPrompt = {
     template: `
     <div v-if="gameReady" class="ready-or-waiting-prompt">
         <div v-if="isHost">
-            <span>Everybody ready?</span>
+            <p>Everybody ready?</p>
             <button v-on:click="emitStartGameEvent" class="form-button">Start Game</button>
         </div>
 

@@ -8,12 +8,17 @@ export const CopyableTextBox = {
           justify-content: flex-start;
         `,
         textBoxStyle: `
-          width: auto;
-          flex-grow: 5;
-        `,
-        buttonStyle: `  
-          width: auto;
-          flex-grow: 1;
+        width: calc(100% - 150px);
+        margin: 0;
+        padding: 15px;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        font-size: 0.8em;
+        white-space: nowrap;
+        overflow: hidden;
+        color: #666;
+        text-overflow: ellipsis;
+        background-color: white;
         `
       }
     },    
@@ -26,8 +31,8 @@ export const CopyableTextBox = {
 
     template: `
     <div v-bind:style="componentStyle">
-      <input id="copyLinkInputBox" v-bind:style="textBoxStyle" type="text" v-bind:value="value" />
-      <input v-on:click="copyLink" v-bind:style="buttonStyle" type="button" value="Copy Link">
+      <span id="copyLinkInputBox" v-bind:style="textBoxStyle">{{ value }}</span>
+      <input type="button" v-on:click="copyLink" class="copy-link" value="Copy link" />
     </div>
 `
 };

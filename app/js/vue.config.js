@@ -6,7 +6,7 @@ import { StackItem } from "./components/StackItem.js";
 import { TimerBar } from "./components/TimerBar.js";
 
 import { ReadyOrWaitingPrompt } from "./components/ReadyOrWaitingPrompt.js";
-import { ConnectedPlayersSummary } from "./components/ConnectedPlayersSummary.js";
+import { ConnectedPlayersSummary, SinglePlayerSummary } from "./components/ConnectedPlayersSummary.js";
 import { CreateGameForm } from "./components/CreateGameForm.js";
 
 import { PlayfieldWaitForOthers } from "./components/PlayfieldWaitForOthers.js";
@@ -22,6 +22,7 @@ Vue.component('CopyableTextBox', CopyableTextBox);
 Vue.component('InviteLink', InviteLink);
 Vue.component('ReadyOrWaitingPrompt', ReadyOrWaitingPrompt);
 Vue.component('ConnectedPlayersSummary', ConnectedPlayersSummary);
+Vue.component('SinglePlayerSummary', SinglePlayerSummary);
 Vue.component('CreateGameForm', CreateGameForm);
 
 Vue.component('PlayfieldWaitForOthers', PlayfieldWaitForOthers);

@@ -27,6 +27,7 @@ export const CreateGameForm = {
 
     template: `
   <form class="create-game-form form">
+    <h2 class="section-heading">Start a new game:</h2>
     <label for="name-name">Enter your name</label>
     <input type="text" name="name" v-model="friendlyName" class="input">          
 

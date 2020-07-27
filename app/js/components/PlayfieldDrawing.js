@@ -9,11 +9,18 @@ export const PlayfieldDrawing = {
 
   template: `
       
-  <div v-if="state?.lastInstruction?.type == 'drawing-request'">
-    <h1>Drawing time!</h1>          
-    <div class="drawing-hint">{{ state.lastInstruction.value }}</div>
+  <section v-if="state?.lastInstruction?.type == 'drawing-request'">
+    <h2 class="section-heading">Drawing time!</h2>
+    <div class="drawing-hint">
+      <div class="hint-front">
+        Draw This
+      </div>
+      <div class="hint-back">
+        {{ state.lastInstruction.value }}
+      </div>
+    </div>
     <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
-  </div>
+  </section>
 
   `
 };

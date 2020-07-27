@@ -3,15 +3,32 @@ export const ConnectedPlayersSummary = {
         
     template: `
     <div class="connected-players-summary">
-      <h3>Players: {{ state?.players?.length }}</h3>
+      <h3 class="subtitle">Players: {{ state?.players?.length }}</h3>
       <ul class="players">
-        <li class="player" v-for="user in state?.players">
-          <div>
-            <div class="player-icon">👩‍🦱</div>            
-            <div>{{ user.friendlyName }}</div>
-          </div>
-        </li>
+        <single-player-summary 
+          v-for="user in state?.players" 
+          v-bind:key="user.clientId"
+          :user="user"
+        ></single-player-summary>
       </ul>
     </div>
+`
+};
+
+export const SinglePlayerSummary = {
+  props: [ 'user' ],
+
+  data: function() {
+    const randomColour = Math.floor(Math.random() * 254) + 1;
+    return {
+      bgColour: `background-color: hsl(${randomColour}deg, 50%, 53%)`
+    }
+  },  
+      
+  template: `
+      <li class="player">
+        <span v-bind:style="bgColour" class="colour"></span>        
+       {{ user.friendlyName }}
+      </li>
 `
 };
