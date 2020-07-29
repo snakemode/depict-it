@@ -47,8 +47,10 @@ p {
 }
 
 .section-heading {
+  flex-shrink: 0;
+  width: 100%;
   margin: 0 0 1em;
-  font-size: 2em;
+  font-size: 2.6rem;
   color: white;
   text-shadow: 0px 0px 2px #222222;
   text-align: center;
@@ -299,6 +301,47 @@ button:hover {
   max-width: 300px;
 }
 
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.gallery-item {
+  width: 400px;
+  height: 400px;
+  border-radius: 40px;
+  border: 6px solid #222;
+  border-left: 10px solid #222;
+  border-bottom: 10px solid #222;
+  background-color: #ffffff;
+}
+
+.gallery-item:first-of-type {
+  width: 300px;
+  height: min-content;
+  border-radius: 4px;
+  font-size: 2em;
+  font-weight: bold;
+  text-align: center;
+  border: 6px solid #222;
+  background-color: #f1c40f;
+}
+
+.stack-item {
+  width: 100%;
+}
+
+.stack-text {
+  display: block;
+  text-align: center;
+  line-height: 1.6em;
+  justify-content: center;
+  padding: 40px;
+  align-items: center;
+}
 
 @media (min-width: 740px) {
   h1 {
