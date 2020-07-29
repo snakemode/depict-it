@@ -31,6 +31,9 @@
             :state="transmittedServerState"
             v-on:startgame="startGame"></ready-or-waiting-prompt>            
         </div>
+        <div v-if="!gameCanBeStarted && !state?.lastInstruction">
+         <loader></loader>
+        </div>
 
         <timer-bar 
           v-if="state?.lastInstruction?.timeout != null" 

@@ -26,6 +26,6 @@ export const DrawableCanvas = {
         <div style="background-color: white;"></div>
       </div>
     </div>
-    <button v-on:click="$emit('drawing-finished', canvas.toString())" class="form-button">Done!</button>
+    <button v-on:click="$emit('drawing-finished', canvas.toString())" class="form-button finished-drawing">I'm finished!</button>
   </div>`
 };

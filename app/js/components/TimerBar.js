@@ -31,7 +31,7 @@ export const TimerBar = {
 
     template: `
     <div class="timer">
-      <div v-bind:style="{ height: percentage + '%'}" class="timer-bar"></div>
+      <div v-bind:style="{ width: percentage + '%'}" class="timer-bar"></div>
     </div>
 `
 };

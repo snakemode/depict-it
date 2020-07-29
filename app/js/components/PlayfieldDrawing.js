@@ -10,7 +10,6 @@ export const PlayfieldDrawing = {
   template: `
       
   <section v-if="state?.lastInstruction?.type == 'drawing-request'">
-    <h2 class="section-heading">Drawing time!</h2>
     <div class="drawing-hint">
       <div class="hint-front">
         Draw This

@@ -11,6 +11,10 @@ body {
   color: #222222;
 }
 
+button {
+  font-family: 'Sora', arial, sans-serif;
+}
+
 *, *:before, *:after {
   box-sizing: inherit;
 }
@@ -21,7 +25,9 @@ h1 {
   left: 10px;
   height: 12vw;
   width: 16vw;
+  min-width: 200px;
   max-width: 300px;
+  min-height: 160px;
   margin: 0;
   color: transparent;
   background: url(./assets/logo.svg) no-repeat center;
@@ -180,25 +186,32 @@ button:hover {
 
 .timer {
   position: absolute;
-  top: calc(12vw + 40px);
-  left: 8vw;
-  width: 40px;
-  height: calc(100vh - 12vw - 80px);
-  background-color: white;
+  bottom: 20px;
+  left: 20px;
+  width: calc(100vw - 40px);
+  height: 40px;
+  background-color: #f1c40f;
   border-radius: 4px;
   border: 4px solid #222;
   transform: rotate(180deg);
 }
 
 .timer-bar {
+  height: 32px;
   bottom: 0;
-  background-color: #f1c40f;
+  background-color: white;
 }
 
 
 /* drawing */
-.drawable-canvas {
-  /* center align the button plz 🖤 */
+.finished-drawing {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  margin-top: 20px;
+  font-size: 1.6em;
+  padding: 20px 40px;
+  width: max-content;
 }
 
 .drawing-hint {
@@ -275,10 +288,26 @@ button:hover {
   display: flex;
 }
 
+.loader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-gif {
+  max-width: 300px;
+}
+
+
 @media (min-width: 740px) {
   h1 {
     top: 20px;
     left: 20px;
+  }
+  .finished-drawing {
+    top: 40px;
+    right: 40px;
   }
 }
 
