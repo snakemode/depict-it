@@ -220,7 +220,8 @@ button:hover {
   perspective: 1000px;
 	position: relative;
   height: 200px;
-  width: 300px;
+  min-width: 300px;
+  max-width: 400px;
   margin: 0 auto 1em;
   font-weight: bold;
   text-align: center;
@@ -341,6 +342,34 @@ button:hover {
   justify-content: center;
   padding: 40px;
   align-items: center;
+}
+
+.caption {
+  display: grid;
+  grid-template-areas: 
+  "top top"
+  "img cap"
+  "img but";
+  grid-gap: 20px
+}
+
+.caption .section-heading {
+  grid-area: top;
+  margin-bottom: 10px;
+}
+
+.caption .image-frame {
+  grid-area: img;
+}
+
+.caption .input {
+  grid-area: cap;
+  font-size: 2em;
+}
+
+.caption .form-button {
+  grid-area: but;
+  height: min-content;
 }
 
 @media (min-width: 740px) {

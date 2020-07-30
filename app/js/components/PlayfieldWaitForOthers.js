@@ -2,8 +2,8 @@ export const PlayfieldWaitForOthers = {
   props: [ 'state' ],
 
     template: `
-        <div v-if="state?.lastInstruction?.type == 'wait'">
+        <h2 v-if="state?.lastInstruction?.type == 'wait'" class="section-heading">
           Wait for other players to finish.
-        </div>
+        </h2>
     `
 };
