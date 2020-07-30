@@ -2,8 +2,11 @@ export const PlayfieldWaitForOthers = {
   props: [ 'state' ],
 
     template: `
-        <h2 v-if="state?.lastInstruction?.type == 'wait'" class="section-heading">
-          Wait for other players to finish.
-        </h2>
+    <div class="loader" v-if="state?.lastInstruction?.type == 'wait'">
+        <h2 class="section-heading"> Waiting for other players to finish.</h2>
+        <img src="../../assets/loading.gif" alt="loading" class="loader-gif" />
+    </div>
     `
 };
+
+

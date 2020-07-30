@@ -372,6 +372,29 @@ button:hover {
   height: min-content;
 }
 
+.score-card {
+  width: max-content;
+  max-width: 90vw;
+  min-width: 400px;
+}
+
+.scores {
+  margin: 0;
+  padding: 0;
+}
+
+.score {
+  display: flex;
+  justify-content: space-between;
+  list-style:  none;
+  line-height: 1.8em;
+  font-size: 1.6em;
+}
+
+.score-score {
+  text-align: right;
+}
+
 @media (min-width: 740px) {
   h1 {
     top: 20px;
