@@ -1,4 +1,3 @@
-
 export class DrawableCanvasElement {
     constructor(canvasElementId) {
         this.canvasElementId = canvasElementId;
@@ -7,12 +6,26 @@ export class DrawableCanvasElement {
 
         this.activeColour = "black";
         this.dragging = false;
-        this.cursorPoint = { x:0, y:0 };
+        this.cursorPoint = { x: 0, y: 0 };
 
         this.paintCanvas.onmousedown = (e) => { this.onMouseDownHandler(e); };
-        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };        
+        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmouseout = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
+                         
+        this.paintCanvas.touchstart = (e) => {
+            e.preventDefault();
+            this.onMouseDownHandler(e); 
+        };
+        this.paintCanvas.touchend = (e) => { 
+            e.preventDefault();
+            this.onMouseUpHandler(e); 
+        };
+        this.paintCanvas.touchmove = (e) => {  
+            e.preventDefault();
+            this.onMouseMoveHandler(e); 
+        };
+        
     }
 
     registerPaletteElements(paletteContainer) {
@@ -27,10 +40,32 @@ export class DrawableCanvasElement {
         this.paintContext.clearRect(0, 0, 100000, 100000);
     }
 
+    getLocationFrom(e) {        
+        const location = { x: 0, y: 0 };
+
+        if (e.constructor.name === "TouchEvent") {            
+            const bounds = e.target.getBoundingClientRect();
+            const touch = e.targetTouches[0];
+            
+            location.x = touch.pageX - bounds.left;
+            location.y = touch.pageY - bounds.top;
+
+            console.log("calculated touch to be ", location);
+        } else {            
+            location.x = e.offsetX;
+            location.y = e.offsetY;
+        }
+
+        console.log("Converted ", e, "to", location);
+        return location;
+    }
+
     onMouseDownHandler(e) {
         this.dragging = true;
-        this.cursorPoint.x = e.offsetX;
-        this.cursorPoint.y = e.offsetY;
+    
+        const location = this.getLocationFrom(e);
+        this.cursorPoint.x = location.x;
+        this.cursorPoint.y = location.y;
 
         this.paintContext.lineWidth = 1;
         this.paintContext.lineCap = 'round';
@@ -47,8 +82,9 @@ export class DrawableCanvasElement {
     onMouseMoveHandler(e) {
         if(!this.dragging) return;
 
-        this.paintContext.lineTo(e.offsetX, e.offsetY);
-        this.paintContext.stroke();            
+        const location = this.getLocationFrom(e);
+        this.paintContext.lineTo(location.x, location.y);
+        this.paintContext.stroke();
     }
 
     toString() {
