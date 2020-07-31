@@ -49,7 +49,7 @@ export class GetUserDrawingHandler {
             const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
 
             for (let stack of stacksThatHaventBeenAddedTo) {
-                const stackItem = new StackItem("image", "http://some/image/url");
+                const stackItem = new StackItem("image", "/assets/no-submit.png");
                 stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
             }   
         }
