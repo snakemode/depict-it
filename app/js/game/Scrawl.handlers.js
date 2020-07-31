@@ -144,7 +144,7 @@ export class GetUserScoresHandler {
         this.waitForUsersFor = waitForUsersFor;
     }
 
-    async execute(state) {     
+    async execute(state) {
 
         for (let stack of state.stacks) { 
             this.submitted = 0;

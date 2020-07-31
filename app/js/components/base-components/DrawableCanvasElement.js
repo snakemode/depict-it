@@ -50,7 +50,7 @@ export class DrawableCanvasElement {
         this.paintContext.clearRect(0, 0, 100000, 100000);
     }
 
-    getLocationFrom(e) {        
+    getLocationFrom(e) {
         const location = { x: 0, y: 0 };
 
         if (e.constructor.name === "TouchEvent") {            
