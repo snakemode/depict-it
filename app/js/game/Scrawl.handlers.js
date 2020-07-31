@@ -67,6 +67,8 @@ export class GetUserCaptionHandler {
 
     async execute(state) {
         this.submitted = 0;
+        
+        this.initialStackLength = state.stacks[0].items.length;
 
         for (let player of state.players) {   
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
@@ -74,14 +76,23 @@ export class GetUserCaptionHandler {
             state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
+        let redirect = { transitionTo: "PassStacksAroundHandler" };
+
         try { 
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
-            return { transitionTo: "PassStacksAroundHandler" }; 
         }
         catch {   
-            console.log("Someone didn't send a caption in time!");         
-            return { transitionTo: "PassStacksAroundHandler", error: true };
-        }         
+            redirect.error = true;
+
+            const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
+
+            for (let stack of stacksThatHaventBeenAddedTo) {
+                const stackItem = new StackItem("string", "Answer not submitted");
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+            }
+        }        
+
+        return redirect;
     }
 
     async handleInput(state, message) {
