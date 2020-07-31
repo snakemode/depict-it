@@ -28,7 +28,8 @@ export class GetUserDrawingHandler {
     }
 
     async execute(state) {
-        this.submitted = 0;
+        this.submitted = 0;        
+        this.initialStackLength = state.stacks[0].items.length;
 
         for (let player of state.players) {   
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
@@ -37,18 +38,27 @@ export class GetUserDrawingHandler {
             state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
+        const result = { transitionTo: "PassStacksAroundHandler" };
+
         try { 
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
-            return { transitionTo: "PassStacksAroundHandler" }; 
         }
         catch (exception) {
-            console.log("Someone didn't send a drawing in time!");         
-            return { transitionTo: "PassStacksAroundHandler", error: true }; // Do something to compensate for lack of drawing?
+            result.error = true;
+            
+            const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
+
+            for (let stack of stacksThatHaventBeenAddedTo) {
+                const stackItem = new StackItem("image", "http://some/image/url");
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+            }   
         }
+
+        return result;
     }
 
     async handleInput(state, message) {
-        if (message.kind == "drawing-response") {        
+        if (message.kind == "drawing-response") {
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
             
@@ -66,7 +76,7 @@ export class GetUserCaptionHandler {
     }
 
     async execute(state) {
-        this.submitted = 0;        
+        this.submitted = 0;
         this.initialStackLength = state.stacks[0].items.length;
 
         for (let player of state.players) {   

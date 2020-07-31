@@ -114,6 +114,15 @@ describe("GetUserDrawingHandler", () => {
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
     });
+    
+    it("execute, if user times out, all stacks still have correct number of items in them so things don't crash later.", async () => {
+        const initialStackLength = state.stacks[0].items.length;
+
+        step = new GetUserDrawingHandler(100);
+        const result = await step.execute(state);
+
+        expect(state.stacks[0].items.length).toBe(initialStackLength + 1);
+    });
 });
 
 describe("GetUserCaptionHandler", () => {
