@@ -25,6 +25,24 @@ export class DrawableCanvasElement {
             e.preventDefault();
             this.onMouseMoveHandler(e); 
         };
+
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == this.paintCanvas) {
+              e.preventDefault();
+            }
+        }, false);
+
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == this.paintCanvas) {
+                e.preventDefault();
+            }
+        }, false);
+        
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == this.paintCanvas) {
+                e.preventDefault();
+            }
+        }, false);
         
     }
 
