@@ -13,34 +13,26 @@ export class DrawableCanvasElement {
         this.paintCanvas.onmouseout = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
                          
-        this.paintCanvas.touchstart = (e) => {
-            e.preventDefault();
-            this.onMouseDownHandler(e); 
-        };
-        this.paintCanvas.touchend = (e) => { 
-            e.preventDefault();
-            this.onMouseUpHandler(e); 
-        };
-        this.paintCanvas.touchmove = (e) => {  
-            e.preventDefault();
-            this.onMouseMoveHandler(e); 
-        };
+        const canvas = this.paintCanvas;
 
-        document.body.addEventListener("touchstart", function (e) {
-            if (e.target == this.paintCanvas) {
-              e.preventDefault();
+        document.body.addEventListener("touchstart", (e) => {
+            if (e.target == canvas) {
+                e.preventDefault();                 
+                this.onMouseDownHandler(e); 
             }
         }, false);
 
-        document.body.addEventListener("touchend", function (e) {
-            if (e.target == this.paintCanvas) {
+        document.body.addEventListener("touchend", (e) => {
+            if (e.target == canvas) { 
                 e.preventDefault();
+                this.onMouseUpHandler(e); 
             }
         }, false);
         
-        document.body.addEventListener("touchmove", function (e) {
-            if (e.target == this.paintCanvas) {
-                e.preventDefault();
+        document.body.addEventListener("touchmove", (e) => {
+            if (e.target == canvas) { 
+                e.preventDefault(); 
+                this.onMouseMoveHandler(e); 
             }
         }, false);
         
@@ -67,20 +59,17 @@ export class DrawableCanvasElement {
             
             location.x = touch.pageX - bounds.left;
             location.y = touch.pageY - bounds.top;
-
-            console.log("calculated touch to be ", location);
         } else {            
             location.x = e.offsetX;
             location.y = e.offsetY;
         }
 
-        console.log("Converted ", e, "to", location);
         return location;
     }
 
     onMouseDownHandler(e) {
         this.dragging = true;
-    
+
         const location = this.getLocationFrom(e);
         this.cursorPoint.x = location.x;
         this.cursorPoint.y = location.y;

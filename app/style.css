@@ -11,6 +11,10 @@ body {
   color: #222222;
 }
 
+canvas {
+  touch-action: none;
+}
+
 button {
   font-family: 'Sora', arial, sans-serif;
 }
