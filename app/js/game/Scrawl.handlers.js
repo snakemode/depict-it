@@ -66,8 +66,7 @@ export class GetUserCaptionHandler {
     }
 
     async execute(state) {
-        this.submitted = 0;
-        
+        this.submitted = 0;        
         this.initialStackLength = state.stacks[0].items.length;
 
         for (let player of state.players) {   

@@ -1,3 +1,4 @@
+
 export class DrawableCanvasElement {
     constructor(canvasElementId) {
         this.canvasElementId = canvasElementId;
@@ -9,7 +10,8 @@ export class DrawableCanvasElement {
         this.cursorPoint = { x:0, y:0 };
 
         this.paintCanvas.onmousedown = (e) => { this.onMouseDownHandler(e); };
-        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
+        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };        
+        this.paintCanvas.onmouseout = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
     }
 
@@ -30,9 +32,9 @@ export class DrawableCanvasElement {
         this.cursorPoint.x = e.offsetX;
         this.cursorPoint.y = e.offsetY;
 
-        this.paintContext.lineWidth = 10;
+        this.paintContext.lineWidth = 1;
         this.paintContext.lineCap = 'round';
-        this.paintContext.filter = 'blur(2px)';
+        this.paintContext.filter = 'blur(1px)';
         this.paintContext.beginPath();
         this.paintContext.moveTo(this.cursorPoint.x, this.cursorPoint.y);
         this.paintContext.strokeStyle = this.activeColour;
