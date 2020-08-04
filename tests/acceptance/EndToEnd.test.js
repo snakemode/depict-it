@@ -97,7 +97,7 @@ describe("Behaviour of the app as a game client", () => {
         await sleep(2000);
 
         const pageBodyAsSeenByPlayerTwo = await player2.pageBody();
-        expect(pageBodyAsSeenByPlayerTwo).toContain("Wait for other players to finish.")
+        expect(pageBodyAsSeenByPlayerTwo).toContain("Waiting for other players to finish.")
     });
 
     it("Players can play multiple rounds of a game on the same gameId", async () => {

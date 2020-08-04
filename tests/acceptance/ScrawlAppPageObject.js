@@ -41,7 +41,7 @@ export class ScrawlAppPageObject {
     }
 
     async getJoinGameUrl() {
-        return await this.page.$eval('#copyLinkInputBox', e => e.value);
+        return await this.page.$eval('#copyLinkInputBox', e => e.innerText);
     }
 
     async waitForDrawingCanvasToAppear() {
@@ -54,7 +54,7 @@ export class ScrawlAppPageObject {
         await this.page.mouse.down();
         await this.page.mouse.move(550, 550);
         await this.page.mouse.up();        
-        await this.page.click('text=Done!');
+        await this.page.click("text=I'm finished!");
     }
 
     async voteForFirstStackItem() {        
