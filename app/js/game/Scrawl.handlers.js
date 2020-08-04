@@ -140,19 +140,19 @@ export class PassStacksAroundHandler {
 }
 
 export class GetUserScoresHandler {
-    constructor(waitForUsersFor) {
-        this.waitForUsersFor = waitForUsersFor;
+    constructor() {
     }
 
     async execute(state) {
 
         for (let stack of state.stacks) {
+            this.skip = false;
             this.submitted = 0;
 
-            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack, timeout: this.waitForUsersFor });
+            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
 
             try {
-                await waitUntil(() => { return this.submitted == state.players.length }, this.waitForUsersFor);
+                await waitUntil(() => { return this.skip || (this.submitted == state.players.length); });
             } catch {
                 console.log("Not all votes cast, shrug")
             }
@@ -162,6 +162,11 @@ export class GetUserScoresHandler {
     }
 
     async handleInput(state, message) {
+        if (message.kind === "skip-scoring-forwards") {
+            this.skip = true;
+            return;
+        }
+
         if (message.kind != "pick-one-response") {
             return;
         }

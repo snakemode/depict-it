@@ -12,6 +12,7 @@ export class P2PClient {
 
     this.state = {
       status: "disconnected",
+      instructionHistory: [],
       lastInstruction: null
     };
   }
@@ -33,6 +34,7 @@ export class P2PClient {
         this.state.status = "acknowledged";
         break;
       case "instruction":
+        this.state.instructionHistory.push(message);
         this.state.lastInstruction = message;
         break;
       default: { };

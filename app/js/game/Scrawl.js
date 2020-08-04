@@ -11,7 +11,7 @@ export const Scrawl = new GameStateMachine({
     "GetUserDrawingHandler": new GetUserDrawingHandler(180_000),
     "GetUserCaptionHandler": new GetUserCaptionHandler(60_000),
     "PassStacksAroundHandler": new PassStacksAroundHandler(),
-    "GetUserScoresHandler": new GetUserScoresHandler(30_000),
+    "GetUserScoresHandler": new GetUserScoresHandler(),
     "EndHandler": new EndHandler()
   }
 });
@@ -38,5 +38,9 @@ export class ScrawlClient {
 
   async logVote(id) {
     this.channel.sendMessage({ kind: "pick-one-response", id: id });
+  }
+
+  async hostProgressedVote() {
+    this.channel.sendMessage({ kind: "skip-scoring-forwards" })
   }
 }

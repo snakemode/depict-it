@@ -43,7 +43,7 @@
 
         <playfield-drawing :state="state" :client="scrawlClient"></playfield-drawing>
         <playfield-caption :state="state" :client="scrawlClient"></playfield-caption>
-        <playfield-pick-one :state="state" :client="scrawlClient"></playfield-pick-one>
+        <playfield-pick-one :state="state" :client="scrawlClient" :is-host="isHost"></playfield-pick-one>
 
         <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
       </div>

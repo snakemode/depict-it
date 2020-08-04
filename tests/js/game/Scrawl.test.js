@@ -1,9 +1,9 @@
 import { NullMessageChannel } from "../../../app/js/game/GameStateMachine";
 import {
-    StartHandler, 
-    DealHandler, 
-    GetUserDrawingHandler, 
-    GetUserCaptionHandler, 
+    StartHandler,
+    DealHandler,
+    GetUserDrawingHandler,
+    GetUserCaptionHandler,
     PassStacksAroundHandler,
     GetUserScoresHandler,
     EndHandler
@@ -15,7 +15,7 @@ import { Identity } from "../../../app/js/Identity";
 describe("Scrawl", () => {
     let sut;
     beforeEach(() => {
-        sut = Scrawl;        
+        sut = Scrawl;
         sut.state.players = [];
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));
@@ -51,13 +51,13 @@ describe("StartHandler", () => {
     });
 });
 
-describe("DealHandler", () => {    
+describe("DealHandler", () => {
     let step, state;
     beforeEach(() => {
         state = {
-            players: [ new Identity("Some player") ],
+            players: [new Identity("Some player")],
             stacks: [],
-            hints: [ "hint1", "hint2" ]
+            hints: ["hint1", "hint2"]
         };
         step = new DealHandler();
     });
@@ -66,7 +66,7 @@ describe("DealHandler", () => {
         await step.execute(state);
         expect(state.stacks.length).toBe(1);
     });
-    
+
     it("execute, triggers 'getUserDrawing' step to start game", async () => {
         const result = await step.execute(state);
         expect(result.transitionTo).toBe("GetUserDrawingHandler");
@@ -79,9 +79,9 @@ describe("GetUserDrawingHandler", () => {
         identity = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
-            players: [ identity ],
-            stacks: [ new Stack(identity.clientId, "hint1") ],
-            hints: [ "hint1", "hint2" ],
+            players: [identity],
+            stacks: [new Stack(identity.clientId, "hint1")],
+            hints: ["hint1", "hint2"],
             channel: channel
         };
         step = new GetUserDrawingHandler(5_000);
@@ -95,7 +95,7 @@ describe("GetUserDrawingHandler", () => {
         expect(channel.sentMessages[0].message.type).toBe("drawing-request");
         expect(channel.sentMessages[0].message.value).toBe("hint1");
     });
-    
+
     it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
             step.handleInput(state, { kind: "drawing-response", imageUrl: "http://my/drawing.jpg", metadata: { clientId: identity.clientId } });
@@ -114,7 +114,7 @@ describe("GetUserDrawingHandler", () => {
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
     });
-    
+
     it("execute, if user times out, all stacks still have correct number of items in them so things don't crash later.", async () => {
         const initialStackLength = state.stacks[0].items.length;
 
@@ -131,9 +131,9 @@ describe("GetUserCaptionHandler", () => {
         identity = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
-            players: [ identity ],
-            stacks: [ new Stack(identity.clientId, "hint1") ],
-            hints: [ "hint1", "hint2" ],
+            players: [identity],
+            stacks: [new Stack(identity.clientId, "hint1")],
+            hints: ["hint1", "hint2"],
             channel: channel
         };
         step = new GetUserCaptionHandler(5_000);
@@ -149,7 +149,7 @@ describe("GetUserCaptionHandler", () => {
         expect(channel.sentMessages[0].message.type).toBe("caption-request");
         expect(channel.sentMessages[0].message.value).toBe("http://tempuri.org/img.png");
     });
-    
+
     it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
             step.handleInput(state, { kind: "caption-response", caption: "blah blah blah", metadata: { clientId: identity.clientId } });
@@ -170,7 +170,7 @@ describe("GetUserCaptionHandler", () => {
     });
 
     it("execute, if user times out, all stacks still have correct number of items in them so things don't crash later.", async () => {
-        const initialStackLength = state.stacks[0].items.length;     
+        const initialStackLength = state.stacks[0].items.length;
         console.log(initialStackLength);
 
         step = new GetUserCaptionHandler(100);
@@ -187,12 +187,12 @@ describe("PassStacksAroundHandler", () => {
         p2 = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
-            players: [ p1, p2 ],
-            stacks: [ 
+            players: [p1, p2],
+            stacks: [
                 new Stack(p1.clientId, "hint1"),
                 new Stack(p2.clientId, "hint2"),
             ],
-            hints: [ "hint1", "hint2" ],
+            hints: ["hint1", "hint2"],
             channel: channel
         };
 
@@ -237,15 +237,15 @@ describe("GetUserScoresHandler", () => {
         p1 = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
-            players: [ p1 ],
-            stacks: [ 
+            players: [p1],
+            stacks: [
                 new Stack(p1.clientId, "hint1"),
             ],
-            hints: [ "hint1", "hint2" ],
+            hints: ["hint1", "hint2"],
             channel: channel
         };
 
-        step = new GetUserScoresHandler(5_000);
+        step = new GetUserScoresHandler();
         const item = new StackItem("image", "http://tempuri.org/img.png");
         item.author = p1.clientId;
         item.id = "1234";
@@ -268,6 +268,16 @@ describe("GetUserScoresHandler", () => {
         expect(result.transitionTo).toBe("EndHandler");
         expect(result.error).not.toBeDefined();
     });
+
+    it("execute, can be skipped by host", async () => {
+        setTimeout(async () => {
+            step.handleInput(state, { kind: "skip-scoring-forwards" });
+        }, 100);
+
+        const result = await step.execute(state);
+
+        expect(result.transitionTo).toBe("EndHandler");
+    });
 });
 
 describe("EndHandler", () => {
@@ -276,9 +286,9 @@ describe("EndHandler", () => {
         p1 = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
-            players: [ p1 ],
-            stacks: [ new Stack(p1.clientId, "hint1") ],
-            hints: [ "hint1" ],
+            players: [p1],
+            stacks: [new Stack(p1.clientId, "hint1")],
+            hints: ["hint1"],
             channel: channel
         };
 
