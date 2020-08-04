@@ -1,17 +1,17 @@
 export const PlayfieldCaption = {
-  props: [ 'state', 'client' ],
+  props: ['state', 'client'],
 
-  data: function() {
+  data: function () {
     return {
       caption: "",
     }
   },
-  
-  methods: {      
-    sendCaption: async function(evt) {
+
+  methods: {
+    sendCaption: async function (evt) {
       await this.client.sendCaption(this.caption);
       this.caption = "";
-    }    
+    }
   },
 
   template: `

@@ -3,7 +3,7 @@ export class ScrawlAppPageObject {
         const page = await browser.newPage();
         await page.goto('http://127.0.0.1:8080');
         return new ScrawlAppPageObject(browser, page);
-    }    
+    }
 
     constructor(browser, page) {
         this.browser = browser;
@@ -48,21 +48,21 @@ export class ScrawlAppPageObject {
         await this.page.waitForSelector('.drawing-hint');
     }
 
-    async drawOnCanvas() {     
+    async drawOnCanvas() {
         await this.waitForDrawingCanvasToAppear();
         await this.page.mouse.move(500, 500);
         await this.page.mouse.down();
         await this.page.mouse.move(550, 550);
-        await this.page.mouse.up();        
+        await this.page.mouse.up();
         await this.page.click("text=I'm finished!");
     }
 
-    async voteForFirstStackItem() {        
+    async voteForFirstStackItem() {
         await this.page.waitForSelector('.stack-item');
         await this.page.dispatchEvent('.stack-item:first-of-type', 'click');
     }
 
-    async waitForScores() {        
+    async waitForScores() {
         await this.page.waitForSelector('text=Scores');
     }
 
@@ -72,7 +72,7 @@ export class ScrawlAppPageObject {
 
     async captionImageReceivedFromServer(text) {
         await this.page.waitForSelector('[name=caption]');
-        await this.page.fill('[name=caption]', text);        
+        await this.page.fill('[name=caption]', text);
         await this.page.click('text=Send Caption');
     }
 
@@ -80,7 +80,7 @@ export class ScrawlAppPageObject {
         return await this.page.$eval('.players', e => e.innerHTML);
     }
 
-    async youAreWaitingMessage() {        
+    async youAreWaitingMessage() {
         await this.page.waitForSelector('#wait-message');
         return await this.page.$eval('#wait-message', e => e.innerHTML);
     }
@@ -89,11 +89,11 @@ export class ScrawlAppPageObject {
         return await this.page.$eval('body', e => e.innerHTML);
     }
 
-    async drawableCanvasIsVisible() {        
+    async drawableCanvasIsVisible() {
         await this.page.waitForSelector('.drawable-canvas');
     }
 
-    close() {        
+    close() {
         this.page.close();
     }
 }

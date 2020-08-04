@@ -1,20 +1,20 @@
 import { DrawableCanvasElement } from "./DrawableCanvasElement.js";
 
 export const DrawableCanvas = {
-    data: function() {    
-      return {
-        canvasId: "canvas-" + crypto.getRandomValues(new Uint32Array(1))[0],
-        paletteId: "palette-" + crypto.getRandomValues(new Uint32Array(1))[0],
-        canvas: null 
-      }
-    },
-    mounted: function () {
-      const element = document.getElementById(this.canvasId);
-      if (element && !this.canvas) {
-        this.canvas = new DrawableCanvasElement(this.canvasId).registerPaletteElements(this.paletteId);
-      }
-    },
-    template: `
+  data: function () {
+    return {
+      canvasId: "canvas-" + crypto.getRandomValues(new Uint32Array(1))[0],
+      paletteId: "palette-" + crypto.getRandomValues(new Uint32Array(1))[0],
+      canvas: null
+    }
+  },
+  mounted: function () {
+    const element = document.getElementById(this.canvasId);
+    if (element && !this.canvas) {
+      this.canvas = new DrawableCanvasElement(this.canvasId).registerPaletteElements(this.paletteId);
+    }
+  },
+  template: `
   <div class="drawable-canvas">
     <div class="canvas-and-paints">
       <canvas v-bind:id="canvasId" class="image-frame paint-canvas" width="400" height="400"></canvas>  

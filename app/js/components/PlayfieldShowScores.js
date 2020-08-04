@@ -1,10 +1,10 @@
 export const PlayfieldShowScores = {
-  props: [ 'state', 'isHost' ],
-  
+  props: ['state', 'isHost'],
+
   methods: {
-    emitNextRoundEvent: async function() {
+    emitNextRoundEvent: async function () {
       this.$emit('nextround');
-    }     
+    }
   },
 
   template: `

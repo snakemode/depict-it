@@ -4,7 +4,7 @@ export class NullMessageChannel {
     }
 
     sendMessage(message, targetClientId) {
-        this.sentMessages.push( { message, targetClientId });
+        this.sentMessages.push({ message, targetClientId });
     }
 }
 
@@ -34,7 +34,7 @@ export class GameStateMachine {
         const currentStep = this.currentStep();
         const response = await currentStep.execute(this.state);
 
-        if (this.currentStepKey == "EndHandler" && (response == null || response.complete)) {            
+        if (this.currentStepKey == "EndHandler" && (response == null || response.complete)) {
             return; // State machine exit signal
         }
 
@@ -42,26 +42,26 @@ export class GameStateMachine {
             throw "You must return a response from your execute functions so we know where to redirect to.";
         }
 
-        this.currentStepKey = response.transitionTo; 
+        this.currentStepKey = response.transitionTo;
         this.run();
     }
 
     async handleInput(input) {
         const currentStep = this.currentStep();
-        if(currentStep.handleInput) {
+        if (currentStep.handleInput) {
             currentStep.handleInput(this.state, input);
         } else {
             console.log("Input received while no handler was available.");
-        } 
+        }
     }
 
     trackMilliseconds() {
-        clearTimeout(this.msTracker);        
+        clearTimeout(this.msTracker);
         this.state.msInCurrentStep = 0;
 
         const interval = 5;
-        this.msTracker = setInterval(() => { 
-            this.state.msInCurrentStep += interval; 
+        this.msTracker = setInterval(() => {
+            this.state.msInCurrentStep += interval;
         }, interval);
     }
 }
@@ -84,7 +84,7 @@ export function waitUntil(condition, timeout) {
                 return;
             }
 
-            elapsed += pollFrequency;  
+            elapsed += pollFrequency;
 
             if (!timeout) {
                 return;
@@ -95,6 +95,6 @@ export function waitUntil(condition, timeout) {
                 rej("Timed out");
             }
         }, pollFrequency);
-        
+
     });
 }

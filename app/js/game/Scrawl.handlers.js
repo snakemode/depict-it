@@ -1,4 +1,4 @@
-import { Stack, StackItem  } from "./Scrawl.types.js";
+import { Stack, StackItem } from "./Scrawl.types.js";
 import { ScrawlCards } from "./Scrawl.cards.js";
 import { waitUntil } from "./GameStateMachine.js";
 
@@ -19,7 +19,7 @@ export class DealHandler {
             state.stacks.push(stack);
         }
         return { transitionTo: "GetUserDrawingHandler" };
-    }   
+    }
 }
 
 export class GetUserDrawingHandler {
@@ -28,30 +28,30 @@ export class GetUserDrawingHandler {
     }
 
     async execute(state) {
-        this.submitted = 0;        
+        this.submitted = 0;
         this.initialStackLength = state.stacks[0].items.length;
 
-        for (let player of state.players) {   
+        for (let player of state.players) {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
-            const lastItem = stack.items[stack.items.length -1];
+            const lastItem = stack.items[stack.items.length - 1];
 
             state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         const result = { transitionTo: "PassStacksAroundHandler" };
 
-        try { 
+        try {
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
         }
         catch (exception) {
             result.error = true;
-            
+
             const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
 
             for (let stack of stacksThatHaventBeenAddedTo) {
                 const stackItem = new StackItem("image", "/assets/no-submit.png");
                 stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
-            }   
+            }
         }
 
         return result;
@@ -61,7 +61,7 @@ export class GetUserDrawingHandler {
         if (message.kind == "drawing-response") {
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
-            
+
             stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
             state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
@@ -70,7 +70,7 @@ export class GetUserDrawingHandler {
     }
 }
 
-export class GetUserCaptionHandler {    
+export class GetUserCaptionHandler {
     constructor(waitForUsersFor) {
         this.waitForUsersFor = waitForUsersFor;
     }
@@ -79,18 +79,18 @@ export class GetUserCaptionHandler {
         this.submitted = 0;
         this.initialStackLength = state.stacks[0].items.length;
 
-        for (let player of state.players) {   
+        for (let player of state.players) {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
-            const lastItem = stack.items[stack.items.length -1];
+            const lastItem = stack.items[stack.items.length - 1];
             state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         let redirect = { transitionTo: "PassStacksAroundHandler" };
 
-        try { 
+        try {
             await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
         }
-        catch {   
+        catch {
             redirect.error = true;
 
             const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
@@ -99,13 +99,13 @@ export class GetUserCaptionHandler {
                 const stackItem = new StackItem("string", "Answer not submitted");
                 stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
             }
-        }        
+        }
 
         return redirect;
     }
 
     async handleInput(state, message) {
-        if (message.kind == "caption-response") {       
+        if (message.kind == "caption-response") {
             const stackItem = new StackItem("string", message.caption);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
@@ -121,16 +121,16 @@ export class PassStacksAroundHandler {
     async execute(state) {
         let holders = state.stacks.map(s => s.heldBy);
         const popped = holders.pop();
-        holders = [ popped, ...holders ];
+        holders = [popped, ...holders];
 
         for (let stackIndex in state.stacks) {
             state.stacks[stackIndex].heldBy = holders[stackIndex];
         }
-        
+
         const stacksHeldByOriginalOwners = state.stacks[0].heldBy == state.players[0].clientId;
-        
+
         if (stacksHeldByOriginalOwners) {
-            return { transitionTo: "GetUserScoresHandler" }; 
+            return { transitionTo: "GetUserScoresHandler" };
         }
 
         const nextStackRequirement = state.stacks[0].requires;
@@ -146,12 +146,12 @@ export class GetUserScoresHandler {
 
     async execute(state) {
 
-        for (let stack of state.stacks) { 
+        for (let stack of state.stacks) {
             this.submitted = 0;
 
             state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack, timeout: this.waitForUsersFor });
-            
-            try { 
+
+            try {
                 await waitUntil(() => { return this.submitted == state.players.length }, this.waitForUsersFor);
             } catch {
                 console.log("Not all votes cast, shrug")
@@ -160,12 +160,12 @@ export class GetUserScoresHandler {
 
         return { transitionTo: "EndHandler" };
     }
-    
+
     async handleInput(state, message) {
         if (message.kind != "pick-one-response") {
             return;
         }
-            
+
         for (let stack of state.stacks) {
             for (let item of stack.items) {
                 if (item.id == message.id) {
@@ -176,13 +176,13 @@ export class GetUserScoresHandler {
                         continue; // They voted on the original phrase, what?!
                     }
 
-                    if(!author.score) {
+                    if (!author.score) {
                         author.score = 0;
                     }
                     author.score++;
                 }
             }
-        }            
+        }
 
         state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
         this.submitted++;
@@ -198,14 +198,14 @@ export class EndHandler {
 
 function shuffle(collection) {
     for (let i = collection.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [collection[i], collection[j]] = [collection[j], collection[i]];
+        const j = Math.floor(Math.random() * (i + 1));
+        [collection[i], collection[j]] = [collection[j], collection[i]];
     }
 }
 
 function createId() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
     });
 }

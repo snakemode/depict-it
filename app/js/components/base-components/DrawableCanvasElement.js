@@ -12,30 +12,30 @@ export class DrawableCanvasElement {
         this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmouseout = (e) => { this.onMouseUpHandler(e); };
         this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
-                         
+
         const canvas = this.paintCanvas;
 
         document.body.addEventListener("touchstart", (e) => {
             if (e.target == canvas) {
-                e.preventDefault();                 
-                this.onMouseDownHandler(e); 
+                e.preventDefault();
+                this.onMouseDownHandler(e);
             }
         }, false);
 
         document.body.addEventListener("touchend", (e) => {
-            if (e.target == canvas) { 
+            if (e.target == canvas) {
                 e.preventDefault();
-                this.onMouseUpHandler(e); 
+                this.onMouseUpHandler(e);
             }
         }, false);
-        
+
         document.body.addEventListener("touchmove", (e) => {
-            if (e.target == canvas) { 
-                e.preventDefault(); 
-                this.onMouseMoveHandler(e); 
+            if (e.target == canvas) {
+                e.preventDefault();
+                this.onMouseMoveHandler(e);
             }
         }, false);
-        
+
     }
 
     registerPaletteElements(paletteContainer) {
@@ -43,7 +43,7 @@ export class DrawableCanvasElement {
         for (let colour of palette.children) {
             colour.addEventListener('click', (event) => { this.activeColour = event.target.style["background-color"]; });
         }
-        return this; 
+        return this;
     }
 
     clear() {
@@ -53,13 +53,13 @@ export class DrawableCanvasElement {
     getLocationFrom(e) {
         const location = { x: 0, y: 0 };
 
-        if (e.constructor.name === "TouchEvent") {            
+        if (e.constructor.name === "TouchEvent") {
             const bounds = e.target.getBoundingClientRect();
             const touch = e.targetTouches[0];
-            
+
             location.x = touch.pageX - bounds.left;
             location.y = touch.pageY - bounds.top;
-        } else {            
+        } else {
             location.x = e.offsetX;
             location.y = e.offsetY;
         }
@@ -87,7 +87,7 @@ export class DrawableCanvasElement {
     }
 
     onMouseMoveHandler(e) {
-        if(!this.dragging) return;
+        if (!this.dragging) return;
 
         const location = this.getLocationFrom(e);
         this.paintContext.lineTo(location.x, location.y);

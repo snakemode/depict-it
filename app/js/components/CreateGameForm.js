@@ -4,28 +4,28 @@ const urlParams = new URLSearchParams(location.search);
 const queryGameId = urlParams.get("gameId");
 
 export const CreateGameForm = {
-    props: [ ],
-       
-    data: function() {
-      return {
-        friendlyName: generateName(2),
-        gameId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
-        isJoinLink: [...urlParams.keys()].indexOf("join") > -1
-      }
-    },
+  props: [],
 
-    methods: {
-      emitCreateGameEvent: async function(evt) {
-        evt.preventDefault();
-        this.$emit('create', { gameId: this.gameId, friendlyName: this.friendlyName });
-      },
-      emitJoinGameEvent: async function(evt) {
-        evt.preventDefault();
-        this.$emit('join', { gameId: this.gameId, friendlyName: this.friendlyName });
-      }
-    },
+  data: function () {
+    return {
+      friendlyName: generateName(2),
+      gameId: queryGameId || generateName(3, "-").toLocaleLowerCase(),
+      isJoinLink: [...urlParams.keys()].indexOf("join") > -1
+    }
+  },
 
-    template: `
+  methods: {
+    emitCreateGameEvent: async function (evt) {
+      evt.preventDefault();
+      this.$emit('create', { gameId: this.gameId, friendlyName: this.friendlyName });
+    },
+    emitJoinGameEvent: async function (evt) {
+      evt.preventDefault();
+      this.$emit('join', { gameId: this.gameId, friendlyName: this.friendlyName });
+    }
+  },
+
+  template: `
   <form class="create-game-form form">
     <h2 class="section-heading">Start a new game:</h2>
     <label for="name-name">Enter your name</label>

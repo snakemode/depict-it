@@ -1,10 +1,10 @@
 export const PlayfieldDrawing = {
-  props: [ 'state', 'client' ],
+  props: ['state', 'client'],
 
-  methods: {      
-    sendImage: async function(base64EncodedImage) {
+  methods: {
+    sendImage: async function (base64EncodedImage) {
       await this.client.sendImage(base64EncodedImage);
-    }     
+    }
   },
 
   template: `

@@ -3,12 +3,12 @@ export function generateName(wordNumber, divider = " ") {
     const singleWords = allOptions.split(" ");
 
     const names = [];
-    while(names.length < wordNumber) {
+    while (names.length < wordNumber) {
         const random = randomFrom(singleWords);
         const capped = random.substr(0, 1).toUpperCase() + random.substr(1);
         names.push(capped);
     }
-    
+
     return names.join(divider);
 }
 

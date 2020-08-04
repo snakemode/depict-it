@@ -1,8 +1,8 @@
 module.exports = function (wallaby) {
-    
+
     return {
         localProjectDir: "tests",
-        
+
         files: [
             '/**/*.js',
             '!/**/*.test.js',
@@ -17,7 +17,7 @@ module.exports = function (wallaby) {
             '!/node_modules/**/*.js',
             '!/api/node_modules/**/*.js',
         ],
-        
+
         env: { type: 'node' },
         testFramework: 'jest',
     }

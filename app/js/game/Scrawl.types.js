@@ -2,7 +2,7 @@ export class Stack {
     constructor(ownerId, openingHint) {
         this.ownedBy = ownerId;
         this.heldBy = ownerId;
-        this.items = [ new StackItem("string", openingHint) ];
+        this.items = [new StackItem("string", openingHint)];
         this.items[0].author = "SYSTEM";
         this.requires = "image";
     }
