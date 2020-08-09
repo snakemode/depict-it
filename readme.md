@@ -1,26 +1,14 @@
-# Static Web app
+# Depict-It
 
-## Explanation:
-
-[Ably Channels](https://www.ably.io/channels) are multicast (many publishers can publish to many subscribers) and we can use them to build peer-to-peer apps.
-
-"Peer to peer" (p2p) is a term from distributed computing that describes any system where many participants, often referred to as "nodes", can participate in some form of collective communication. The idea of peer to peer was popularised in early filesharing networks, where users could connect to each other to exchange files, and search operated across all of the connected users, there is a long history of apps built using p2p. In this demo, we're going to build a simple app that will allow one of the peers to elect themselves the **"leader"**, and co-ordinate communication between each instance of our app.
-
-## What's a leader?
-
-Horizontally scaled systems, like P2P, often incorporate some form of "leader election" - where all of the nodes in the system attempt to become the "leader". This "leader" will co-ordinate the work distributed amongst the peers. For the sake of this demo, we will not implement leader election, instead, one of the users is going to click a button that makes them the leader. We'll refer to them as the `host` throughout this tutorial, although really they are just another peer.
-
-If you want to learn more about robust leader election patterns, [Microsoft have an excellent writeup](https://docs.microsoft.com/en-us/azure/architecture/patterns/leader-election)
+* https://lemon-forest-095442503.azurestaticapps.net
 
 ## What are we going to build?
 
-To demonstrate these concepts, we're going to build a simple app that keeps track of users as they join an Ably channel.
-The `channel name` will be up to the `host` to define - by typing it into the UI. There's nothing special about the `host`, they're just the first one to click the `host` button.
-
-Once a `host` has joined the `channel`, their browser will be listening for messages from `clients` joining the same `channel`, and keeping track each time somebody joins.
-They'll also keep all the `clients` in sync, by sending the complete list of `clients` on every connection.
-
-By the end of this demo, everyone that joins the `channel`, should see the name of every other participant in the browser UI - powered by multicast messages.
+- Vue app
+- Depict-It game handlers for the `GameStateMachine`
+- Peer to peer code that hosts and joins a running instance of the `Depict-It` game.
+- Ably pub/sub to send messages between the game participants
+- Azure blob storage to store images.
 
 ## A brief introduction to Vue.js before we start
 
@@ -65,6 +53,13 @@ You can also see Vue's binding syntax, where we use `{{ greeting }}` to bind dat
 **Vue is simple to get started with, especially with a small app like this, with easy to understand data-binding syntax.
 Vue works well for our example here, because it doesn't require much additional code.**
 
+## Ably Channels for pub-sub
+
+[Ably Channels](https://www.ably.io/channels) are multicast (many publishers can publish to many subscribers) and we can use them to build peer-to-peer apps.
+
+"Peer to peer" (p2p) is a term from distributed computing that describes any system where many participants, often referred to as "nodes", can participate in some form of collective communication. The idea of peer to peer was popularised in early filesharing networks, where users could connect to each other to exchange files, and search operated across all of the connected users, there is a long history of apps built using p2p. In this demo, we're going to build a simple app that will allow one of the peers to elect themselves the **"leader"**, and co-ordinate communication between each instance of our app.
+
+
 ## Ably channels and API keys
 
 In order to run this app, you will need an Ably API key. If you are not already signed up, you can [sign up now for a free Ably account](https://www.ably.io/signup). Once you have an Ably account:
@@ -75,6 +70,7 @@ In order to run this app, you will need an Ably API key. If you are not already 
 * Copy the secret **“API Key”** value from your Root key, we will use this later when we build our app.
 
 This app is going to use [Ably Channels](https://www.ably.io/channels) and [Token Authentication](https://www.ably.io/documentation/rest/authentication/#token-authentication).
+
 
 ## Making sure we send consistent messages by wrapping our Ably client
 
@@ -565,34 +561,6 @@ If your internet connection is disrupted, the Ably client, used by `P2PServer`, 
 
 So much like our `P2PServer` will buffer outbound messages, any disconnected clients will receive all the messages sent in a window of up to **two minutes of disconnection**
 
-### Using the History API to catch up
-
-Ably offers a `History API` and a `Rewind` setting. The History API allows you to query the history of a channel for by default, the last *two minutes* of data. If you enable `persisted history` on your channel, that window is extended for 24-72 hours. This has a cost - it counts against message quotas (see docs for more: https://support.ably.com/support/solutions/articles/3000030059), but we can use this extended window to allow clients to join "mid-stream" and catch up when they connect.
-
-The `Rewind` setting can be enabled when you subscribe to a channel, which will immediate then receive up to the last 100 messages in the time window you specify.
-
-The caveat is, the client will be processing historical messages - so be sure you understand what that means for your specific application. In some scenarios, it may be more effective for another `peer` or the `server` to just send new clients whatever state they need rather than the client reconstructing it.
-
-If you use the History API you probably don't want your clients re-processing thousands and thousands of messages.
-
-We need to add an additional parameter to our `channels.get` call, to add the parameter ` { params: { rewind: '1m' } }`. This tells our client to return up to the last 100 messages, from the minute. You can provide different time periods in here in either minutes ('2m') or seconds ('15s').
-
-```js
-async connect(identity, uniqueId) {
-  ...
-  const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
-  this.channel = await ably.channels.get(`p2p-sample-${uniqueId}`, { params: { rewind: '1m' } });  
-  ...
-}
-```
-
-Some notes on the limits of the history API from the `Ably docs`
-
-    By default, persisted history on channels is disabled and messages are only stored by the Ably service for two minutes in memory. If persisted history is enabled for the channel, then messages will typically be stored for 24 – 72 hours on disk.
-
-    Every message that is persisted to or retrieved from disk counts as an extra message towards your monthly quote. For example, for a channel that has persistence enabled, if a message is published, two messages will be deducted from your monthly quota. If the message is later retrieved from history, another message will be deducted from your monthly quota.
-
-If you use the History API to collect history, there's a chance that while you're processing historical messages, new messages could be handled by the SDK - you'd have to write code to buffer and make sure you process these messages in order.
 
 ## Yay, the end, but there's more
 
@@ -647,4 +615,4 @@ npm run start
 
 ## Hosting on Azure
 
-We're hosting this as a Azure Static Web Apps - and the deployment information is in [hosting.md](https://github.com/thisisjofrank/Ablingo/blob/master/readme.md#hosting-on-azure).
+We're hosting this as a Azure Static Web Apps - and the deployment information is in [hosting.md](hosting.md).

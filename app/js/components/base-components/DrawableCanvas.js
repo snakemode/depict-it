@@ -1,4 +1,4 @@
-import { DrawableCanvasElement } from "./DrawableCanvasElement.js";
+import { DrawableCanvasElement } from "../../../web_modules/DrawableCanvasElement.js";
 
 export const DrawableCanvas = {
   data: function () {
