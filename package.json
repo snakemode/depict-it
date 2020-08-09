@@ -5,6 +5,8 @@
     "repository": "http://tempuri.org",
     "license": "http://tempuri.org",
     "scripts": {
+        "prestart": "npm run copydeps",
+        "copydeps": "node build.js",
         "start": "run-p dev:api dev:server",
         "test": "jest",
         "test:acceptance": "jest acceptance",
@@ -12,10 +14,12 @@
         "dev:server": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api",
         "dev:server:test": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",
         "acceptance": "run-p dev:server:test dev:api test:acceptance",
-        "build:azure": ""
+        "build:azure": "npm run copydeps"
     },
     "author": "",
-    "dependencies": {},
+    "dependencies": {
+        "@snakemode/snake-canvas": "^1.0.3"
+    },
     "devDependencies": {
         "@babel/cli": "^7.10.4",
         "@babel/core": "^7.10.4",
