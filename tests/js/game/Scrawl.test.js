@@ -104,7 +104,7 @@ describe("GetUserDrawingHandler", () => {
     it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
             step.handleInput(state, context, { kind: "drawing-response", imageUrl: "http://my/drawing.jpg", metadata: { clientId: identity.clientId } });
-        }, 100);
+        }, 50);
 
         const result = await step.execute(state, context);
 
