@@ -1,5 +1,5 @@
 import { chromium } from "playwright";
-import { ScrawlAppPageObject } from "./ScrawlAppPageObject";
+import { DepictItAppPageObject } from "./DepictItAppPageObject";
 
 jest.setTimeout(30_000);
 const chromeOptions = { headless: false };
@@ -9,7 +9,7 @@ describe("Behaviour of the app as a game host", () => {
     let browser, host, cleanup;
     beforeEach(async () => {
         browser = await chromium.launch(chromeOptions);
-        host = await ScrawlAppPageObject.create(browser);
+        host = await DepictItAppPageObject.create(browser);
         cleanup = [browser, host];
     });
 
@@ -22,7 +22,7 @@ describe("Behaviour of the app as a game host", () => {
     });
 
     async function newPageObject() {
-        const instance = await ScrawlAppPageObject.create(browser);
+        const instance = await DepictItAppPageObject.create(browser);
         cleanup.push(instance);
         return instance;
     }
@@ -33,7 +33,7 @@ describe("Behaviour of the app as a game client", () => {
     let browser, host, cleanup, joinUrl;
     beforeEach(async () => {
         browser = await chromium.launch(chromeOptions);
-        host = await ScrawlAppPageObject.create(browser);
+        host = await DepictItAppPageObject.create(browser);
         joinUrl = await host.hostASession();
         cleanup = [browser, host];
     });
@@ -136,7 +136,7 @@ describe("Behaviour of the app as a game client", () => {
     });
 
     async function newPageObject() {
-        const instance = await ScrawlAppPageObject.create(browser);
+        const instance = await DepictItAppPageObject.create(browser);
         cleanup.push(instance);
         return instance;
     }

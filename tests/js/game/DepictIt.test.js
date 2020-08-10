@@ -7,15 +7,15 @@ import {
     PassStacksAroundHandler,
     GetUserScoresHandler,
     EndHandler
-} from "../../../app/js/game/Scrawl.handlers";
-import { Stack, StackItem } from "../../../app/js/game/Scrawl.types";
-import { Scrawl } from "../../../app/js/game/Scrawl";
+} from "../../../app/js/game/DepictIt.handlers";
+import { Stack, StackItem } from "../../../app/js/game/DepictIt.types";
+import { DepictIt } from "../../../app/js/game/DepictIt";
 import { Identity } from "../../../app/js/Identity";
 
-describe("Scrawl", () => {
+describe("DepictIt", () => {
     let sut;
     beforeEach(() => {
-        sut = Scrawl({
+        sut = DepictIt({
             channel: {}
         });
 

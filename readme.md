@@ -2,7 +2,7 @@
 
 Depict-It is a party game for 4+ players (ideally!) where you mutate a phrase through drawings and captions, to make funny scenarios up with your friends.
 
-You can play this online here: https://lemon-forest-095442503.azurestaticapps.net
+You can play this online here: https://wonderful-island-0a4516a03.azurestaticapps.net
 
 ## The rules of the game
 
@@ -246,7 +246,7 @@ class P2PClient {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    this.scrawl = null;
+    this.depictIt = null;
     this.serverState = null;
     this.countdownTimer = null;
 
@@ -266,7 +266,7 @@ We then go on to define our `connect` function
     await this.ably.connect(this.identity, this.uniqueId);
     this.ably.sendMessage({ kind: "connected" });
     this.state.status = "awaiting-acknowledgement";
-    // this.scrawl = new ScrawlClient(this.uniqueId, this.ably);
+    // this.depictIt = new DepictItClient(this.uniqueId, this.ably);
   }
 ```
 
@@ -316,7 +316,7 @@ export class P2PServer {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    // this.stateMachine = Scrawl({ channel: ably });
+    // this.stateMachine = DepictIt({ channel: ably });
 
     this.state = {
       players: [],

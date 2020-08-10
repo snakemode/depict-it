@@ -1,4 +1,4 @@
-export const ScrawlCards = [
+export const DepictItCards = [
     "Screaming inside your heart",
     "Bum bongos",
     "Aztec sacrifice",

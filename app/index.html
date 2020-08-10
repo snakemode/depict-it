@@ -41,9 +41,9 @@
       <div v-if="state?.lastInstruction" class="playfield">
         <playfield-wait-for-others :state="state"></playfield-wait-for-others>
 
-        <playfield-drawing :state="state" :client="scrawlClient"></playfield-drawing>
-        <playfield-caption :state="state" :client="scrawlClient"></playfield-caption>
-        <playfield-pick-one :state="state" :client="scrawlClient" :is-host="isHost"></playfield-pick-one>
+        <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
+        <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
+        <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
 
         <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
       </div>

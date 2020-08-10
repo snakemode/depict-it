@@ -1,4 +1,4 @@
-import { ScrawlClient } from "../game/Scrawl.js";
+import { DepictItClient } from "../game/DepictIt.js";
 
 export class P2PClient {
   constructor(identity, uniqueId, ably) {
@@ -6,7 +6,7 @@ export class P2PClient {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    this.scrawl = null;
+    this.depictIt = null;
     this.serverState = null;
     this.countdownTimer = null;
 
@@ -21,7 +21,7 @@ export class P2PClient {
     await this.ably.connect(this.identity, this.uniqueId);
     this.ably.sendMessage({ kind: "connected" });
     this.state.status = "awaiting-acknowledgement";
-    this.scrawl = new ScrawlClient(this.uniqueId, this.ably);
+    this.depictIt = new DepictItClient(this.uniqueId, this.ably);
   }
 
   onReceiveMessage(message) {

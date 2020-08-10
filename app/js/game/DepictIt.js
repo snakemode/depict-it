@@ -2,9 +2,9 @@ import { GameStateMachine } from "./GameStateMachine.js";
 import {
   StartHandler, DealHandler, GetUserDrawingHandler, GetUserCaptionHandler, PassStacksAroundHandler,
   GetUserScoresHandler, EndHandler
-} from "./Scrawl.handlers.js";
+} from "./DepictIt.handlers.js";
 
-export const Scrawl = (handlerContext) => new GameStateMachine({
+export const DepictIt = (handlerContext) => new GameStateMachine({
   steps: {
     "StartHandler": new StartHandler(),
     "DealHandler": new DealHandler(),
@@ -17,7 +17,7 @@ export const Scrawl = (handlerContext) => new GameStateMachine({
   context: handlerContext
 });
 
-export class ScrawlClient {
+export class DepictItClient {
   constructor(gameId, channel) {
     this.gameId = gameId;
     this.channel = channel;
