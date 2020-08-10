@@ -68,6 +68,8 @@ Vue works well for our example here, because it doesn't require much additional 
 
 ## Ably Channels for pub-sub
 
+We're also going to use Ably for pub-sub between our players.
+
 [Ably Channels](https://www.ably.io/channels) are multicast (many publishers can publish to many subscribers) and we can use them to build peer-to-peer apps.
 
 "Peer to peer" (p2p) is a term from distributed computing that describes any system where many participants, often referred to as "nodes", can participate in some form of collective communication. The idea of peer to peer was popularised in early filesharing networks, where users could connect to each other to exchange files, and search operated across all of the connected users, there is a long history of apps built using p2p. In this demo, we're going to build a simple app that will allow one of the peers to elect themselves the **"leader"**, and co-ordinate communication between each instance of our app.
@@ -83,8 +85,6 @@ In order to run this app, you will need an Ably API key. If you are not already 
 * Copy the secret **“API Key”** value from your Root key, we will use this later when we build our app.
 
 This app is going to use [Ably Channels](https://www.ably.io/channels) and [Token Authentication](https://www.ably.io/documentation/rest/authentication/#token-authentication).
-
-
 
 
 ## Making sure we send consistent messages by wrapping our Ably client
@@ -364,22 +364,275 @@ Then, it send a `peer-status` message, with a copy of the latest `this.state` ob
 
 There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first.
 
+## Designing our game using a GameStateMachine
+
+Forgetting the web-UI for a moment, we need to write some code to capture the logic of our game.
+
+We've built a `StateMachine` class to keep track of the different phases of our game.
+
+`State Machines` are a design pattern that model a system that can only ever be in one of several known states at a time.
+
+We're going to break the various phases of our game up into different `Handlers` - that represent both the logic of that portion of the game, and the logic that handles user input during that specific game phase.
+
+Our implementation is part `state-machine`, part `command-pattern-style handler`.
+
+Let's take a look at what our state machine code can look like - here's a "simple" two-step game definition, taken from one of our unit tests:
+
+```js
+const twoStepGame = () => ({
+    steps: {
+        "StartHandler": {
+            execute: async function (state) { 
+                state.executeCalled = true; 
+                return { transitionTo: "EndHandler" };
+            }
+        },
+        "EndHandler": {
+            execute: async function (state) { }
+        }
+    }
+});
+```
+
+This game definition doesn't do anything on it's own - it's a collection of `steps`.
+In this example, we have a start handler that just flags that execute has been called, and then `transitionTo`s the `EndHandler`.
+
+### Defining a game
+
+A game definition looks exactly like this:
+
+```js
+const gameDef = () => ({
+    steps: {
+        "StartHandler": { ... },
+        "EndHandler": { ... }
+    },
+    context: {
+      some: "object"
+    }
+});
+```
+
+* Steps **must** be named
+* Steps **must** contain `StartHandler` and `EndHandler`
+* Properties assigned to the `state` object during `handleInput` **can** be read in the `execute` function.
+* `context` can be provided, and can contain anything you like to make your game work.
+
+### Defining a handler
+
+Here's one of the handlers from the previous example:
+
+```js
+{
+    execute: async function (state, context) { 
+        await waitUntil(() => state.gotInput == true, 5_000);                
+        return { transitionTo: "EndHandler" }; 
+    },
+    handleInput: async function(state, context, input) { 
+        state.gotInput = true; 
+    }
+}
+```
+
+This is an exhaustive example, with both an `execute` and a `handleInput` function, though only `execute` is required.
+
+* Handlers **must** contain an `execute` function
+* Handlers **can** contain a `handleInput` function
+* Handlers **can** call `waitUntil(() => some-condition-here);` to pause execution while waiting for input
+* `handleInput` **can** be called multiple times
+* `waitUntil` can be given a `timeout` in `milliseconds`.
+* `context` will be passed to the `execute` and `handleInput` functions every time they are called by the `GameStateMachine`.
+* Handlers **must** return a `transitionTo` response from their `execute` function, that refers to the next `Handler`.
+* Handlers **must** be `async functions`.
+
+## The GameStateMachine
+
+The `GameStateMachine` takes our `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed, and when. It's always expecting a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
+
+You create a new `instance` of a Game by doing something like this:
+
+```js
+const game = new GameStateMachine({
+    steps: {
+        "StartHandler": { ... },
+        "EndHandler": { ... }
+    },
+    context: {
+      some: "object"
+    }
+});
+```
+Once you have a `game` object, you can call
+
+```js
+  game.run();
+```
+To start processing the game logic at the `StartHandler`.
+
+Let's peak under the hook of the `GameStateMachine` to see what it's doing.
+
+The constructor for the `GameStateMachine` takes the `steps` and the `context` and saves them inside itself.
+Once that's done, the `run` function does all the hard work.
+
+```js
+async run() {
+    console.log("Invoking run()", this.currentStepKey);
+
+    this.trackMilliseconds();
+
+    const currentStep = this.currentStep();
+    const response = await currentStep.execute(this.state, this.context);
+
+    if (this.currentStepKey == "EndHandler" && (response == null || response.complete)) {
+        return; // State machine exit signal
+    }
+
+    if (response == null) {
+        throw "You must return a response from your execute functions so we know where to redirect to.";
+    }
+
+    this.currentStepKey = response.transitionTo;
+    this.run();
+}
+```
+
+The state machine:
+
+* Keeps track of the `currentStepKey` - this is the string that you use to define your `steps` in the `game definition`.
+* Keeps track of time
+* awaits the `execute` function of the `StartHandler`
+* Evaluates the response
+
+Once a response from the current handler has been received:
+
+* If the `currentStepKey` is `EndHandler` we return, the game has concluded.
+* Otherwise, we update the `currentStepKey` to be the target of the `transitionTo` response - changing the current active state of the game.
+* We then call `run` again, to process the step we've just arrived at.
+
+This flow of moving between game steps based on the outcome of the current step allows us to define games of all kinds of shapes.
+
+The state machine contains the function `handleInput`
+
+```js
+async handleInput(input) {
+    const currentStep = this.currentStep();
+    if (currentStep.handleInput) {
+        currentStep.handleInput(this.state, this.context, input);
+    } else {
+        console.log("Input received while no handler was available.");
+    }
+}
+```
+This is the glue code that we can pass input to, which will in turn find the currently active step, and forward the input onto the `handleInput` function defined in it. This means if any of our steps require user input, the input will be passed through this function.
+
+We'll have to wire this up to our Web UI and Ably connection later.
+
+
+## The GameStateMachine and our handlers
+
+Now that we understand a little about how the `GameStateMachine` can be used to define "any game", let's get specific and talk about `Depict-It`.
+
+Inside of `/app/js/game/` there are a series of files
+
+```
+DepictIt.js
+DepictIt.cards.js
+DepictIt.handlers.js
+DepictIt.types.js
+GameStateMachine.js
+```
+
+The ones with `DepictIt` in the filename, predictably contain our game logic.
+
+`DepictIt.js` is our entrypoint, and references all our game handlers, returning the `Game Definition` that we need to create our game.
+
+```js
+export const DepictIt = (handlerContext) => new GameStateMachine({
+  steps: {
+    "StartHandler": new StartHandler(),
+    "DealHandler": new DealHandler(),
+    "GetUserDrawingHandler": new GetUserDrawingHandler(180_000),
+    "GetUserCaptionHandler": new GetUserCaptionHandler(60_000),
+    "PassStacksAroundHandler": new PassStacksAroundHandler(),
+    "GetUserScoresHandler": new GetUserScoresHandler(),
+    "EndHandler": new EndHandler()
+  },
+  context: handlerContext
+});
+```
+It's a function, because we're going to pass in our Ably connection inside the `handlerContext` parameter here, but it returns a fully created `GameStateMachine` instance for us to run in our `Vue.js` app.
+
+You can see we have our game defined as a series of handlers in the sample above. Each of these game handlers are `imported` from the `DepictIt.handlers.js` file. The game handlers themselves are a couple of hundred lines of code long in total.
+
+Each `Handler` has access to an `ably client` that we're going to supply as a property called `channel` in our `context` object, and our game works by having the `hosting players browser` keep track of where all the `game hands` are, sending players `p2p messages` to make the client code in their browsers prompt the players for input.
+
+Each of these messages looks similar:
+
+```js
+context.channel.sendMessage({ 
+    kind: "instruction", 
+    type: "drawing-request", 
+    value: lastItem.value, 
+    timeout: this.waitForUsersFor 
+  }, player.clientId);      
+```
+They each contain a `kind` of `instruction`, which will allow our clients to process these messages differently than the standard `connection` messages. And they also each have a `type` - which varies depending on the phase of the game currently playing.
+
+The `Handlers` control which message `types` they send, but they'll always also contain a `value`.
+
+This value, when we're in a drawing phase of the game, is going to be the `hint` the player is using to draw from, and if we're in the `captioning` phase of the game, it'll contain the `url` of the image they need to caption so our players browser can render it in the UI.
+
+The messages can also feature an optional `timeout` value - some of our steps have a time limit on the length of time they'll wait for users to reply with a drawing or caption, so including this `timeout` in the `instruction` means we can render a timer bar on the client side.
+
+Let's dive into a few of our steps and take a look at what they do.
+
+### StartHandler
+
+Generates and shuffles the various `Game Hint Cards` that it imports from `DepictIt.cards.js`
+
+There is no user input.
+
+### DealHandler
+
+For every player in the collection `state.players` (that we'll need our web ui to populate), it creates an empty `game stack`, and adds a `hint` to the top of it.
+
+There is no user input.
+
+### GetUserDrawingHandler
+
+For each of the `state.players`, it sends an `instruction` of type `drawing-request`, along with the hint card that's currently on the top of the `Game stack`.
+
+Once the `Handler` has sent a message to each player with their hint, it waits until either all the players have responded, or 180 seconds has elapsed. If a player hasn't submitted a drawing in that time, a placeholder is put in their stack, and the game progresses.
+
+The input that this handler expects is the `url` of an image stored somewhere publically accessible. We're going to use `Azure storage buckets` for this later on.
+
+When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
+
+### GetUserCaptionHandler
+### PassStacksAroundHandler
+### GetUserScoresHandler
+### EndHandler
+
+
+
+- State Machine that executes game steps
+- Collecting input using ably and async / await
+  - P2P sample code passing on messages to state machine
+
+
 ## Designing a browser based game
 
-We've outlined the basics of our Vue app, and the P2PClient and Server architecture we're using - but we need to put our game logic inside of this framework somehow.
+We've outlined the basics of our Vue app, and the P2PClient and Server architecture we're using - but we need to put our game logic inside of this skeleton.
 
 [Maybe a diargram here?!]
+
+
 
 - Vue app
 - Player that starts the game hosts the game
 - The host starting the game triggers messages sent to the players
 - The games UI responds to the last received instruction of a specific type, forwarding on that message to a state machine that keeps track of "what phase of the game are we in"
 
-## The GameStateMachine and our handlers
-
-- State Machine that executes game steps
-- Collecting input using ably and async / await
-  - P2P sample code passing on messages to state machine
 
 ## Building our UI with Vue
 
