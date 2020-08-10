@@ -1,11 +1,11 @@
-import { Stack, StackItem } from "./Scrawl.types.js";
-import { ScrawlCards } from "./Scrawl.cards.js";
+import { Stack, StackItem } from "./DepictIt.types.js";
+import { DepictItCards } from "./DepictIt.cards.js";
 import { waitUntil } from "./GameStateMachine.js";
 
 export class StartHandler {
     async execute(state, context) {
         state.stacks = [];
-        state.hints = ScrawlCards.slice();
+        state.hints = DepictItCards.slice();
         shuffle(state.hints);
         return { transitionTo: "DealHandler" };
     }

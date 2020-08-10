@@ -1,4 +1,4 @@
-import { Scrawl } from "../game/Scrawl.js";
+import { DepictIt } from "../game/DepictIt.js";
 
 export class P2PServer {
   constructor(identity, uniqueId, ably) {
@@ -6,7 +6,7 @@ export class P2PServer {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    this.stateMachine = Scrawl({
+    this.stateMachine = DepictIt({
       channel: ably
     });
 

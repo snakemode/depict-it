@@ -246,7 +246,7 @@ class P2PClient {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    this.scrawl = null;
+    this.depictIt = null;
     this.serverState = null;
     this.countdownTimer = null;
 
@@ -266,7 +266,7 @@ We then go on to define our `connect` function
     await this.ably.connect(this.identity, this.uniqueId);
     this.ably.sendMessage({ kind: "connected" });
     this.state.status = "awaiting-acknowledgement";
-    // this.scrawl = new ScrawlClient(this.uniqueId, this.ably);
+    // this.depictIt = new DepictItClient(this.uniqueId, this.ably);
   }
 ```
 
@@ -316,7 +316,7 @@ export class P2PServer {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    // this.stateMachine = Scrawl({ channel: ably });
+    // this.stateMachine = DepictIt({ channel: ably });
 
     this.state = {
       players: [],

@@ -21,7 +21,7 @@ export var app = new Vue({
     isHost: function () { return this.p2pServer != null; },
     hasMessage: function () { return this.message != null; },
     gameCanBeStarted: function () { return this.transmittedServerState && !this.transmittedServerState.started },
-    scrawlClient: function () { return this.p2pClient?.scrawl; }
+    depictItClient: function () { return this.p2pClient?.depictIt; }
   },
   methods: {
     host: async function (context) {

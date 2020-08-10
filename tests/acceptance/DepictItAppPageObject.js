@@ -1,8 +1,8 @@
-export class ScrawlAppPageObject {
+export class DepictItAppPageObject {
     static async create(browser) {
         const page = await browser.newPage();
         await page.goto('http://127.0.0.1:8080');
-        return new ScrawlAppPageObject(browser, page);
+        return new DepictItAppPageObject(browser, page);
     }
 
     constructor(browser, page) {
