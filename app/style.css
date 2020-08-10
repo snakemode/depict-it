@@ -56,10 +56,14 @@ p {
    2px -2px 0 #000,
   -2px  2px 0 #000,
    2px  2px 0 #000;
+}
 
+.playfield {
+  margin: 0 10px;
 }
 
 .form, .game-lobby {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -194,7 +198,7 @@ button:hover {
   position: absolute;
   top: 20px;
   left: 20px;
-  width: calc(100vw - 40px);
+  width: calc(100% - 40px);
   height: 40px;
   background-color: #f1c40f;
   border-radius: 4px;
@@ -219,6 +223,9 @@ button:hover {
 
 .drawing-hint {
   perspective: 1000px;
+  position: absolute;
+  top: 56px;
+  left: 20px;
   width: calc(100% - 40px);
   height: 100px;
   min-width: 300px;
@@ -233,10 +240,6 @@ button:hover {
   animation-timing-function: ease-in;
   animation-delay: 2s;
   animation-duration: 1s;
-
-  position: absolute;
-  top: 50px;
-  left: 20px;
 }
 
 .hint-front, .hint-back {
@@ -280,7 +283,7 @@ button:hover {
   width: 100%;
   max-width: 400px;
   height: 400px;
-  margin: 0;
+  margin: 0 auto 1em;
   border-radius: 40px;
   border: 6px solid #222;
   border-left: 10px solid #222;
@@ -295,6 +298,7 @@ button:hover {
 .canvas-and-paints {
   display: grid;
   grid-template-rows: 1fr 70px;
+  justify-content: center;
   margin: 10px;
 }
 
@@ -303,10 +307,12 @@ button:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0 20px;
 }
 
 .loader-gif {
-  max-width: 300px;
+  max-width: 240px;
+  margin-bottom: 1em;
 }
 
 .gallery {
@@ -314,7 +320,7 @@ button:hover {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 60px;
+  gap: 20px;
 }
 
 .gallery-item {
@@ -359,36 +365,9 @@ button:hover {
   font-size: 1.4em;
 }
 
-.caption {
-  display: grid;
-  grid-template-areas: 
-  "top top"
-  "img cap"
-  "img but";
-  grid-gap: 20px
-}
-
-.caption .section-heading {
-  grid-area: top;
-  margin-bottom: 10px;
-}
-
-.caption .image-frame {
-  grid-area: img;
-}
-
-.caption .input {
-  grid-area: cap;
-  font-size: 2em;
-}
-
-.caption .form-button {
-  grid-area: but;
-  height: min-content;
-}
-
 .score-card {
-  width: max-content;
+  width: 100%;
+  padding: 10px;
   max-width: 90vw;
   min-width: 400px;
 }
@@ -403,7 +382,7 @@ button:hover {
   justify-content: space-between;
   list-style:  none;
   line-height: 1.8em;
-  font-size: 1.6em;
+  font-size: 1em;
 }
 
 .score-score {
@@ -505,6 +484,7 @@ button:hover {
   
   .caption .image-frame {
     grid-area: img;
+    margin-bottom: 0;
   }
   
   .caption .input {
@@ -515,10 +495,13 @@ button:hover {
   .caption .form-button {
     grid-area: but;
     height: min-content;
+  }    
+  .gallery {
+    gap: 60px;
   }
-  
-    
-  
+  .score {
+    font-size: 1.6em;
+  }
 }
 
 @keyframes flipInY {
