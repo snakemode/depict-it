@@ -2,7 +2,7 @@
 
 Depict-It is a party game for 4+ players (ideally!) where you mutate a phrase through drawings and captions, to make funny scenarios up with your friends.
 
-You can play this online here: https://wonderful-island-0a4516a03.azurestaticapps.net
+You can play this online here: https://depictit.snkmo.de
 
 ## The rules of the game
 
