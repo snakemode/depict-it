@@ -10,10 +10,15 @@ export class NullMessageChannel {
 
 export class GameStateMachine {
     constructor(gameDefinition) {
-        this.game = gameDefinition;
+        this.steps = gameDefinition.steps;
+        this.context = gameDefinition.context || {};
+
+        if (!this.context.channel) {
+            this.context.channel = new NullMessageChannel();
+        }
+
         this.state = {
             msInCurrentStep: 0,
-            channel: new NullMessageChannel()
         };
 
         this.resetCurrentStepKeepingState();
@@ -24,7 +29,7 @@ export class GameStateMachine {
         this.msTracker = null;
     }
 
-    currentStep() { return this.game.steps[this.currentStepKey]; }
+    currentStep() { return this.steps[this.currentStepKey]; }
 
     async run() {
         console.log("Invoking run()", this.currentStepKey);
@@ -32,7 +37,7 @@ export class GameStateMachine {
         this.trackMilliseconds();
 
         const currentStep = this.currentStep();
-        const response = await currentStep.execute(this.state);
+        const response = await currentStep.execute(this.state, this.context);
 
         if (this.currentStepKey == "EndHandler" && (response == null || response.complete)) {
             return; // State machine exit signal
@@ -49,7 +54,7 @@ export class GameStateMachine {
     async handleInput(input) {
         const currentStep = this.currentStep();
         if (currentStep.handleInput) {
-            currentStep.handleInput(this.state, input);
+            currentStep.handleInput(this.state, this.context, input);
         } else {
             console.log("Input received while no handler was available.");
         }

@@ -4,7 +4,7 @@ import {
   GetUserScoresHandler, EndHandler
 } from "./Scrawl.handlers.js";
 
-export const Scrawl = new GameStateMachine({
+export const Scrawl = (handlerContext) => new GameStateMachine({
   steps: {
     "StartHandler": new StartHandler(),
     "DealHandler": new DealHandler(),
@@ -13,7 +13,8 @@ export const Scrawl = new GameStateMachine({
     "PassStacksAroundHandler": new PassStacksAroundHandler(),
     "GetUserScoresHandler": new GetUserScoresHandler(),
     "EndHandler": new EndHandler()
-  }
+  },
+  context: handlerContext
 });
 
 export class ScrawlClient {

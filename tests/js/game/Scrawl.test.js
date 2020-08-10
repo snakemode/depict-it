@@ -15,7 +15,10 @@ import { Identity } from "../../../app/js/Identity";
 describe("Scrawl", () => {
     let sut;
     beforeEach(() => {
-        sut = Scrawl;
+        sut = Scrawl({
+            channel: {}
+        });
+
         sut.state.players = [];
         sut.state.players.push(new Identity("Player1"));
         sut.state.players.push(new Identity("Player2"));
@@ -74,21 +77,23 @@ describe("DealHandler", () => {
 });
 
 describe("GetUserDrawingHandler", () => {
-    let step, state, identity, channel;
+    let step, state, identity, channel, context;
     beforeEach(() => {
         identity = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
             players: [identity],
             stacks: [new Stack(identity.clientId, "hint1")],
-            hints: ["hint1", "hint2"],
+            hints: ["hint1", "hint2"]
+        };
+        context = {
             channel: channel
         };
         step = new GetUserDrawingHandler(5_000);
     });
 
     it("execute, sends instruction for each user to draw an image from the hint at the top of their stack", async () => {
-        step.execute(state);
+        step.execute(state, context);
 
         expect(channel.sentMessages.length).toBe(1);
         expect(channel.sentMessages[0].message.kind).toBe("instruction");
@@ -98,10 +103,10 @@ describe("GetUserDrawingHandler", () => {
 
     it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
-            step.handleInput(state, { kind: "drawing-response", imageUrl: "http://my/drawing.jpg", metadata: { clientId: identity.clientId } });
-        }, 100);
+            step.handleInput(state, context, { kind: "drawing-response", imageUrl: "http://my/drawing.jpg", metadata: { clientId: identity.clientId } });
+        }, 50);
 
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).not.toBeDefined();
@@ -109,7 +114,7 @@ describe("GetUserDrawingHandler", () => {
 
     it("execute, transitions to PassStacksAroundHandler with error flag if users timeout.", async () => {
         step = new GetUserDrawingHandler(100);
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
@@ -119,21 +124,23 @@ describe("GetUserDrawingHandler", () => {
         const initialStackLength = state.stacks[0].items.length;
 
         step = new GetUserDrawingHandler(100);
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(state.stacks[0].items.length).toBe(initialStackLength + 1);
     });
 });
 
 describe("GetUserCaptionHandler", () => {
-    let step, state, identity, channel;
+    let step, state, identity, channel, context;
     beforeEach(() => {
         identity = new Identity("Some player");
         channel = new NullMessageChannel();
         state = {
             players: [identity],
             stacks: [new Stack(identity.clientId, "hint1")],
-            hints: ["hint1", "hint2"],
+            hints: ["hint1", "hint2"]
+        };
+        context = {
             channel: channel
         };
         step = new GetUserCaptionHandler(5_000);
@@ -142,7 +149,7 @@ describe("GetUserCaptionHandler", () => {
     });
 
     it("execute, sends instruction for each user to enter caption for the image at the top of their stack", async () => {
-        step.execute(state);
+        step.execute(state, context);
 
         expect(channel.sentMessages.length).toBe(1);
         expect(channel.sentMessages[0].message.kind).toBe("instruction");
@@ -152,10 +159,10 @@ describe("GetUserCaptionHandler", () => {
 
     it("execute, transitions to PassStacksAroundHandler after all users have provided input", async () => {
         setTimeout(async () => {
-            step.handleInput(state, { kind: "caption-response", caption: "blah blah blah", metadata: { clientId: identity.clientId } });
+            step.handleInput(state, context, { kind: "caption-response", caption: "blah blah blah", metadata: { clientId: identity.clientId } });
         }, 100);
 
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).not.toBeDefined();
@@ -163,7 +170,7 @@ describe("GetUserCaptionHandler", () => {
 
     it("execute, transitions to passStacksAround with error flag if users timeout.", async () => {
         step = new GetUserCaptionHandler(100);
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("PassStacksAroundHandler");
         expect(result.error).toBeDefined();
@@ -174,14 +181,14 @@ describe("GetUserCaptionHandler", () => {
         console.log(initialStackLength);
 
         step = new GetUserCaptionHandler(100);
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(state.stacks[0].items.length).toBe(initialStackLength + 1);
     });
 });
 
 describe("PassStacksAroundHandler", () => {
-    let step, state, p1, p2, channel;
+    let step, state, p1, p2, channel, context;
     beforeEach(() => {
         p1 = new Identity("Some player");
         p2 = new Identity("Some player");
@@ -192,7 +199,10 @@ describe("PassStacksAroundHandler", () => {
                 new Stack(p1.clientId, "hint1"),
                 new Stack(p2.clientId, "hint2"),
             ],
-            hints: ["hint1", "hint2"],
+            hints: ["hint1", "hint2"]
+        };
+
+        context = {
             channel: channel
         };
 
@@ -202,21 +212,21 @@ describe("PassStacksAroundHandler", () => {
     });
 
     it("execute, assigns players each others stacks", async () => {
-        step.execute(state);
+        step.execute(state, context);
 
         expect(state.stacks[0].heldBy).toBe(p2.clientId);
         expect(state.stacks[1].heldBy).toBe(p1.clientId);
     });
 
     it("execute, when original owners have their stacks again, redirects to getUserScores", async () => {
-        await step.execute(state);
-        const result = await step.execute(state);
+        await step.execute(state, context);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("GetUserScoresHandler");
     });
 
     it("execute, routes to getUserCaption when last card was an image", async () => {
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("GetUserCaptionHandler");
     });
@@ -225,14 +235,14 @@ describe("PassStacksAroundHandler", () => {
         state.stacks[0].add(new StackItem("string", "blah blah"));
         state.stacks[1].add(new StackItem("string", "bleh bleh"));
 
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("GetUserDrawingHandler");
     });
 });
 
 describe("GetUserScoresHandler", () => {
-    let step, state, p1, p2, channel;
+    let step, state, p1, p2, channel, context;
     beforeEach(() => {
         p1 = new Identity("Some player");
         channel = new NullMessageChannel();
@@ -241,9 +251,12 @@ describe("GetUserScoresHandler", () => {
             stacks: [
                 new Stack(p1.clientId, "hint1"),
             ],
-            hints: ["hint1", "hint2"],
-            channel: channel
+            hints: ["hint1", "hint2"]
         };
+
+        context = {
+            channel: channel
+        }
 
         step = new GetUserScoresHandler();
         const item = new StackItem("image", "http://tempuri.org/img.png");
@@ -254,13 +267,13 @@ describe("GetUserScoresHandler", () => {
 
     it("execute, requests players to vote for one card per stack", async () => {
         setTimeout(async () => {
-            step.handleInput(state, { kind: "pick-one-response", id: "1234", metadata: { clientId: p1.clientId } });
+            step.handleInput(state, context, { kind: "pick-one-response", id: "1234", metadata: { clientId: p1.clientId } });
 
             expect(channel.sentMessages[1].message.kind).toBe("instruction");
             expect(channel.sentMessages[1].message.type).toBe("wait");
         }, 100);
 
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(channel.sentMessages[0].message.kind).toBe("instruction");
         expect(channel.sentMessages[0].message.type).toBe("pick-one-request");
@@ -271,17 +284,17 @@ describe("GetUserScoresHandler", () => {
 
     it("execute, can be skipped by host", async () => {
         setTimeout(async () => {
-            step.handleInput(state, { kind: "skip-scoring-forwards" });
+            step.handleInput(state, context, { kind: "skip-scoring-forwards" });
         }, 100);
 
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.transitionTo).toBe("EndHandler");
     });
 });
 
 describe("EndHandler", () => {
-    let step, state, p1, p2, channel;
+    let step, state, p1, p2, channel, context;
     beforeEach(() => {
         p1 = new Identity("Some player");
         channel = new NullMessageChannel();
@@ -289,20 +302,23 @@ describe("EndHandler", () => {
             players: [p1],
             stacks: [new Stack(p1.clientId, "hint1")],
             hints: ["hint1"],
-            channel: channel
         };
+
+        context = {
+            channel: channel
+        }
 
         step = new EndHandler();
     });
 
     it("execute, completes the state machine", async () => {
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(result.complete).toBe(true);
     });
 
     it("execute, sends a message to the clients to show the scoreboard", async () => {
-        const result = await step.execute(state);
+        const result = await step.execute(state, context);
 
         expect(channel.sentMessages.length).toBe(1);
         expect(channel.sentMessages[0].message.kind).toBe("instruction");

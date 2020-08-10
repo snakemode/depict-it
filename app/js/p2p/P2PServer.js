@@ -6,8 +6,9 @@ export class P2PServer {
     this.uniqueId = uniqueId;
     this.ably = ably;
 
-    this.stateMachine = Scrawl;
-    this.stateMachine.state.channel = ably;
+    this.stateMachine = Scrawl({
+      channel: ably
+    });
 
     this.state = {
       players: [],

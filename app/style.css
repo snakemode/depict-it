@@ -489,6 +489,35 @@ button:hover {
     padding-left: 20px;
   }
   
+  .caption {
+    display: grid;
+    grid-template-areas: 
+    "top top"
+    "img cap"
+    "img but";
+    grid-gap: 20px
+  }
+  
+  .caption .section-heading {
+    grid-area: top;
+    margin-bottom: 10px;
+  }
+  
+  .caption .image-frame {
+    grid-area: img;
+  }
+  
+  .caption .input {
+    grid-area: cap;
+    font-size: 2em;
+  }
+  
+  .caption .form-button {
+    grid-area: but;
+    height: min-content;
+  }
+  
+    
   
 }
 

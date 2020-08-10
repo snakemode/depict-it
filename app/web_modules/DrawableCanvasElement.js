@@ -8,42 +8,50 @@ export class DrawableCanvasElement {
         this.dragging = false;
         this.cursorPoint = { x: 0, y: 0 };
 
-        this.paintCanvas.onmousedown = (e) => { this.onMouseDownHandler(e); };
-        this.paintCanvas.onmouseup = (e) => { this.onMouseUpHandler(e); };
-        this.paintCanvas.onmouseout = (e) => { this.onMouseUpHandler(e); };
-        this.paintCanvas.onmousemove = (e) => { this.onMouseMoveHandler(e); };
+        this.paintCanvas.onmousedown = (e) => { this.startDrawing(e); };
+        this.paintCanvas.onmouseup = (e) => { this.stopDrawing(e); };
+        this.paintCanvas.onmouseout = (e) => { this.stopDrawing(e); };
+        this.paintCanvas.onmousemove = (e) => { this.makeMarks(e); };
 
         const canvas = this.paintCanvas;
 
         document.body.addEventListener("touchstart", (e) => {
             if (e.target == canvas) {
                 e.preventDefault();
-                this.onMouseDownHandler(e);
+                this.startDrawing(e);
             }
         }, false);
 
         document.body.addEventListener("touchend", (e) => {
             if (e.target == canvas) {
                 e.preventDefault();
-                this.onMouseUpHandler(e);
+                this.stopDrawing(e);
             }
         }, false);
 
         document.body.addEventListener("touchmove", (e) => {
             if (e.target == canvas) {
                 e.preventDefault();
-                this.onMouseMoveHandler(e);
+                this.makeMarks(e);
             }
         }, false);
 
+        this.notificationBuffer = [];
+        this.notificationBatch = 200;
     }
 
     registerPaletteElements(paletteContainer) {
         const palette = document.getElementById(paletteContainer);
         for (let colour of palette.children) {
-            colour.addEventListener('click', (event) => { this.activeColour = event.target.style["background-color"]; });
+            colour.addEventListener('click', (event) => {
+                this.setActiveColour(event.target.style["background-color"]);
+            });
         }
         return this;
+    }
+
+    setActiveColour(colour) {
+        this.activeColour = colour;
     }
 
     clear() {
@@ -57,8 +65,8 @@ export class DrawableCanvasElement {
             const bounds = e.target.getBoundingClientRect();
             const touch = e.targetTouches[0];
 
-            location.x = touch.pageX - bounds.left;
-            location.y = touch.pageY - bounds.top;
+            location.x = touch.clientX - bounds.left;
+            location.y = touch.clientY - bounds.top;
         } else {
             location.x = e.offsetX;
             location.y = e.offsetY;
@@ -67,31 +75,64 @@ export class DrawableCanvasElement {
         return location;
     }
 
-    onMouseDownHandler(e) {
+    startDrawing(e) {
         this.dragging = true;
 
         const location = this.getLocationFrom(e);
-        this.cursorPoint.x = location.x;
-        this.cursorPoint.y = location.y;
+        this.cursorPoint = location;
 
         this.paintContext.lineWidth = 1;
         this.paintContext.lineCap = 'round';
         this.paintContext.filter = 'blur(1px)';
         this.paintContext.beginPath();
-        this.paintContext.moveTo(this.cursorPoint.x, this.cursorPoint.y);
+        this.paintContext.moveTo(location.x, location.y);
         this.paintContext.strokeStyle = this.activeColour;
     }
 
-    onMouseUpHandler(e) {
+    stopDrawing(e) {
         this.dragging = false;
+        this.notify(null, true);
     }
 
-    onMouseMoveHandler(e) {
+    makeMarks(e) {
         if (!this.dragging) return;
 
         const location = this.getLocationFrom(e);
         this.paintContext.lineTo(location.x, location.y);
         this.paintContext.stroke();
+
+        this.notify(location);
+    }
+
+    addMarks(markCollection) {
+        this.paintContext.beginPath();
+        this.paintContext.moveTo(location.x, location.y);
+        this.paintContext.strokeStyle = this.activeColour;
+
+        for (let location of markCollection) {
+            this.paintContext.lineTo(location.x, location.y);
+            this.paintContext.stroke();
+        }
+    }
+
+    onNotification(callback) {
+        this.notificationCallback = callback;
+        return this;
+    }
+
+    notify(evt, force = false) {
+        if (this.notificationCallback == null) {
+            return;
+        }
+
+        if (evt != null) {
+            this.notificationBuffer.push(evt);
+        }
+
+        if ((force || this.notificationBuffer.length === this.notificationBatch) && this.notificationBuffer.length > 0) {
+            this.notificationCallback(this.notificationBuffer);
+            this.notificationBuffer = [];
+        }
     }
 
     toString() {

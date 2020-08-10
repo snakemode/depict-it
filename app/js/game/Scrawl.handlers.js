@@ -3,7 +3,7 @@ import { ScrawlCards } from "./Scrawl.cards.js";
 import { waitUntil } from "./GameStateMachine.js";
 
 export class StartHandler {
-    async execute(state) {
+    async execute(state, context) {
         state.stacks = [];
         state.hints = ScrawlCards.slice();
         shuffle(state.hints);
@@ -12,7 +12,7 @@ export class StartHandler {
 }
 
 export class DealHandler {
-    async execute(state) {
+    async execute(state, context) {
         for (let player of state.players) {
             const hint = state.hints.pop();
             const stack = new Stack(player.clientId, hint);
@@ -27,7 +27,7 @@ export class GetUserDrawingHandler {
         this.waitForUsersFor = waitForUsersFor;
     }
 
-    async execute(state) {
+    async execute(state, context) {
         this.submitted = 0;
         this.initialStackLength = state.stacks[0].items.length;
 
@@ -35,7 +35,7 @@ export class GetUserDrawingHandler {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
 
-            state.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         const result = { transitionTo: "PassStacksAroundHandler" };
@@ -57,13 +57,13 @@ export class GetUserDrawingHandler {
         return result;
     }
 
-    async handleInput(state, message) {
+    async handleInput(state, context, message) {
         if (message.kind == "drawing-response") {
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
             stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
-            state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;
         }
@@ -75,14 +75,14 @@ export class GetUserCaptionHandler {
         this.waitForUsersFor = waitForUsersFor;
     }
 
-    async execute(state) {
+    async execute(state, context) {
         this.submitted = 0;
         this.initialStackLength = state.stacks[0].items.length;
 
         for (let player of state.players) {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
-            state.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
         }
 
         let redirect = { transitionTo: "PassStacksAroundHandler" };
@@ -104,13 +104,13 @@ export class GetUserCaptionHandler {
         return redirect;
     }
 
-    async handleInput(state, message) {
+    async handleInput(state, context, message) {
         if (message.kind == "caption-response") {
             const stackItem = new StackItem("string", message.caption);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
             stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
-            state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;
         }
@@ -118,7 +118,7 @@ export class GetUserCaptionHandler {
 }
 
 export class PassStacksAroundHandler {
-    async execute(state) {
+    async execute(state, context) {
         let holders = state.stacks.map(s => s.heldBy);
         const popped = holders.pop();
         holders = [popped, ...holders];
@@ -140,16 +140,14 @@ export class PassStacksAroundHandler {
 }
 
 export class GetUserScoresHandler {
-    constructor() {
-    }
 
-    async execute(state) {
+    async execute(state, context) {
 
         for (let stack of state.stacks) {
             this.skip = false;
             this.submitted = 0;
 
-            state.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
+            context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
 
             try {
                 await waitUntil(() => { return this.skip || (this.submitted == state.players.length); });
@@ -161,7 +159,7 @@ export class GetUserScoresHandler {
         return { transitionTo: "EndHandler" };
     }
 
-    async handleInput(state, message) {
+    async handleInput(state, context, message) {
         if (message.kind === "skip-scoring-forwards") {
             this.skip = true;
             return;
@@ -189,14 +187,14 @@ export class GetUserScoresHandler {
             }
         }
 
-        state.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
+        context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
         this.submitted++;
     }
 }
 
 export class EndHandler {
-    async execute(state) {
-        state.channel.sendMessage({ kind: "instruction", type: "show-scores", playerScores: state.players });
+    async execute(state, context) {
+        context.channel.sendMessage({ kind: "instruction", type: "show-scores", playerScores: state.players });
         return { complete: true };
     }
 }
