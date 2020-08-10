@@ -18,7 +18,7 @@
     },
     "author": "",
     "dependencies": {
-        "@snakemode/snake-canvas": "^1.0.4"
+        "@snakemode/snake-canvas": "^1.0.6"
     },
     "devDependencies": {
         "@babel/cli": "^7.10.4",

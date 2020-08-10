@@ -27,10 +27,15 @@ h1 {
   height: 26vw;
   width: 100%;
   min-width: 160px;
-  margin: 20px auto;
+  margin: 0px auto;
+  border-top: 20px solid transparent;
   color: transparent;
-  background: url(./assets/logo.svg) no-repeat center;
+  background: url(./assets/logo.svg) no-repeat center bottom;
   background-size: contain;
+}
+
+.hide {
+  display: none;
 }
 
 p {
@@ -40,7 +45,6 @@ p {
 .join-container, .game-info {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 .section-heading {
@@ -195,80 +199,62 @@ button:hover {
 }
 
 .timer {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: calc(100% - 40px);
-  height: 40px;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 30px;
+  margin-bottom: 20px;
   background-color: #f1c40f;
-  border-radius: 4px;
-  border: 4px solid #222;
   transform: rotate(180deg);
 }
 
 .timer-bar {
-  height: 32px;
+  height:100%;
   bottom: 0;
   background-color: white;
 }
 
-
-/* drawing */
 .finished-drawing {
-  width: calc(100% - 40px);
-  font-size: 1.6em;
+  display: block;
+  width: max-content;
+  margin: 10px auto;
   padding: 20px 40px;
-  margin: 10px 20px 20px;
+  font-size: 1.6em;
 }
 
 .drawing-hint {
-  perspective: 1000px;
-  position: absolute;
-  top: 56px;
-  left: 20px;
-  width: calc(100% - 40px);
-  height: 100px;
-  min-width: 300px;
-  margin: 0 auto 1em;
-  font-weight: bold;
+  margin-bottom: 1em;
   text-align: center;
-  transition: 0.6s;
-  transform-style: preserve-3d;
-  animation-name: flipInY;
-  animation-fill-mode: forwards;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-delay: 2s;
-  animation-duration: 1s;
+  flex-shrink: 0;
+  color: white;
+  text-shadow: 0px 0px 2px #222222;
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
 }
 
-.hint-front, .hint-back {
-	backface-visibility: hidden;
-	position: absolute;
-	top: 0;
-  left: 0;
-  width: 100%;
-  padding: 20px;
-  border-radius: 4px;
-  background-color: white;
-  border: 4px solid #222;
-  font-size: 1.4em;
-}
-
-.hint-front {
-	z-index: 2;
-  transform: rotateY(0deg);
-  background-color: #f1c40f;
-}
-
+.hint-front, 
 .hint-back {
-	transform: rotateY(180deg);
+  display: inline;
+  font-size: 1.6em;
+}
+
+.hint-front:after {
+  content:": ";
+  display: inline;
 }
 
 .palette {
   display: flex;
-  justify-content: center;
-  padding-top: 10px;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.paint-canvas {
+  cursor: url(./assets/pencil.png), auto;
+}
+
+.eraser {
+  cursor: url(./assets/eraser.png), auto;
 }
 
 .palette div {
@@ -276,14 +262,13 @@ button:hover {
   height: 50px;
   border-radius: 50%;
   border: 5px solid black;
-  margin: 10px;
 }
 
 .image-frame {
   width: 100%;
   max-width: 400px;
   height: 400px;
-  margin: 0 auto 1em;
+  margin: 0 auto;
   border-radius: 40px;
   border: 6px solid #222;
   border-left: 10px solid #222;
@@ -292,14 +277,13 @@ button:hover {
 }
 
 .paint-canvas {
-  cursor: crosshair;
+  box-sizing: content-box;
 }
 
 .canvas-and-paints {
   display: grid;
-  grid-template-rows: 1fr 70px;
+  grid-template-rows: 1fr 80px;
   justify-content: center;
-  margin: 10px;
 }
 
 .loader {
@@ -392,26 +376,14 @@ button:hover {
 @media (min-width: 740px) {
   h1 {
     position: absolute;
-    top: 10px;
+    top: 0px;
     left: 10px;
-    height: 12vw;
-    width: 16vw;
-    min-width: 200px;
-    max-width: 300px;
-    min-height: 160px;
-    margin: 0;
+    width: 240px;
+    height: 180px;
   }
 
   .section-heading {
     font-size: 2.6rem;
-  }
-
-  .finished-drawing {
-    position: absolute;
-    top: 40px;
-    right: 40px;
-    width: max-content;
-    margin: 20px 0 0;
   }
 
   .form, .game-lobby {
@@ -438,34 +410,66 @@ button:hover {
   }
 
   .timer {
-    top: auto;
-    bottom: 20px;
+    position: absolute;
+    top: calc(100% - 30px);
+    left: 110px;
+    width: calc(100vh - 180px - 40px);
+    height: 40px;
+    border-radius: 4px;
+    border: 4px solid #222;
+    transform: rotate(-90deg);
+    transform-origin: top left;
+    background-color: white;
   }
 
-  .drawing-hint {
-    position: relative;
-    min-height: 8em;
-    max-width: 500px;
-    top: auto;
-    left: auto;
+  .timer-bar {
+    background-color: #f1c40f;
   }
   
+  .drawing-hint {
+    perspective: 1000px;
+    position: relative;
+    min-height: 8em;
+    max-width: 300px;
+    top: auto;
+    left: auto;
+    width: 100%;
+    margin: 1em auto;
+    font-weight: bold;
+    text-align: center;
+    transition: 0.6s;
+    transform-style: preserve-3d;
+    animation-name: flipInY;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-delay: 2s;
+    animation-duration: 1s;
+    color: #333;
+    text-shadow: none;
+  }
+
   .hint-front, .hint-back {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     padding: 30px;
+    border-radius: 4px;
+    background-color: white;
+    border: 4px solid #222;
     font-size: 1.4em;
   }
 
-  .canvas-and-paints {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr 40px;
-    margin: 0;
+  .hint-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+    background-color: #f1c40f;
   }
 
-  .palette {
-    flex-direction: column;
-    padding-top: 10px;
-    padding-left: 20px;
+  .hint-back {
+    transform: rotateY(180deg);
   }
   
   .caption {
@@ -495,37 +499,27 @@ button:hover {
   .caption .form-button {
     grid-area: but;
     height: min-content;
-  }    
+  }
+
   .gallery {
     gap: 60px;
   }
+
   .score {
     font-size: 1.6em;
   }
+
+  .hide {
+    display: block;
+  }
+
+  .playfield {
+    margin: 0;
+  }
+
 }
 
 @keyframes flipInY {
-  0% {
-    transform: rotateY(0deg);
-
-  }
-
-  40% {
-    transform: rotateY(45deg);
-
-  }
-
-  60% {
-    transform: rotateY(110deg);
-
-  }
-
-  80% {
-    transform: rotateY(160deg);
-
-  }
-
-  to {
-    transform: rotateY(180deg);
-  }
+  0% { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
 }

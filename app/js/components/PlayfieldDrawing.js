@@ -11,9 +11,7 @@ export const PlayfieldDrawing = {
       
   <section v-if="state?.lastInstruction?.type == 'drawing-request'">
     <div class="drawing-hint">
-      <div class="hint-front">
-        Draw This
-      </div>
+      <div class="hint-front">Draw This</div>
       <div class="hint-back">
         {{ state.lastInstruction.value }}
       </div>

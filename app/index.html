@@ -19,7 +19,7 @@
       {{ state?.status == undefined ? "disconnected" : state?.status }}
     </div>
 
-    <h1>Depict-it</h1>
+    <h1 v-bind:class="{ hide: state?.lastInstruction?.type == 'drawing-request'}">Depict-it</h1>
 
     <div v-if="!joinedOrHosting" class="join-container">
       <create-game-form v-on:create="host" v-on:join="join"></create-game-form>

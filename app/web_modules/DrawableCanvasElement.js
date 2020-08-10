@@ -5,6 +5,7 @@ export class DrawableCanvasElement {
         this.paintContext = this.paintCanvas.getContext("2d");
 
         this.activeColour = "black";
+        this.lineWidth = 1;
         this.dragging = false;
         this.cursorPoint = { x: 0, y: 0 };
 
@@ -81,7 +82,7 @@ export class DrawableCanvasElement {
         const location = this.getLocationFrom(e);
         this.cursorPoint = location;
 
-        this.paintContext.lineWidth = 1;
+        this.paintContext.lineWidth = this.lineWidth;
         this.paintContext.lineCap = 'round';
         this.paintContext.filter = 'blur(1px)';
         this.paintContext.beginPath();
