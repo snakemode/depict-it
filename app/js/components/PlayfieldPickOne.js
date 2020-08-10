@@ -21,16 +21,16 @@ export const PlayfieldPickOne = {
     <div>
 
       <section v-if="state?.lastInstruction?.type == 'pick-one-request'" class="gallery">
-        <h2 class="section-heading">Pick a Winner!</h2>
+        <h2 class="section-heading">Which card is best?</h2>
         <div v-for="item in state?.lastInstruction?.stack.items" class="gallery-item">
           <stack-item :item="item" v-on:click="sendVote"></stack-item>
         </div>
       </section>
             
 
-      <div v-if="displaySkipButtonForHost">
-        You are the host and can skip the scoring forwards.<br/>
-        If a player drops out and the game won't move forwards, click this.
+      <div v-if="displaySkipButtonForHost" class="form">
+        <p>You are the host and can skip the scoring forwards.</p>
+        <p>If a player drops out and the game won't move forwards, click the button below.</p>
         <button v-on:click="progressVote">Move vote forwards</button>
       </div>
 
