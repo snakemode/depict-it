@@ -364,13 +364,64 @@ Then, it send a `peer-status` message, with a copy of the latest `this.state` ob
 
 There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first.
 
-## Designing our game using a GameStateMachine
+# Designing our game
+
+Our game is going to play out over messages between the `host` and all the `players`.
+
+As a principal we're going to send messages from the `host` to each individual client representing the next thing they have to do.
+The `game stacks` - the piles of Depcit-It cards, will be stored in memory in the `hosts` browser, with only the information required to display to the player sent in messages at any one time.
+
+This:
+
+- Keeps our message payloads small
+- Means we can structure our application in pairs of messages - requests for user input and their responses.
+
+Our game has five key phases:
+
+- Dealing and setup
+- Collecting image input from players
+- Collecting text captions from players
+- Collecting scores from players
+- Displaying scores
+
+Each of these phases will be driven by pairs of messages.
+
+To fit inside our `p2p client`, we're going to always store a variable called `lastMessage` in our web app - and have our UI respond to the contents of this last message. This is a simple way to control what is shown on each players screen.
+
+We'll use a message type called `wait` to place players in a holding page while other players complete their inputs.
+
+Here are the messages used in each phase of the game:
+
+| Phase  | Message kind | Example |
+|--------|------| --- |
+| Dealing and setup                          | No messages | |
+| Collecting image input                     | `drawing-request`        | { kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: 30_000 } |
+| Collecting image input response            | `drawing-response`       | { kind: "drawing-response", imageUrl: "http://some/url" } |
+| Collecting caption input                   | `caption-request`       | { kind: "instruction", type: "caption-request", value: lastItem.value, timeout: 30_000 } |
+| Collecting caption input response          | `caption-response`      | { kind: "caption-response", caption: "a funny caption" } |
+| Collecting scores from players input       | `pick-one-request`      | { kind: "instruction", type: "pick-one-request", stack: stack } |
+| Collecting scores from players response    | `pick-one-response`     | { kind: "pick-one-response", id: "stack-item-id" } |
+|                                            | `skip-scoring-forwards` | { kind: "skip-scoring-forwards" } |
+| Displaying scores                          | `show-scores`           | { kind: "instruction", type: "show-scores", playerScores: state.players } |
+|                                            | `wait`                  | { kind: "instruction", type: "wait" } |
+
+Each of these messages will be sent through our `PubSubClient` class, that'll add some identifying information (the id of the player that sent each message) into the message body for us to filter by in our code.
+
+As our game runs, and sends these messages to each individual client, it can collect their responses and move the `game state` forwards.
+
+Luckily, there isn't very much logic in the game, it has to:
+
+- Ensure when a player sends a response to a request, it's placed on the correct `game stack` of items
+- Keep track of scores when players vote on items
+- Keep track of which stack each player is currently holding
+
+We need to make sure we write code for each of our game phases to send these `p2p messages` at the right time, and then build a web UI that responds to the last message received to add our gameplay experience.
+
+There's a pattern in software called a `State Machine` - a way to model a system that can exist in one of several known states, and we're going to build a `State Machine` to run our game logic.
+
+# The GameStateMachine
 
 Forgetting the web-UI for a moment, we need to write some code to capture the logic of our game.
-
-We've built a `StateMachine` class to keep track of the different phases of our game.
-
-`State Machines` are a design pattern that model a system that can only ever be in one of several known states at a time.
 
 We're going to break the various phases of our game up into different `Handlers` - that represent both the logic of that portion of the game, and the logic that handles user input during that specific game phase.
 
@@ -397,7 +448,7 @@ const twoStepGame = () => ({
 This game definition doesn't do anything on it's own - it's a collection of `steps`.
 In this example, we have a start handler that just flags that execute has been called, and then `transitionTo`s the `EndHandler`.
 
-### Defining a game
+## Defining a game
 
 A game definition looks exactly like this:
 
@@ -418,7 +469,7 @@ const gameDef = () => ({
 * Properties assigned to the `state` object during `handleInput` **can** be read in the `execute` function.
 * `context` can be provided, and can contain anything you like to make your game work.
 
-### Defining a handler
+## Defining a handler
 
 Here's one of the handlers from the previous example:
 
@@ -445,7 +496,7 @@ This is an exhaustive example, with both an `execute` and a `handleInput` functi
 * Handlers **must** return a `transitionTo` response from their `execute` function, that refers to the next `Handler`.
 * Handlers **must** be `async functions`.
 
-## The GameStateMachine
+## How the GameStateMachine works
 
 The `GameStateMachine` takes our `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed, and when. It's always expecting a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
 
@@ -528,7 +579,7 @@ This is the glue code that we can pass input to, which will in turn find the cur
 We'll have to wire this up to our Web UI and Ably connection later.
 
 
-## The GameStateMachine and our handlers
+# The GameStateMachine and our Game
 
 Now that we understand a little about how the `GameStateMachine` can be used to define "any game", let's get specific and talk about `Depict-It`.
 
@@ -609,6 +660,15 @@ The input that this handler expects is the `url` of an image stored somewhere pu
 When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
 ### GetUserCaptionHandler
+
+For each of the `state.players`, it sends an `instruction` of type `caption-request`, along with the hint card that's currently on the top of the `Game stack`.
+
+Once the `Handler` has sent a message to each player with their hint, it waits until either all the players have responded, or 180 seconds has elapsed. If a player hasn't submitted a drawing in that time, a placeholder is put in their stack, and the game progresses.
+
+The input that this handler expects is the `url` of an image stored somewhere publically accessible. We're going to use `Azure storage buckets` for this later on.
+
+When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
+
 ### PassStacksAroundHandler
 ### GetUserScoresHandler
 ### EndHandler
