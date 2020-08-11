@@ -1123,8 +1123,186 @@ It's the most important piece of data in the entire application.
 
 # Splitting our game phases into Vue componenets
 
-- Vue components
-  - Spliting our game phases into vue componenets
+`Vue components` let you split out parts of your functionality into what looks like tiny little `Vue apps`.
+They follow practically the same syntax, but contain both the UI template and the JavaScript.
+
+Our application is split into a bunch of smaller componenets:
+
+```bash
+base-components/CopyableTextBox.js
+base-components/DrawableCanvas.js
+
+ConnectedPlayersSummary.js
+CreateGameForm.js
+InviteLink.js
+Loader.js
+PlayfieldCaption.js
+PlayfieldDrawing.js
+PlayfieldPickOne.js
+PlayfieldShowScores.js
+PlayfieldWaitForOthers.js
+ReadyOrWaitingPrompt.js
+StackItem.js
+TimerBar.js
+```
+We're following some relatively obvious conventions here - the componet name tends to have the phase of the game it's associated with in the filename!
+
+We're going to look inside `StackItem` as an example, as it's a simple component
+
+```js
+export const StackItem = {
+  props: ['item'],
+  methods: {
+    emitIdOfClickedElement: async function () {
+      this.$emit('click', this.item.id);
+    }
+  },
+  template: `    
+<span v-if="item.type == 'string'"
+      v-on:click="emitIdOfClickedElement"
+      class="stack-item stack-text">{{ item.value }}</span>
+
+<img  v-else      
+      v-bind:src="item.value"
+      v-on:click="emitIdOfClickedElement"
+      class="stack-item" />
+`
+};
+```
+`Vue Components`
+- Can Have named `props` that you can bind in `HTML` using the `:prop-name="something"` syntax
+- Can Have methods
+- Can have computed properties
+- Have a template string.
+
+In the example of the `StackItem`, we have a `v-if` and `v-else` statement displaying a `span` if the item is a `string` (a caption), or an `img` tag when the item is a `drawing`.
+
+All of the components follow a similar pattern - capturing bits of interaction.
+
+The other piece of syntax you'll see here is the `this.$emit` function call.
+
+Doing this allows us to define custom events that can be bound in the consuming `vue component` or `vue app` - so if we emit an event, in our parent we can use the `v-on` syntax to listen and respond to it. In this case, we're creating an event called `click`, and passing the `item.id` of the selected `Stack Item` to whatever subscribes to our event.
+
+It would be exhausting to walk through the code of each `Vue Component` but lets take a look at the `PlayfieldDrawing` component to see how we handle sending data back from the server.
+
+```js
+export const PlayfieldDrawing = {
+  props: ['state', 'client'],
+
+  methods: {
+    sendImage: async function (base64EncodedImage) {
+      await this.client.sendImage(base64EncodedImage);
+    }
+  },
+
+  template: `      
+  <section v-if="state?.lastInstruction?.type == 'drawing-request'">
+    <div class="drawing-hint">
+      <div class="hint-front">Draw This</div>
+      <div class="hint-back">
+        {{ state.lastInstruction.value }}
+      </div>
+    </div>
+    <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
+  </section>
+  `
+};
+```
+This `Vue component` is typical of the others that require interactivity. Remember when we walked through `P2PClient` and we created an instance of `DepictItClient` - well we've bound that client into the `vue component` here as the property `client`. What this means, is that when our `sendImage` function is triggered by the `DrawableCanvas` raising the `drawing-finished` event, we can use that client to send an image back to our `host`.
+
+This general pattern holds for collecting captions, and scoring our game.
+
+# The DepictIt Client
+
+Our `DepictIt Client` is a small wrapper class around all of our components interactions with the `host`.
+This client is responsible for sending data and little else.
+
+All those messages that are expected? They're all defined here.
+
+```js
+export class DepictItClient {
+  constructor(gameId, channel) {
+    this.gameId = gameId;
+    this.channel = channel;
+  }
+
+  async sendImage(base64EncodedImage) {
+    ...
+  }
+
+  async sendCaption(caption) {
+    this.channel.sendMessage({ kind: "caption-response", caption: caption });
+  }
+
+  async logVote(id) {
+    this.channel.sendMessage({ kind: "pick-one-response", id: id });
+  }
+
+  async hostProgressedVote() {
+    this.channel.sendMessage({ kind: "skip-scoring-forwards" })
+  }
+}
+```
+There is one extra interesting function in here though - and that's `sendImage`.
+
+```js
+  async sendImage(base64EncodedImage) {
+    const result = await fetch("/api/storeImage", {
+      method: "POST",
+      body: JSON.stringify({ gameId: this.gameId, imageData: base64EncodedImage })
+    });
+
+    const savedUrl = await result.json();
+    this.channel.sendMessage({ kind: "drawing-response", imageUrl: savedUrl.url });
+  }
+```
+
+`sendImage` has to POST the `base64EncodedImage` that's created by our `DrawableCanvas` component to an `API` running on our instance of `Azure Functions`, before it sends a message back to the `host`.
+
+
+# Storing images into Azure Blob Storage via an Azure Function
+
+To make our images work work, we've added an extra function to the directory `/api/storeImage/index.js`
+
+```js
+const { StorageSharedKeyCredential } = require("@azure/storage-blob");
+const { BlobServiceClient } = require("@azure/storage-blob");
+    
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+}  
+
+module.exports = async function (context, req) {
+    
+    const defaultAzureCredential = new StorageSharedKeyCredential(process.env.AZURE_ACCOUNT, process.env.AZURE_KEY);
+    const blobServiceClient = new BlobServiceClient(process.env.AZURE_BLOBSTORAGE, defaultAzureCredential);
+    const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINERNAME);
+
+    const unique = `game_${req.body.gameId}_${uuidv4()}.png`;
+    const url = `${process.env.AZURE_BLOBSTORAGE}/${process.env.AZURE_CONTAINERNAME}/${unique}`;
+    const fileData = req.body.imageData.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = new Buffer(fileData, 'base64');
+
+    const blockBlobClient = containerClient.getBlockBlobClient(unique);
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length || 0);
+
+    context.res = { 
+        headers: { "content-type": "application/json" },
+        body: { url: url }
+    };    
+};
+```
+
+This is pretty boiler-plate-ey, but it's the standard `Azure Blob Storage SDK` code to upload a file to a storage bucket.
+This `Azure function` is mounted by the `Azure functions runtime` to the path `/api/storeImage` so we can call it using our browsers `Fetch API`.
+
+The function returns an `absolute url` of the stored image - which is stored in a bucket that supports `unauthenticated reads`.
+The bucket is also configured to auto-delete items after 24-hours to keep our storage costs really low.
+
+This is a super quick way to add a little bit of statefulness to our app - especially because the average size of our images is over the message size cap for `Ably messages`.
 
 # Drawing using HTML5 Canvas
 
@@ -1140,12 +1318,8 @@ It's the most important piece of data in the entire application.
 - Wait on ably messages
 - Host can skip steps
 
-# Storing images into Azure Blob Storage via an Azure Function
 
-... for when you've not got enough Azure in Your Azure for your Azure Static Web App
-
-
-## Running on your machine
+# Running on your machine
 
 While this whole application runs inside a browser, to host it anywhere people can use, we need some kind of backend to keep our `Ably API key` safe. The running version of this app is hosted on `Azure Static Web Apps (preview)` and provides us a `serverless` function that we can use to implement Ably `Token Authentication`.
 
@@ -1153,7 +1327,7 @@ The short version is - we need to keep the `Ably API key` on the server side, so
 
 `Azure Static Web Apps` automatically hosts this API for us, because there are a few .json files in the right places that it's looking for and understands. To have this same experience locally, we'll need to use the `Azure Functions Core Tools`.
 
-### Local dev pre-requirements
+## Local dev pre-requirements
 
 We'll use live-server to serve our static files and Azure functions for interactivity
 
@@ -1172,7 +1346,7 @@ func settings add ABLY_API_KEY Your-Ably-Api-Key
 Running this command will encrypt your API key into the file `/api/local.settings.json`.
 You don't need to check it in to source control, and even if you do, it won't be usable on another machine.
 
-### How to run for local dev
+## How to run for local dev
 
 Run the bingo app:
 
@@ -1187,6 +1361,6 @@ cd api
 npm run start
 ```
 
-## Hosting on Azure
+# Hosting on Azure
 
 We're hosting this as a Azure Static Web Apps - and the deployment information is in [hosting.md](hosting.md).
