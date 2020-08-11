@@ -637,7 +637,7 @@ The messages can also feature an optional `timeout` value - some of our steps ha
 
 Let's dive into a few of our steps and take a look at what they do.
 
-# StartHandler
+## StartHandler
 
 **On execute**
 
@@ -649,7 +649,7 @@ Let's dive into a few of our steps and take a look at what they do.
 
 * There is no user input.
 
-# DealHandler
+## DealHandler
 
 **On execute**
 
@@ -661,8 +661,7 @@ Let's dive into a few of our steps and take a look at what they do.
 
 * There is no user input.
 
-
-# GetUserDrawingHandler
+## GetUserDrawingHandler
 
 **On execute**
 
@@ -680,7 +679,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * We're going to use `Azure storage buckets` for this later on.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
-# GetUserCaptionHandler
+## GetUserCaptionHandler
 
 **On execute**
 
@@ -696,7 +695,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * Handler expects a `caption` property in player response message.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
-# PassStacksAroundHandler
+## PassStacksAroundHandler
 
 **On execute**
 
@@ -706,7 +705,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * Picks `GetUserDrawingHandler` when the top item in the `Game Stack` is a `Caption`
 * Picks `GetUserCaptionHandler` when the top item in the `Game Stack` is a `Drawing`
 
-# GetUserScoresHandler
+## GetUserScoresHandler
 
 **On execute**
 
@@ -719,11 +718,80 @@ Let's dive into a few of our steps and take a look at what they do.
 * Assigns a vote to the author of each picked `Game Stack Item`
 * Also handles admin input to progress the game forward and skip the user scoring, to prevent games hanging.
 
-# EndHandler
+## EndHandler
 
 **On execute**
 
 * Sends a `show-scores` message with the final scores of the `Game round`
+
+# Handlers and async / await
+
+The interesting thing about these handlers, is we're using `async/await` and an `unresolved Promise` to pause the execution while we wait for user input.
+This is a fun trick, allowing us to represent our game's control flow `linearly` while waiting for messages to arrive over our `p2p channel`.
+
+Lets take a look at our `GetUserDrawingHandler` as an example of this.
+
+First we setup our execute method, creating an instance variable `submitted` (scoped to `this`). 
+We know that when the number of `submitted` drawings, is equal to the total number of `players`, every player has sent an image.
+
+```js
+async execute(state, context) {
+    this.submitted = 0;
+    ...
+```
+
+Next, we send an `instruction` to each player, in this case a `drawing-request`
+
+```js
+    for (let player of state.players) {
+        ...
+        context.channel.sendMessage({ kind: "instruction", type: "drawing-request", ...);
+    }
+```
+Then we begin waiting for responses.
+We use the syntax `await waitUntil(() => some condition)` here to do this.
+
+```js
+    const result = { transitionTo: "PassStacksAroundHandler" };
+
+    try {
+        await waitUntil(() => this.submitted == state.players.length, this.waitForUsersFor);
+    }
+    catch (exception) {
+        result.error = true;
+        ... /* error handling */
+    }
+
+    return result;
+}
+```
+
+What this does, is create an `unresolved Promise` that in the background is `polling` and executing the `function` passed to it.
+This function can contain anything, and when it returns `true`, we continue our execution as the `Promise` will resolve.
+
+While our code is `paused` here `awaiting` the unresolved `Promise`, further user input can be provided by calling `handleInput` from our `Ably client callback`.
+
+```js
+async handleInput(state, context, message) {
+    if (message.kind == "drawing-response") {
+        const stackItem = new StackItem("image", message.imageUrl);
+        const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
+
+        stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
+        context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
+
+        this.submitted++;
+    }
+}
+```
+
+You'll notice the code here increments `this.submitted` - each time our `waitUntil` condition runs, it's checking what the current value of `this.submitted` is, and when `this.submitted` finally reaches the target `state.players.length`.
+
+Our `waitUntil` call, also takes a timeout value - in this example it's the `instance variable` `this.waitForUsersFor` which is prvoided in our constructor. If our `callback condition` hasn't been reached by the time we reach this `timeout` value, the `Promise` will be rejected, and an `exception` will be thrown.
+
+In the real handler, we have some code there to make sure that each of our `Game Stacks` is in a valid state.
+
+Each of the handlers that require user input follows this pattern.
 
 
 ## Designing a browser based game
