@@ -637,47 +637,93 @@ The messages can also feature an optional `timeout` value - some of our steps ha
 
 Let's dive into a few of our steps and take a look at what they do.
 
-### StartHandler
+# StartHandler
 
-Generates and shuffles the various `Game Hint Cards` that it imports from `DepictIt.cards.js`
+**On execute**
 
-There is no user input.
+* Creates hint deck imported from  `DepictIt.cards.js`
+* Shuffles deck
+* Transitions to `DealHandler`
 
-### DealHandler
+**On handleInput**
 
-For every player in the collection `state.players` (that we'll need our web ui to populate), it creates an empty `game stack`, and adds a `hint` to the top of it.
+* There is no user input.
 
-There is no user input.
+# DealHandler
 
-### GetUserDrawingHandler
+**On execute**
 
-For each of the `state.players`, it sends an `instruction` of type `drawing-request`, along with the hint card that's currently on the top of the `Game stack`.
+* Creates `Game Stack` for every player in `state.players`
+* Adds hint to the top of the `Game Stack`
+* Transitions to `GetUserDrawingHandler`
 
-Once the `Handler` has sent a message to each player with their hint, it waits until either all the players have responded, or 180 seconds has elapsed. If a player hasn't submitted a drawing in that time, a placeholder is put in their stack, and the game progresses.
+**On handleInput**
 
-The input that this handler expects is the `url` of an image stored somewhere publically accessible. We're going to use `Azure storage buckets` for this later on.
-
-When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
-
-### GetUserCaptionHandler
-
-For each of the `state.players`, it sends an `instruction` of type `caption-request`, along with the hint card that's currently on the top of the `Game stack`.
-
-Once the `Handler` has sent a message to each player with their hint, it waits until either all the players have responded, or 180 seconds has elapsed. If a player hasn't submitted a drawing in that time, a placeholder is put in their stack, and the game progresses.
-
-The input that this handler expects is the `url` of an image stored somewhere publically accessible. We're going to use `Azure storage buckets` for this later on.
-
-When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
-
-### PassStacksAroundHandler
-### GetUserScoresHandler
-### EndHandler
+* There is no user input.
 
 
+# GetUserDrawingHandler
 
-- State Machine that executes game steps
-- Collecting input using ably and async / await
-  - P2P sample code passing on messages to state machine
+**On execute**
+
+* Sends `drawing-request` for every player in `state.players`
+* Request contains `hint` from the top of that players `Game Stack`
+* Waits for players to respond, or 180 seconds have elapsed
+* Adds placeholder images to `Game Stack` if players do not respond.
+* Transitions to `PassStacksAroundHandler`
+
+
+**On handleInput**
+
+* Handler expects a `url` property in player response message.
+* `url` points to image stored somewhere publically accessible. 
+* We're going to use `Azure storage buckets` for this later on.
+* When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
+
+# GetUserCaptionHandler
+
+**On execute**
+
+* Sends `caption-request` for every player in `state.players`
+* Request contains `url` from the top of that players `Game Stack`
+* Waits for players to respond, or 60 seconds have elapsed
+* Adds "Answer not submitted" to `Game Stack` if players do not respond.
+* Transitions to `PassStacksAroundHandler`
+
+
+**On handleInput**
+
+* Handler expects a `caption` property in player response message.
+* When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
+
+# PassStacksAroundHandler
+
+**On execute**
+
+* Moves the `Game Stacks` forward to the next player that is required to contribute
+* If the `Game Stacks` have been moved to their original owner, transitions to `GetUserScoresHandler`
+* Otherwise, picks either `GetUserDrawingHandler` or `GetUserCaptionHandler`
+* Picks `GetUserDrawingHandler` when the top item in the `Game Stack` is a `Caption`
+* Picks `GetUserCaptionHandler` when the top item in the `Game Stack` is a `Drawing`
+
+# GetUserScoresHandler
+
+**On execute**
+
+* Sends a `pick-one-request` for each `Game Stack`
+* Waits for all users to submit a score for that specific `Game Stack`
+* Sends the next `pick-one-request` until all `Game Stacks` have been scored.
+
+**On handleInput**
+
+* Assigns a vote to the author of each picked `Game Stack Item`
+* Also handles admin input to progress the game forward and skip the user scoring, to prevent games hanging.
+
+# EndHandler
+
+**On execute**
+
+* Sends a `show-scores` message with the final scores of the `Game round`
 
 
 ## Designing a browser based game
