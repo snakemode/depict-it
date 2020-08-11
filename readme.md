@@ -17,9 +17,9 @@ You can play this online here: https://depictit.snkmo.de
 
 ## What are we going to build?
 
-We're going to build `Depict-It` as a browser game hosted inside our users browsers.
+We're going to build `Depict-It` as a browser game.
 
-To do this, we're going to create a `web application` using `Vue.js`, some code derived from this `Ably Peer to Peer sample` (link here) and `ably` to send messages between our players.
+To do this, we're going to create a `web application` using `Vue.js`, some code derived from this [Ably Peer to Peer sample](https://github.com/thisisjofrank/p2p-demo-ably) and `ably` to send messages between our players.
 
 We'll be hosting the application on `Azure Static Web Applications` and we'll use `Azure Blob Storage` to store user generated content.
 
@@ -30,7 +30,7 @@ We'll be hosting the application on `Azure Static Web Applications` and we'll us
 
 [Vue.js](https://vuejs.org/) is a single page app framework, and we will use it to build the UI of our app. Our Vue code lives in [index.js](index.js) - and handles all of the user interactions. We're using Vue because it doesn't require a toolchain and it provides simple binding syntax for updating the UI when data changes.
 
-Our Vue app looks a little like this abridged sample:
+A Vue app looks a little like this abridged sample:
 
 ```js
 var app = new Vue({
@@ -360,7 +360,7 @@ All the work is done in `onClientConnected`
 When a client connects, we keep track of their `metadata` - the `friendlyName`, and then send two messages.
 The first, is a `connection-acknowledged` message, that is sent **specifically** to the `clientId` that just connected.
 
-Then, it send a `peer-status` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
+Then, it sends a `game-state` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
 
 There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first.
 
@@ -395,8 +395,8 @@ Here are the messages used in each phase of the game:
 | Phase  | Message kind | Example |
 |--------|------| --- |
 | Dealing and setup                          | No messages | |
-| Collecting image input                     | `drawing-request`        | { kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: 30_000 } |
-| Collecting image input response            | `drawing-response`       | { kind: "drawing-response", imageUrl: "http://some/url" } |
+| Collecting image input                     | `drawing-request`       | { kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: 30_000 } |
+| Collecting image input response            | `drawing-response`      | { kind: "drawing-response", imageUrl: "http://some/url" } |
 | Collecting caption input                   | `caption-request`       | { kind: "instruction", type: "caption-request", value: lastItem.value, timeout: 30_000 } |
 | Collecting caption input response          | `caption-response`      | { kind: "caption-response", caption: "a funny caption" } |
 | Collecting scores from players input       | `pick-one-request`      | { kind: "instruction", type: "pick-one-request", stack: stack } |
@@ -496,7 +496,7 @@ This is an exhaustive example, with both an `execute` and a `handleInput` functi
 * Handlers **must** return a `transitionTo` response from their `execute` function, that refers to the next `Handler`.
 * Handlers **must** be `async functions`.
 
-## How the GameStateMachine works
+# How the GameStateMachine works
 
 The `GameStateMachine` takes our `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed, and when. It's always expecting a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
 
