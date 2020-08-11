@@ -292,7 +292,8 @@ button:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 0 20px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .loader-gif {
