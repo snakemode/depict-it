@@ -6,14 +6,14 @@ You can play this online here: https://depictit.snkmo.de
 
 ## The rules of the game
 
-The game is played in rounds. When the game starts, each player will be sent a caption to draw, and given 180 seconds to draw something that best describes the hint they're provided.
-
-Once they finish drawing, they press "I'm finished!" and wait for the rest of the party to finish their drawings.
-When all the drawings are complete, each player will get another players drawing to write their own caption to, just describe what you see!
-
-Once the starting player receives their "stack", the scoring round begins, where each completed stack, and all the mutations it has gone through as players have added and described drawings is presented to all players to score. Just click on the thing that's the best!
-
-Once all the scores have been accepted, scores are shown, and the host can start the next round.
+* The game is played in rounds. 
+* Each player is provided with a `Game Stack` containing a `Caption` and a blank screen for them to draw on.
+* They have 180 seconds to draw a picture for the caption.
+* Once either *all players* have finished, or 180 seconds elapses each drawing is passed to the next player.
+* Now each player captions the drawing in front of them to the best of their ability
+* Once the first player has their own `Game Stack` returned to them the `Scoring phase` begins.
+* Each `Game Stack` is displayed shown, and all the players get to vote on the `funniest` card in the `Game Stack`
+* Points are awarded and the `Host` can start a new round.
 
 ## What are we going to build?
 
