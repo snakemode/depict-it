@@ -8,7 +8,6 @@ export class P2PClient {
 
     this.depictIt = null;
     this.serverState = null;
-    this.countdownTimer = null;
 
     this.state = {
       status: "disconnected",

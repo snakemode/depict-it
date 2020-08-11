@@ -794,52 +794,532 @@ In the real handler, we have some code there to make sure that each of our `Game
 Each of the handlers that require user input follows this pattern.
 
 
-## Designing a browser based game
+# Designing a browser based game
 
-We've outlined the basics of our Vue app, and the P2PClient and Server architecture we're using - but we need to put our game logic inside of this skeleton.
+We've outlined the basics of our Vue app, and the P2PClient, and the way out GameStateMachine works to orchestrate our game, but we need to tie all these pieces together into a web application.
 
-[Maybe a diargram here?!]
+We're going to build
+
+- A Vue app, split out into `Vue Components`
+- Each `Vue component` will respond to a specific `Game State Instruction` message.
+- There will be additional code in the `Vue app` for creating and joining games.
+- We'll need to build UI componenets for drawing on the screen with a mouse, and fingers on touch screen devices.
+- We need to wire up the `Game State Machine` and have the Vue app forward on messages it receives from `Ably` so our `Game Handlers` can respond to events.
+- We need to hook up some server side functionality to save user created `Images`.
+
+# Building our UI with Vue
+
+Our Vue UI markup is deceptively simple at the top level, because we're going to make `Vue Components` for all of our game phases.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Depict-it</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="//cdn.ably.io/lib/ably-1.js" defer></script>
+  <script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="/index.js" type="module"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+```
+
+First we're defining our head, which references the `Ably` JavaScript SDK, along with the `Vue` library from the `Vue CDN`.
+We're also referencing our `Index.js` file as a `module` - this means we can use native browser `import` and `export` module syntax.
+We finally reference our `style.css` stylesheet for our UI.
+
+```html
+<body>
+  <main id="app">
+    <div class="debug">
+      {{ state?.status == undefined ? "disconnected" : state?.status }}
+    </div>
+```
+
+We're going to quickly add a `debug` element to help us keep track of our `Ably` connection, and then define the majority of the Game UI.
+
+```html
+    <h1 v-bind:class="{ hide: state?.lastInstruction?.type == 'drawing-request'}">Depict-it</h1>
+
+    <div v-if="!joinedOrHosting" class="join-container">
+      <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
+    </div>
+```
+We have a `CreateGameForm` that we're importing from `/app/js/components/CreateGameForm.js` for when a game hasn't been started or joined.
+And then the `activeGame` portion of the application that contains the components that trigger when the game is running.
+
+This is split into two parts - first the `game-lobby`...
+
+```html
+    <div v-else id="activeGame" class="game-info">
+      <div class="game-lobby" v-if="gameCanBeStarted">
+        <invite-link :game-id="gameId"></invite-link>
+        <connected-players-summary :state="transmittedServerState"></connected-players-summary>
+        <ready-or-waiting-prompt :is-host="isHost" :state="transmittedServerState" v-on:startgame="startGame">
+        </ready-or-waiting-prompt>
+      </div>
+      <div v-if="!gameCanBeStarted && !state?.lastInstruction">
+        <loader></loader>
+      </div>
+```
+The game lobby references components to render our invite links, connected players and any player prompts.
+
+Next we have a timer bar component that binds to any `timeouts` sent from the `host`
+
+```html
+      <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout">
+      </timer-bar>
+```
+
+And finally the markup components for the different `instructions` sent from the `host`. You'll spot familiar names here as they line up with the various `Handlers` we defined earlier - one component per game phase.
+
+```html
+      <div v-if="state?.lastInstruction" class="playfield">
+        <playfield-wait-for-others :state="state"></playfield-wait-for-others>
+
+        <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
+        <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
+        <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
+
+        <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>
+```
+
+Throughout all this markup we're using the `Vue` syntax `:state=` and `:is-host` - these `attributes` are `Vue bindings` that pass values from our main `Vue app` down to the `Vue compnents` so the components can use them. Likewise the `v-on:` event handlers bind functions in our `Vue` app to `events` that our components can raise.
+
+We touched on the layout of our `index.js` file briefly at the start of this piece - but let's take a look at it here in full.
+
+```js
+export var app = new Vue({
+  el: '#app',
+  data: {
+    p2pClient: null,
+    p2pServer: null,
+
+    gameId: null,
+    friendlyName: null,
+  },
+```
+
+First we're defining our data properties - `Vue` will make these properties `observable` so we can bind them to our UI.
+Whenever anything changes in these properties, our `UI` will update.
+
+Next we're defining some computed properties to make our HTML binding code more succinct.
+
+```js
+  computed: {
+    state: function () { return this.p2pClient?.state; },
+    transmittedServerState: function () { return this.p2pClient?.serverState; },
+    joinedOrHosting: function () { return this.p2pClient != null || this.p2pServer != null; },
+    isHost: function () { return this.p2pServer != null; },
+    hasMessage: function () { return this.message != null; },
+    gameCanBeStarted: function () { return this.transmittedServerState && !this.transmittedServerState.started },
+    depictItClient: function () { return this.p2pClient?.depictIt; }
+  },
+```
+
+These computed properties are used in our markup above - you can see where we use `depictItClient` in our HTML, that it's this computed property that it's referencing - because anything you bind to either needs to be in your `Vue data` or your `Vue computed` properties.
+
+Finally we're going to define our `host` and `join` methods, to bind to clicks, along with `startGame` and `nextRound` equally, to bind to events emitted by our `Vue components`.
+
+```js
+  methods: {
+    host: async function (context) {
+      this.gameId = context.gameId;
+      this.friendlyName = context.friendlyName;
+
+      const pubSubClient = new PubSubClient((message, metadata) => {
+        handleMessagefromAbly(message, metadata, this.p2pClient, this.p2pServer);
+      });
+
+      const identity = new Identity(this.friendlyName);
+      this.p2pServer = new P2PServer(identity, this.gameId, pubSubClient);
+      this.p2pClient = new P2PClient(identity, this.gameId, pubSubClient);
+
+      await this.p2pServer.connect();
+      await this.p2pClient.connect();
+    },
+    join: async function (context) {
+      this.gameId = context.gameId;
+      this.friendlyName = context.friendlyName;
+
+      const pubSubClient = new PubSubClient((message, metadata) => {
+        handleMessagefromAbly(message, metadata, this.p2pClient, this.p2pServer);
+      });
+
+      const identity = new Identity(this.friendlyName);
+      this.p2pClient = new P2PClient(identity, this.gameId, pubSubClient);
+
+      await this.p2pClient.connect();
+    },
+    startGame: async function (evt) {
+      this.p2pServer?.startGame();
+    },
+    nextRound: async function (evt) {
+      this.p2pServer?.nextRound();
+    }
+  }
+});
+```
+
+This is the entire outline of the top level of our `Vue app`, but most of the display logic is hidden in our `Vue components`.
+
+At the bottom of `Index.js` is also our `handleMessagefromAbly` function - that passes messages received over our `p2p channel` onto our `p2pServer` and `p2pClient` instances. Let's take a quick look inside those classes again to see how this all works.
+
+# Inside P2PServer
+
+P2PServer is really where most of the game is managed.
+
+When the host creates a game, a new instance of `P2PServer` is created, in turn, creating an instance of the `GameStateMachine` with an empty `this.state` object.
+
+```js
+import { DepictIt } from "../game/DepictIt.js";
+
+export class P2PServer {
+  constructor(identity, uniqueId, ably) {
+    this.identity = identity;
+    this.uniqueId = uniqueId;
+    this.ably = ably;
+
+    this.stateMachine = DepictIt({
+      channel: ably
+    });
+
+    this.state = {
+      players: [],
+      hostIdentity: this.identity,
+      started: false
+    };
+  }
+```
+Notice that when we call the imported `DepictIt` function, we're passing a `context object` with the property `channel` set to our `ably` parameter.
+
+By providing this channel to our `GameStateMachine` instance, we're making sure that every time one of our `Handlers` executes, it has access to this `Ably` channel, and can use it to send `p2p messages` to all the other clients.
+
+Next we're going to define `connect` and `startGame`
+
+```js
+  async connect() {
+    await this.ably.connect(this.identity, this.uniqueId);
+  }
+
+  async startGame() {
+    this.state.started = true;
+
+    this.ably.sendMessage({ kind: "game-start", serverState: this.state });
+    this.stateMachine.state.players = this.state.players;
+    this.stateMachine.run();
+  }
+```
+These two functions are bound into our `Vue components`, and crucially both assign the currently connected players to the `stateMachine.state` property, and trigger `stateMachine.run();` - starting the game of DepictIt.
+
+We'll also define `nextRound` used to progress the game - a function that calls `resetCurrentStepKeepingState` on our `stateMachine` before invoking `run` again - a function that moves the current handler back to the start without clearing player scores.
+
+```js
+  async nextRound() {
+    this.stateMachine.resetCurrentStepKeepingState();
+    this.stateMachine.run();
+  }
+```
+
+And finally, the vitally important `onReceiveMessage` handler.
+
+```js
+  onReceiveMessage(message) {
+    switch (message.kind) {
+      case "connected": this.onClientConnected(message); break;
+      default: {
+        this.stateMachine.handleInput(message);
+      };
+    }
+  }
+
+  onClientConnected(message) {
+    this.state.players.push(message.metadata);
+    this.ably.sendMessage({ kind: "connection-acknowledged", serverState: this.state }, message.metadata.clientId);
+    this.ably.sendMessage({ kind: "game-state", serverState: this.state });
+  }
+}  
+```
+
+You can see in this version of the handler, that we treat clients connecting as a special case - replying with `connection-acknowledged` - we use this to update our debug `connected` UI element.
+
+Most importantly however, is that any *other* messages are passed to the `this.stateMachine.handleInput()` function.
+
+What we're doing here is delegating responsibility for processing our messages to whichever `handler` is currently active, routed via the `GameStateMachine` instance. This is the glue that takes a message received by our `Ably connection`, and passes it through our `GameStateMachine` to the currently active `Handler`.
+
+# Inside P2PClient
+
+The P2PClient that gets created when anyone joins a game follows the same general pattern as the `P2PServer`.
+
+First we have a constructor that creates some state, and a few properties that our game is gonna use - `depictIt` is going to store a client wrapper that we'll later bind into some `Vue componenets`, and the `this.state` object contains both an `instructionHistory` and `lastInstruction` for us to track all the messages this client has received from the `host`.
+
+```js
+import { DepictItClient } from "../game/DepictIt.js";
+
+export class P2PClient {
+  constructor(identity, uniqueId, ably) {
+    this.identity = identity;
+    this.uniqueId = uniqueId;
+    this.ably = ably;
+
+    this.depictIt = null;
+    this.serverState = null;
+
+    this.state = {
+      status: "disconnected",
+      instructionHistory: [],
+      lastInstruction: null
+    };
+  }
+```
+Next, much like in `P2PServer` we define our `connect` function - that sends a message to the `host` and waits for `acknowledgement`.
+We're also creating an instance of `DepictItClient` - this client is a class that offers a function for each response the `client` has to send back to the `host`. We'll bind this to our `Vue components` so they can reply to the `host` when they have player input.
+
+```js
+  async connect() {
+    await this.ably.connect(this.identity, this.uniqueId);
+    this.ably.sendMessage({ kind: "connected" });
+    this.state.status = "awaiting-acknowledgement";
+    this.depictIt = new DepictItClient(this.uniqueId, this.ably);
+  }
+```
+And finally we have the `onReceiveMessage` function.
+
+The most important piece here, is that when the `p2pclient` receives a message with the `kind` of `instruction`, it'll store a copy of it into the `instructionHistory` along with assigning the most recent message to the property `this.lastInstruction`.
+
+```js
+
+  onReceiveMessage(message) {
+    if (message.serverState) {
+      this.serverState = message.serverState;
+    }
+
+    switch (message.kind) {
+      case "connection-acknowledged":
+        this.state.status = "acknowledged";
+        break;
+      case "instruction":
+        this.state.instructionHistory.push(message);
+        this.state.lastInstruction = message;
+        break;
+      default: { };
+    }
+  }
+}
+```
+
+Practically all of our UI is going to be bound-up to the values in the `lastInstruction` property. 
+It's the most important piece of data in the entire application.
+
+# Splitting our game phases into Vue componenets
+
+`Vue components` let you split out parts of your functionality into what looks like tiny little `Vue apps`.
+They follow practically the same syntax, but contain both the UI template and the JavaScript.
+
+Our application is split into a bunch of smaller componenets:
+
+```bash
+base-components/CopyableTextBox.js
+base-components/DrawableCanvas.js
+
+ConnectedPlayersSummary.js
+CreateGameForm.js
+InviteLink.js
+Loader.js
+PlayfieldCaption.js
+PlayfieldDrawing.js
+PlayfieldPickOne.js
+PlayfieldShowScores.js
+PlayfieldWaitForOthers.js
+ReadyOrWaitingPrompt.js
+StackItem.js
+TimerBar.js
+```
+We're following some relatively obvious conventions here - the componet name tends to have the phase of the game it's associated with in the filename!
+
+We're going to look inside `StackItem` as an example, as it's a simple component
+
+```js
+export const StackItem = {
+  props: ['item'],
+  methods: {
+    emitIdOfClickedElement: async function () {
+      this.$emit('click', this.item.id);
+    }
+  },
+  template: `    
+<span v-if="item.type == 'string'"
+      v-on:click="emitIdOfClickedElement"
+      class="stack-item stack-text">{{ item.value }}</span>
+
+<img  v-else      
+      v-bind:src="item.value"
+      v-on:click="emitIdOfClickedElement"
+      class="stack-item" />
+`
+};
+```
+`Vue Components`
+- Can Have named `props` that you can bind in `HTML` using the `:prop-name="something"` syntax
+- Can Have methods
+- Can have computed properties
+- Have a template string.
+
+In the example of the `StackItem`, we have a `v-if` and `v-else` statement displaying a `span` if the item is a `string` (a caption), or an `img` tag when the item is a `drawing`.
+
+All of the components follow a similar pattern - capturing bits of interaction.
+
+The other piece of syntax you'll see here is the `this.$emit` function call.
+
+Doing this allows us to define custom events that can be bound in the consuming `vue component` or `vue app` - so if we emit an event, in our parent we can use the `v-on` syntax to listen and respond to it. In this case, we're creating an event called `click`, and passing the `item.id` of the selected `Stack Item` to whatever subscribes to our event.
+
+It would be exhausting to walk through the code of each `Vue Component` but lets take a look at the `PlayfieldDrawing` component to see how we handle sending data back from the server.
+
+```js
+export const PlayfieldDrawing = {
+  props: ['state', 'client'],
+
+  methods: {
+    sendImage: async function (base64EncodedImage) {
+      await this.client.sendImage(base64EncodedImage);
+    }
+  },
+
+  template: `      
+  <section v-if="state?.lastInstruction?.type == 'drawing-request'">
+    <div class="drawing-hint">
+      <div class="hint-front">Draw This</div>
+      <div class="hint-back">
+        {{ state.lastInstruction.value }}
+      </div>
+    </div>
+    <drawable-canvas v-on:drawing-finished="sendImage"></drawable-canvas>
+  </section>
+  `
+};
+```
+This `Vue component` is typical of the others that require interactivity. Remember when we walked through `P2PClient` and we created an instance of `DepictItClient` - well we've bound that client into the `vue component` here as the property `client`. What this means, is that when our `sendImage` function is triggered by the `DrawableCanvas` raising the `drawing-finished` event, we can use that client to send an image back to our `host`.
+
+This general pattern holds for collecting captions, and scoring our game.
+
+# The DepictIt Client
+
+Our `DepictIt Client` is a small wrapper class around all of our components interactions with the `host`.
+This client is responsible for sending data and little else.
+
+All those messages that are expected? They're all defined here.
+
+```js
+export class DepictItClient {
+  constructor(gameId, channel) {
+    this.gameId = gameId;
+    this.channel = channel;
+  }
+
+  async sendImage(base64EncodedImage) {
+    ...
+  }
+
+  async sendCaption(caption) {
+    this.channel.sendMessage({ kind: "caption-response", caption: caption });
+  }
+
+  async logVote(id) {
+    this.channel.sendMessage({ kind: "pick-one-response", id: id });
+  }
+
+  async hostProgressedVote() {
+    this.channel.sendMessage({ kind: "skip-scoring-forwards" })
+  }
+}
+```
+There is one extra interesting function in here though - and that's `sendImage`.
+
+```js
+  async sendImage(base64EncodedImage) {
+    const result = await fetch("/api/storeImage", {
+      method: "POST",
+      body: JSON.stringify({ gameId: this.gameId, imageData: base64EncodedImage })
+    });
+
+    const savedUrl = await result.json();
+    this.channel.sendMessage({ kind: "drawing-response", imageUrl: savedUrl.url });
+  }
+```
+
+`sendImage` has to POST the `base64EncodedImage` that's created by our `DrawableCanvas` component to an `API` running on our instance of `Azure Functions`, before it sends a message back to the `host`.
 
 
+# Storing images into Azure Blob Storage via an Azure Function
 
-- Vue app
-- Player that starts the game hosts the game
-- The host starting the game triggers messages sent to the players
-- The games UI responds to the last received instruction of a specific type, forwarding on that message to a state machine that keeps track of "what phase of the game are we in"
+To make our images work work, we've added an extra function to the directory `/api/storeImage/index.js`
 
+```js
+const { StorageSharedKeyCredential } = require("@azure/storage-blob");
+const { BlobServiceClient } = require("@azure/storage-blob");
+    
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+}  
 
-## Building our UI with Vue
+module.exports = async function (context, req) {
+    
+    const defaultAzureCredential = new StorageSharedKeyCredential(process.env.AZURE_ACCOUNT, process.env.AZURE_KEY);
+    const blobServiceClient = new BlobServiceClient(process.env.AZURE_BLOBSTORAGE, defaultAzureCredential);
+    const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINERNAME);
 
-- Building our UI with Vue
-- Basic boilerplate
-- JavaScript that goes with it
+    const unique = `game_${req.body.gameId}_${uuidv4()}.png`;
+    const url = `${process.env.AZURE_BLOBSTORAGE}/${process.env.AZURE_CONTAINERNAME}/${unique}`;
+    const fileData = req.body.imageData.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = new Buffer(fileData, 'base64');
 
+    const blockBlobClient = containerClient.getBlockBlobClient(unique);
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length || 0);
 
-## Splitting our game phases into Vue componenets
+    context.res = { 
+        headers: { "content-type": "application/json" },
+        body: { url: url }
+    };    
+};
+```
 
-- Vue components
-  - Spliting our game phases into vue componenets
+This is pretty boiler-plate-ey, but it's the standard `Azure Blob Storage SDK` code to upload a file to a storage bucket.
+This `Azure function` is mounted by the `Azure functions runtime` to the path `/api/storeImage` so we can call it using our browsers `Fetch API`.
 
-## Drawing using HTML5 Canvas
+The function returns an `absolute url` of the stored image - which is stored in a bucket that supports `unauthenticated reads`.
+The bucket is also configured to auto-delete items after 24-hours to keep our storage costs really low.
+
+This is a super quick way to add a little bit of statefulness to our app - especially because the average size of our images is over the message size cap for `Ably messages`.
+
+# Drawing using HTML5 Canvas
 
 - Mouse stuff
 - Finger painting
 - Adjustments for scrolling / finger touching
 
 
-## Capturing input from players
+# Capturing input from players
 
 - Using async / await
 - Extra function in handlers to gather input or timeout
 - Wait on ably messages
 - Host can skip steps
 
-## Storing images into Azure Blob Storage via an Azure Function
 
-... for when you've not got enough Azure in Your Azure for your Azure Static Web App
-
-
-## Running on your machine
+# Running on your machine
 
 While this whole application runs inside a browser, to host it anywhere people can use, we need some kind of backend to keep our `Ably API key` safe. The running version of this app is hosted on `Azure Static Web Apps (preview)` and provides us a `serverless` function that we can use to implement Ably `Token Authentication`.
 
@@ -847,7 +1327,7 @@ The short version is - we need to keep the `Ably API key` on the server side, so
 
 `Azure Static Web Apps` automatically hosts this API for us, because there are a few .json files in the right places that it's looking for and understands. To have this same experience locally, we'll need to use the `Azure Functions Core Tools`.
 
-### Local dev pre-requirements
+## Local dev pre-requirements
 
 We'll use live-server to serve our static files and Azure functions for interactivity
 
@@ -866,7 +1346,7 @@ func settings add ABLY_API_KEY Your-Ably-Api-Key
 Running this command will encrypt your API key into the file `/api/local.settings.json`.
 You don't need to check it in to source control, and even if you do, it won't be usable on another machine.
 
-### How to run for local dev
+## How to run for local dev
 
 Run the bingo app:
 
@@ -881,6 +1361,6 @@ cd api
 npm run start
 ```
 
-## Hosting on Azure
+# Hosting on Azure
 
 We're hosting this as a Azure Static Web Apps - and the deployment information is in [hosting.md](hosting.md).
