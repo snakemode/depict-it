@@ -72,3 +72,10 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
   }
 }
 
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(function () {
+      console.log('Service Worker Registered');
+    });
+}
