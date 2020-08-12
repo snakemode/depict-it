@@ -34,6 +34,7 @@ self.addEventListener('install', function (e) {
 });
 
 self.addEventListener('activate', event => {
+    console.log("Activate");
     event.waitUntil(self.clients.claim());
 });
 
@@ -43,7 +44,7 @@ self.addEventListener('fetch', event => {
     }
 
     if (navigator.onLine) {
-        return fetch(event.request);
+        return event.respondWith(fetch(event.request));
     }
 
     event.respondWith(
