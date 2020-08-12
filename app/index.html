@@ -32,8 +32,8 @@
       {{ state?.status == undefined ? "disconnected" : state?.status }}
     </div>
 
-    <header>
-      <h1 v-bind:class="{ hide: state?.lastInstruction?.type == 'drawing-request'}">Depict-it</h1>
+    <header v-bind:class="{ hide: state?.lastInstruction?.type == 'drawing-request'}">
+      <h1>Depict-it</h1>
       <input class="rules-checkbox" id="rules" type="checkbox" />
       <label for="rules" class="rules"></label>
       <div class="rules-text">
@@ -108,10 +108,10 @@
         </div>
       </div>
     </div>
-    <div class="powered">
-      Powered by <a href="" class="ably">Ably</a>
-    </div>
   </main>
+  <footer class="footer">
+    Powered by <a href="" class="ably">Ably</a>
+  </footer>
 </body>
 
 </html>

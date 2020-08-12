@@ -1,5 +1,7 @@
-body {  
-  min-height: 100vh;
+body {
+  display: grid;
+  grid-template-rows: auto 122px;
+  height: 100vh;
   margin: 0 auto;
   border: 0;
   padding: 0;
@@ -7,7 +9,6 @@ body {
   box-sizing: border-box;
   font-family: 'Sora', arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
   color: #222222;
 }
 
@@ -404,6 +405,9 @@ button:hover {
   opacity: 0;
   width: 0;
   height: 0;
+  padding: 0;
+  margin: 0;
+  position: absolute
 }
 
 .rules-text {
@@ -444,10 +448,11 @@ button:hover {
   font-weight: bolder;
 }
 
-.powered {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 20px;
   text-align: right;
 }
 
@@ -499,8 +504,8 @@ button:hover {
 
   .timer {
     position: absolute;
-    top: calc(100% - 60px);
-    left: 110px;
+    top: calc(100% - 40px);
+    left: 130px;
     width: calc(100vh - 180px - 60px);
     height: 40px;
     border-radius: 4px;
