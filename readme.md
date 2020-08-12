@@ -1,4 +1,5 @@
-# Depict-It
+Depict-It
+===========
 
 Depict-It is a party game for 4+ players (ideally!) where you mutate a phrase through drawings and captions, to make funny scenarios up with your friends.
 
@@ -15,6 +16,57 @@ You can play this online here: https://depictit.snkmo.de
 * Each `Game Stack` is displayed shown, and all the players get to vote on the `funniest` card in the `Game Stack`
 * Points are awarded and the `Host` can start a new round.
 
+## This document
+
+If you're just interested on running this on your own machines, or on Azure, scroll all the way down to the bottom of this document.
+The rest of this readme is a teardown, and an explaination of how this game hangs together.
+
+# Contents
+
+- [Depict-It](#depict-it)
+  - [The rules of the game](#the-rules-of-the-game)
+  - [This document](#this-document)
+- [Contents](#contents)
+  - [What are we going to build?](#what-are-we-going-to-build)
+- [Our dependencies](#our-dependencies)
+  - [A brief introduction to Vue.js](#a-brief-introduction-to-vuejs)
+  - [Ably Channels for pub-sub](#ably-channels-for-pub-sub)
+  - [Ably channels and API keys](#ably-channels-and-api-keys)
+  - [Making sure we send consistent messages by wrapping our Ably client](#making-sure-we-send-consistent-messages-by-wrapping-our-ably-client)
+- [The game as a web app](#the-game-as-a-web-app)
+  - [HandleMessageFromAbly](#handlemessagefromably)
+  - [P2PClient](#p2pclient)
+  - [P2PServer](#p2pserver)
+- [Designing our game](#designing-our-game)
+  - [The GameStateMachine](#the-gamestatemachine)
+    - [Defining a game](#defining-a-game)
+    - [Defining a handler](#defining-a-handler)
+  - [How the GameStateMachine works](#how-the-gamestatemachine-works)
+  - [The GameStateMachine and our game](#the-gamestatemachine-and-our-game)
+    - [StartHandler](#starthandler)
+    - [DealHandler](#dealhandler)
+    - [GetUserDrawingHandler](#getuserdrawinghandler)
+    - [GetUserCaptionHandler](#getusercaptionhandler)
+    - [PassStacksAroundHandler](#passstacksaroundhandler)
+    - [GetUserScoresHandler](#getuserscoreshandler)
+    - [EndHandler](#endhandler)
+  - [Handlers and async / await](#handlers-and-async--await)
+- [The game UI](#the-game-ui)
+  - [Building our UI with Vue](#building-our-ui-with-vue)
+  - [Inside P2PServer](#inside-p2pserver)
+  - [Inside P2PClient](#inside-p2pclient)
+  - [Splitting our game phases into Vue componenets](#splitting-our-game-phases-into-vue-componenets)
+  - [The DepictIt Client](#the-depictit-client)
+  - [Storing images into Azure Blob Storage via an Azure Function](#storing-images-into-azure-blob-storage-via-an-azure-function)
+  - [Drawing using HTML5 Canvas](#drawing-using-html5-canvas)
+    - [How does the snake canvas work](#how-does-the-snake-canvas-work)
+    - [Touch support](#touch-support)
+- [Recap](#recap)
+- [Running on your machine](#running-on-your-machine)
+  - [Local dev pre-requirements](#local-dev-pre-requirements)
+  - [How to run for local dev](#how-to-run-for-local-dev)
+- [Hosting on Azure](#hosting-on-azure)
+
 ## What are we going to build?
 
 We're going to build `Depict-It` as a browser game.
@@ -23,7 +75,11 @@ To do this, we're going to create a `web application` using `Vue.js`, some code 
 
 We'll be hosting the application on `Azure Static Web Applications` and we'll use `Azure Blob Storage` to store user generated content.
 
-## A brief introduction to Vue.js before we start
+# Our dependencies
+
+We're going to be working with `Vue.js` and `Ably`.
+
+## A brief introduction to Vue.js
 
 > Vue (pronounced /vjuː/, like view) is a progressive framework for building user interfaces. It is designed from the ground up to be incrementally adoptable, and can easily scale between a library and a framework depending on different use cases. It consists of an approachable core library that focuses on the view layer only, and an ecosystem of supporting libraries that helps you tackle complexity in large Single-Page Applications. 
 > <cite>-- [vue.js Github repo](https://github.com/vuejs/vue)</cite>
@@ -146,8 +202,7 @@ We're also making sure that if the message is for a specific peer - set using `t
 
 We're going to pass this wrapper to the instances of our `P2PClient` and `P2PServer` classes, to make sure they publish messages in a predictable way.
 
-
-# Creating our Vue app
+# The game as a web app
 
 Our application is going to be composed of a `Vue` UI, and two main classes, `P2PClient` and `P2PServer`.
 
@@ -213,7 +268,7 @@ Joining is very similar
 
 Here, we're doing *exactly the same* as the host, except we're only creating a `P2PClient`.
 
-# HandleMessageFromAbly
+## HandleMessageFromAbly
 
 `handleMessageFromAbly` is the callback function we want our `PubSubClient` to trigger whenever a message appears on the `Ably Channel`.
 
@@ -362,7 +417,7 @@ The first, is a `connection-acknowledged` message, that is sent **specifically**
 
 Then, it sends a `game-state` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
 
-There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first.
+There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first. We'll revisit expanded versions of `P2PClient` and `P2PServer` later in this article.
 
 # Designing our game
 
@@ -392,18 +447,18 @@ We'll use a message type called `wait` to place players in a holding page while 
 
 Here are the messages used in each phase of the game:
 
-| Phase  | Message kind | Example |
-|--------|------| --- |
-| Dealing and setup                          | No messages | |
-| Collecting image input                     | `drawing-request`       | { kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: 30_000 } |
-| Collecting image input response            | `drawing-response`      | { kind: "drawing-response", imageUrl: "http://some/url" } |
-| Collecting caption input                   | `caption-request`       | { kind: "instruction", type: "caption-request", value: lastItem.value, timeout: 30_000 } |
-| Collecting caption input response          | `caption-response`      | { kind: "caption-response", caption: "a funny caption" } |
-| Collecting scores from players input       | `pick-one-request`      | { kind: "instruction", type: "pick-one-request", stack: stack } |
-| Collecting scores from players response    | `pick-one-response`     | { kind: "pick-one-response", id: "stack-item-id" } |
-|                                            | `skip-scoring-forwards` | { kind: "skip-scoring-forwards" } |
-| Displaying scores                          | `show-scores`           | { kind: "instruction", type: "show-scores", playerScores: state.players } |
-|                                            | `wait`                  | { kind: "instruction", type: "wait" } |
+| Phase                                   | Message kind            | Example                                                                                  |
+| --------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| Dealing and setup                       | No messages             |                                                                                          |
+| Collecting image input                  | `drawing-request`       | { kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: 30_000 } |
+| Collecting image input response         | `drawing-response`      | { kind: "drawing-response", imageUrl: "http://some/url" }                                |
+| Collecting caption input                | `caption-request`       | { kind: "instruction", type: "caption-request", value: lastItem.value, timeout: 30_000 } |
+| Collecting caption input response       | `caption-response`      | { kind: "caption-response", caption: "a funny caption" }                                 |
+| Collecting scores from players input    | `pick-one-request`      | { kind: "instruction", type: "pick-one-request", stack: stack }                          |
+| Collecting scores from players response | `pick-one-response`     | { kind: "pick-one-response", id: "stack-item-id" }                                       |
+|                                         | `skip-scoring-forwards` | { kind: "skip-scoring-forwards" }                                                        |
+| Displaying scores                       | `show-scores`           | { kind: "instruction", type: "show-scores", playerScores: state.players }                |
+|                                         | `wait`                  | { kind: "instruction", type: "wait" }                                                    |
 
 Each of these messages will be sent through our `PubSubClient` class, that'll add some identifying information (the id of the player that sent each message) into the message body for us to filter by in our code.
 
@@ -419,7 +474,7 @@ We need to make sure we write code for each of our game phases to send these `p2
 
 There's a pattern in software called a `State Machine` - a way to model a system that can exist in one of several known states, and we're going to build a `State Machine` to run our game logic.
 
-# The GameStateMachine
+## The GameStateMachine
 
 Forgetting the web-UI for a moment, we need to write some code to capture the logic of our game.
 
@@ -448,7 +503,7 @@ const twoStepGame = () => ({
 This game definition doesn't do anything on it's own - it's a collection of `steps`.
 In this example, we have a start handler that just flags that execute has been called, and then `transitionTo`s the `EndHandler`.
 
-## Defining a game
+### Defining a game
 
 A game definition looks exactly like this:
 
@@ -469,7 +524,7 @@ const gameDef = () => ({
 * Properties assigned to the `state` object during `handleInput` **can** be read in the `execute` function.
 * `context` can be provided, and can contain anything you like to make your game work.
 
-## Defining a handler
+### Defining a handler
 
 Here's one of the handlers from the previous example:
 
@@ -496,7 +551,7 @@ This is an exhaustive example, with both an `execute` and a `handleInput` functi
 * Handlers **must** return a `transitionTo` response from their `execute` function, that refers to the next `Handler`.
 * Handlers **must** be `async functions`.
 
-# How the GameStateMachine works
+## How the GameStateMachine works
 
 The `GameStateMachine` takes our `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed, and when. It's always expecting a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
 
@@ -579,7 +634,7 @@ This is the glue code that we can pass input to, which will in turn find the cur
 We'll have to wire this up to our Web UI and Ably connection later.
 
 
-# The GameStateMachine and our Game
+## The GameStateMachine and our game
 
 Now that we understand a little about how the `GameStateMachine` can be used to define "any game", let's get specific and talk about `Depict-It`.
 
@@ -637,7 +692,7 @@ The messages can also feature an optional `timeout` value - some of our steps ha
 
 Let's dive into a few of our steps and take a look at what they do.
 
-## StartHandler
+### StartHandler
 
 **On execute**
 
@@ -649,7 +704,7 @@ Let's dive into a few of our steps and take a look at what they do.
 
 * There is no user input.
 
-## DealHandler
+### DealHandler
 
 **On execute**
 
@@ -661,7 +716,7 @@ Let's dive into a few of our steps and take a look at what they do.
 
 * There is no user input.
 
-## GetUserDrawingHandler
+### GetUserDrawingHandler
 
 **On execute**
 
@@ -679,7 +734,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * We're going to use `Azure storage buckets` for this later on.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
-## GetUserCaptionHandler
+### GetUserCaptionHandler
 
 **On execute**
 
@@ -695,7 +750,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * Handler expects a `caption` property in player response message.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
-## PassStacksAroundHandler
+### PassStacksAroundHandler
 
 **On execute**
 
@@ -705,7 +760,7 @@ Let's dive into a few of our steps and take a look at what they do.
 * Picks `GetUserDrawingHandler` when the top item in the `Game Stack` is a `Caption`
 * Picks `GetUserCaptionHandler` when the top item in the `Game Stack` is a `Drawing`
 
-## GetUserScoresHandler
+### GetUserScoresHandler
 
 **On execute**
 
@@ -718,13 +773,13 @@ Let's dive into a few of our steps and take a look at what they do.
 * Assigns a vote to the author of each picked `Game Stack Item`
 * Also handles admin input to progress the game forward and skip the user scoring, to prevent games hanging.
 
-## EndHandler
+### EndHandler
 
 **On execute**
 
 * Sends a `show-scores` message with the final scores of the `Game round`
 
-# Handlers and async / await
+## Handlers and async / await
 
 The interesting thing about these handlers, is we're using `async/await` and an `unresolved Promise` to pause the execution while we wait for user input.
 This is a fun trick, allowing us to represent our game's control flow `linearly` while waiting for messages to arrive over our `p2p channel`.
@@ -794,7 +849,7 @@ In the real handler, we have some code there to make sure that each of our `Game
 Each of the handlers that require user input follows this pattern.
 
 
-# Designing a browser based game
+# The game UI
 
 We've outlined the basics of our Vue app, and the P2PClient, and the way out GameStateMachine works to orchestrate our game, but we need to tie all these pieces together into a web application.
 
@@ -807,7 +862,7 @@ We're going to build
 - We need to wire up the `Game State Machine` and have the Vue app forward on messages it receives from `Ably` so our `Game Handlers` can respond to events.
 - We need to hook up some server side functionality to save user created `Images`.
 
-# Building our UI with Vue
+## Building our UI with Vue
 
 Our Vue UI markup is deceptively simple at the top level, because we're going to make `Vue Components` for all of our game phases.
 
@@ -973,9 +1028,11 @@ Finally we're going to define our `host` and `join` methods, to bind to clicks, 
 
 This is the entire outline of the top level of our `Vue app`, but most of the display logic is hidden in our `Vue components`.
 
+Remember, when a user joins or hosts a game, a `p2pclient` or `p2pserver` instance are created - and the state managed inside of them becomes observable, so we can bind any properties on these objects into our `Vue app`.
+
 At the bottom of `Index.js` is also our `handleMessagefromAbly` function - that passes messages received over our `p2p channel` onto our `p2pServer` and `p2pClient` instances. Let's take a quick look inside those classes again to see how this all works.
 
-# Inside P2PServer
+## Inside P2PServer
 
 P2PServer is really where most of the game is managed.
 
@@ -1057,7 +1114,7 @@ Most importantly however, is that any *other* messages are passed to the `this.s
 
 What we're doing here is delegating responsibility for processing our messages to whichever `handler` is currently active, routed via the `GameStateMachine` instance. This is the glue that takes a message received by our `Ably connection`, and passes it through our `GameStateMachine` to the currently active `Handler`.
 
-# Inside P2PClient
+## Inside P2PClient
 
 The P2PClient that gets created when anyone joins a game follows the same general pattern as the `P2PServer`.
 
@@ -1121,7 +1178,7 @@ The most important piece here, is that when the `p2pclient` receives a message w
 Practically all of our UI is going to be bound-up to the values in the `lastInstruction` property. 
 It's the most important piece of data in the entire application.
 
-# Splitting our game phases into Vue componenets
+## Splitting our game phases into Vue componenets
 
 `Vue components` let you split out parts of your functionality into what looks like tiny little `Vue apps`.
 They follow practically the same syntax, but contain both the UI template and the JavaScript.
@@ -1212,7 +1269,7 @@ This `Vue component` is typical of the others that require interactivity. Rememb
 
 This general pattern holds for collecting captions, and scoring our game.
 
-# The DepictIt Client
+## The DepictIt Client
 
 Our `DepictIt Client` is a small wrapper class around all of our components interactions with the `host`.
 This client is responsible for sending data and little else.
@@ -1260,7 +1317,7 @@ There is one extra interesting function in here though - and that's `sendImage`.
 `sendImage` has to POST the `base64EncodedImage` that's created by our `DrawableCanvas` component to an `API` running on our instance of `Azure Functions`, before it sends a message back to the `host`.
 
 
-# Storing images into Azure Blob Storage via an Azure Function
+## Storing images into Azure Blob Storage via an Azure Function
 
 To make our images work work, we've added an extra function to the directory `/api/storeImage/index.js`
 
@@ -1304,19 +1361,86 @@ The bucket is also configured to auto-delete items after 24-hours to keep our st
 
 This is a super quick way to add a little bit of statefulness to our app - especially because the average size of our images is over the message size cap for `Ably messages`.
 
-# Drawing using HTML5 Canvas
+## Drawing using HTML5 Canvas
 
-- Mouse stuff
-- Finger painting
-- Adjustments for scrolling / finger touching
+We have a `Vue component` that we use to handle drawing with a mouse, or "finger painting" on touch devices.
+
+```js
+export const DrawableCanvas = {
+  ...
+
+  mounted: function () {
+    const element = document.getElementById(this.canvasId);
+    if (element && !this.canvas) {
+      this.canvas = new DrawableCanvasElement(this.canvasId).registerPaletteElements(this.paletteId);
+    }
+  },
+
+  ...
+
+  template: `
+  <div class="drawable-canvas">
+    <div class="canvas-and-paints">
+      <canvas v-bind:id="canvasId" class="image-frame paint-canvas" width="400" height="400"></canvas>  
+      <div v-bind:id="paletteId" class="palette">
+        <div style="background-color: black;" v-on:click="colorSelected"></div>
+        <div style="background-color: red;" v-on:click="colorSelected"></div>
+        <div style="background-color: green;" v-on:click="colorSelected"></div>
+        <div style="background-color: blue;" v-on:click="colorSelected"></div>
+        <div style="background-color: white;" v-on:click="eraserSelected"></div>
+      </div>
+    </div>
+    <button v-on:click="$emit('drawing-finished', canvas.toString())" class="form-button finished-drawing">I'm finished!</button>
+  </div>`
+};
+```
+
+There are two important things about this `component`
+- We use the class `DrawableCanvasElement` from the npm package [`@snakemode/snake-canvas`](https://github.com/snakemode/snake-canvas) (This package was built while writing this game)
+- We emit an event called `drawing-finished` when the user clicks the `I'm finished` button in the template.
+
+This event is listened to in the consuming `Vue component` - in this case the `PlayfieldDrawing` component that deals with the drawing phase of the game.
+
+As an event, we pass the result of the function call `canvas.toString()` - this is a thin wrapper around the native browser call to convert a HTML Canvas element to a base64 encoded PNG. The consuming component then uses this to upload images to our `Azure Blob Storage` account.
+
+### How does the snake canvas work
+
+There's not too much too the snake-canvas - it takes an element Id (that it presumes is of a HTML Canvas Element), and adds some click handlers on mouse up/down/move. Whenever the mouse is moved, a line between the last position and the current one is drawn, and a 1px blur applied to smooth out the aliasing in the image.
+
+You might notice that we're also calling the function `registerPaletteElements` - this adds a click handler to each child element of the passed in element Id, so that when you click on any of them, the active colour is set to the background colour of that element.
+
+This means we can add and remove colours to our drawable canvas at will.
+
+### Touch support
+
+The canvas also has touch support - we have to do a little bit of maths to make sure we're using the correct x and y coordinates in our canvas to support both mouse and touch. Multi-touch isn't supported.
+
+```js    
+getLocationFrom(e) {
+  const location = { x: 0, y: 0 };
+
+  if (e.constructor.name === "TouchEvent") {
+      const bounds = e.target.getBoundingClientRect();
+      const touch = e.targetTouches[0];
+
+      location.x = touch.clientX - bounds.left;
+      location.y = touch.clientY - bounds.top;
+  } else {
+      location.x = e.offsetX;
+      location.y = e.offsetY;
+  }
+
+  return location;
+}
+```
+This function is used to work out where we're drawing on our canvas - using either our mouse position, or the position of the first touch event.
 
 
-# Capturing input from players
+# Recap
 
-- Using async / await
-- Extra function in handlers to gather input or timeout
-- Wait on ably messages
-- Host can skip steps
+We've spoken at length about how the core pieces of this game hangs together.
+
+If you want a deeper understanding, the code is all here, and you can run it locally by pulling this repo, and executing npm run start, once you've added API keys for Ably, and Azure Blob Storage into the `/api/local.settings.json` file.
 
 
 # Running on your machine
@@ -1345,6 +1469,34 @@ func settings add ABLY_API_KEY Your-Ably-Api-Key
 
 Running this command will encrypt your API key into the file `/api/local.settings.json`.
 You don't need to check it in to source control, and even if you do, it won't be usable on another machine.
+
+Next you'll need to [Create an Azure Blob Storage Account](https://azure.microsoft.com/en-gb/services/storage/blobs/?&OCID=AID2100128_SEM_XqK-bwAAAfw50RTJ:20200812092318:s&msclkid=3cef80961050146d866fdfa5a5531dc2&ef_id=XqK-bwAAAfw50RTJ:20200812092318:s&dclid=CLKMy-irlesCFTwWBgAdZdYGKA), create a container, and a storage bucket, and generate an API key.
+
+Please refer to the Azure docs for this. Once you know all your Azure configuration, you can either edit your `local.settings.json` file by hand, or add to it using the `func` command as above. You'll need to add the following keys:
+
+```bash
+AZURE_ACCOUNT
+AZURE_CONTAINERNAME
+AZURE_BLOBSTORAGE
+AZURE_KEY
+```
+
+An example, unencrypted, settings file looks like this:
+
+```js
+{
+  "IsEncrypted": false,
+  "Values": {
+    "ABLY_API_KEY": "ably-api-key-here",
+    "AZURE_ACCOUNT": "scrawlimages",
+    "AZURE_CONTAINERNAME": "gameimages",
+    "AZURE_BLOBSTORAGE": "https://scrawlimages.blob.core.windows.net",
+    "AZURE_KEY": "some-azure-access-token-from-the-storage-account",
+    "FUNCTIONS_WORKER_RUNTIME": "node"
+  },
+  "ConnectionStrings": {}
+}
+```
 
 ## How to run for local dev
 
