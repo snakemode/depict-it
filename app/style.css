@@ -1,5 +1,7 @@
-body {  
-  min-height: 100vh;
+body {
+  display: grid;
+  grid-template-rows: auto 122px;
+  height: 100vh;
   margin: 0 auto;
   border: 0;
   padding: 0;
@@ -7,8 +9,8 @@ body {
   box-sizing: border-box;
   font-family: 'Sora', arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
   color: #222222;
+  overflow-x: hidden;
 }
 
 canvas {
@@ -26,11 +28,11 @@ button {
 h1 {
   height: 26vw;
   width: 100%;
-  min-width: 160px;
-  margin: 0px auto;
-  border-top: 20px solid transparent;
+  min-width: 300px;
+  margin: 0px;
+  border: 10px solid transparent;
   color: transparent;
-  background: url(./assets/logo.svg) no-repeat center bottom;
+  background: url(./assets/logo.svg) no-repeat left bottom;
   background-size: contain;
 }
 
@@ -60,10 +62,6 @@ p {
    2px -2px 0 #000,
   -2px  2px 0 #000,
    2px  2px 0 #000;
-}
-
-.playfield {
-  margin: 0 10px;
 }
 
 .form, .game-lobby {
@@ -225,12 +223,17 @@ button:hover {
 }
 
 .drawing-hint {
-  margin-bottom: 1em;
+  margin: 0 1em 1em;
   text-align: center;
   flex-shrink: 0;
   color: white;
   text-shadow: 0px 0px 2px #222222;
-  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+  text-align: center;
+  text-shadow:
+  -2px -2px 0 #000,  
+   2px -2px 0 #000,
+  -2px  2px 0 #000,
+   2px  2px 0 #000;
 }
 
 .hint-front, 
@@ -280,6 +283,7 @@ button:hover {
 
 .paint-canvas {
   box-sizing: content-box;
+  margin: 0 auto;
 }
 
 .canvas-and-paints {
@@ -378,13 +382,16 @@ button:hover {
 
 .rules {
   position: absolute;
-  bottom: 0px;
-  margin: 0;
+  top: 20px;
+  right: 20px;
   padding: 10px 20px;
   border: 0;
-  font-weight: bold;
-  background-color: #f1c40f;
-  color: #333;
+  border-radius: 4px;
+  font-size: 1em;
+  color: white;
+  background-color: #9265ba;
+  cursor: pointer;
+  box-shadow: 0 6px #704c90;
   z-index: 3;
 }
 
@@ -400,6 +407,9 @@ button:hover {
   opacity: 0;
   width: 0;
   height: 0;
+  padding: 0;
+  margin: 0;
+  position: absolute
 }
 
 .rules-text {
@@ -410,7 +420,7 @@ button:hover {
   padding: 20px 20px 40px;
   overflow-y: auto;
   background-color: #f1c40f;
-  transform: translate(0,100%);
+  transform: translate(0,-100%);
   transition: ease-in-out all 0.5s;
   z-index: 2;
 }
@@ -440,13 +450,31 @@ button:hover {
   font-weight: bolder;
 }
 
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 20px;
+  text-align: right;
+}
+
+.ably {
+  display: block;
+  height: 60px;
+  width: 160px;
+  color: transparent;
+  background: url(./assets/ably.svg) no-repeat bottom right;
+  background-size: 150px;
+}
+
 @media (min-width: 740px) {
   h1 {
     position: absolute;
-    top: 0px;
-    left: 10px;
+    top: 20px;
+    left: 20px;
     width: 240px;
     height: 180px;
+    border: 0;
   }
 
   .section-heading {
@@ -478,8 +506,8 @@ button:hover {
 
   .timer {
     position: absolute;
-    top: calc(100% - 60px);
-    left: 110px;
+    top: calc(100% - 40px);
+    left: 130px;
     width: calc(100vh - 180px - 60px);
     height: 40px;
     border-radius: 4px;
@@ -584,6 +612,11 @@ button:hover {
     margin: 0;
   }
 
+  .footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
 }
 
 @keyframes flipInY {
