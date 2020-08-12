@@ -26,11 +26,12 @@ button {
 h1 {
   height: 26vw;
   width: 100%;
-  min-width: 160px;
-  margin: 0px auto;
+  min-width: 300px;
+  margin: 0px;
   border-top: 20px solid transparent;
+  border-left: 20px solid transparent;
   color: transparent;
-  background: url(./assets/logo.svg) no-repeat center bottom;
+  background: url(./assets/logo.svg) no-repeat left bottom;
   background-size: contain;
 }
 
@@ -378,13 +379,16 @@ button:hover {
 
 .rules {
   position: absolute;
-  bottom: 0px;
-  margin: 0;
+  top: 20px;
+  right: 20px;
   padding: 10px 20px;
   border: 0;
-  font-weight: bold;
-  background-color: #f1c40f;
-  color: #333;
+  border-radius: 4px;
+  font-size: 1em;
+  color: white;
+  background-color: #9265ba;
+  cursor: pointer;
+  box-shadow: 0 6px #704c90;
   z-index: 3;
 }
 
@@ -410,7 +414,7 @@ button:hover {
   padding: 20px 20px 40px;
   overflow-y: auto;
   background-color: #f1c40f;
-  transform: translate(0,100%);
+  transform: translate(0,-100%);
   transition: ease-in-out all 0.5s;
   z-index: 2;
 }
@@ -440,13 +444,30 @@ button:hover {
   font-weight: bolder;
 }
 
+.powered {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  text-align: right;
+}
+
+.ably {
+  display: block;
+  height: 60px;
+  width: 160px;
+  color: transparent;
+  background: url(./assets/ably.svg) no-repeat bottom right;
+  background-size: 150px;
+}
+
 @media (min-width: 740px) {
   h1 {
     position: absolute;
-    top: 0px;
-    left: 10px;
+    top: 20px;
+    left: 20px;
     width: 240px;
     height: 180px;
+    border: 0;
   }
 
   .section-heading {
