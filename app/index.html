@@ -4,12 +4,17 @@
 <head>
   <meta charset="utf-8" />
   <title>Depict-it</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="//cdn.ably.io/lib/ably-1.js" defer></script>
-  <script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17B5E9">
+  <link rel="apple-touch-icon" href="/assets/icons-192.png">
+
+  <script src="/js/ably-1.js" defer></script>
+  <script src="/js/vue.min.js"></script>
   <script src="/index.js" type="module"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="/style.css" />
   <link rel='manifest' href='/manifest.json'>
   <link rel="icon" type="image/png" href="./assets/icons/favicon.ico">
@@ -17,6 +22,7 @@
   <meta property="og:description" content="A hilarious online game of draw and describe." />
   <meta property="og:url" content="https://wonderful-island-0a4516a03.azurestaticapps.net/" />
   <meta property="og:image" content="./assets/fb-og.png" />
+
 </head>
 
 <body>
@@ -33,23 +39,32 @@
           <h2>How to play Depict-It</h2>
           <p>Depict-It is a hilarious cross between Pictionary and Chinese Whispers.</p>
           <p>Each player is given a prompt card which they must attempt to illustrate on the canvas provided.
-            Their drawings will be passed to another player to describe in text, and that text passed to another player to draw and so on until it has passed through the whole group.
+            Their drawings will be passed to another player to describe in text, and that text passed to another player
+            to draw and so on until it has passed through the whole group.
           </p>
-          <p>At game end, the progression of the prompt will be shown to all players, and they can vote on which they think is the most funny, clever or just downright nonsensical.</p>
+          <p>At game end, the progression of the prompt will be shown to all players, and they can vote on which they
+            think is the most funny, clever or just downright nonsensical.</p>
           <p>The winner is the player with the most votes at the end of all the voting rounds.</p>
           <img class="rules-img" src="./assets/rules.png" alt="description of how to play" />
-         
+
           <h3>Game Play</h3>
           <ol>
             <li>When the game starts you will be shown a drawing prompt.</li>
-            <li>As best you can in the time allowed, try to draw on the white tile what your prompt describes. When you are finished drawing, press the "I'm finished button"</li>
-            <li>In the next round, your drawing will be passed to another player in your group and you will receive a drawing of theirs. Feel free to admire it.</li>
-            <li>In the text box provided, type in a description of the drawing you're looking at, you can be as expressive as you like.</li>
+            <li>As best you can in the time allowed, try to draw on the white tile what your prompt describes. When you
+              are finished drawing, press the "I'm finished button"</li>
+            <li>In the next round, your drawing will be passed to another player in your group and you will receive a
+              drawing of theirs. Feel free to admire it.</li>
+            <li>In the text box provided, type in a description of the drawing you're looking at, you can be as
+              expressive as you like.</li>
             <li>When you are done click "Caption this" and your description will be sent to another player to draw.</li>
-            <li>In the next round you'll be given a description written by another player. Try to draw what they've described.</li>
-            <li>The game will continue until each prompt has passed back round to its original illustrator. Once this happens the prompt progressions will be revealed.</li>
-            <li>Take your time to laugh at your friend's drawing skills and perhaps even share a screenshot of your favourites.</li>
-            <li>Vote for the card in each progression that you think is the best. You can define your own reasoning for this.</li>
+            <li>In the next round you'll be given a description written by another player. Try to draw what they've
+              described.</li>
+            <li>The game will continue until each prompt has passed back round to its original illustrator. Once this
+              happens the prompt progressions will be revealed.</li>
+            <li>Take your time to laugh at your friend's drawing skills and perhaps even share a screenshot of your
+              favourites.</li>
+            <li>Vote for the card in each progression that you think is the best. You can define your own reasoning for
+              this.</li>
             <li>The winner is the player with the most votes, but in the end, <b>aren't we all winners?!</b></li>
           </ol>
         </div>

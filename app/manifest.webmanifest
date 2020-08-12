@@ -1,0 +1,23 @@
+{
+    "short_name": "DepictIt",
+    "name": "DepictIt: A Game",
+    "description": "Play with friends",
+    "icons": [
+        {
+            "src": "/assets/icons-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/assets/icons-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/?offline=true",
+    "background_color": "#17B5E9",
+    "theme_color": "#17B5E9",
+    "display": "standalone",
+    "scope": "/",
+    "shortcuts": []
+}
