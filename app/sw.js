@@ -38,6 +38,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+        return;
+    }
+
     if (navigator.onLine) {
         return fetch(event.request);
     }
