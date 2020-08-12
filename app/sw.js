@@ -12,8 +12,13 @@ var filesToCache = [
     '/assets/logo.svg',
     '/assets/loading.gif',
     '/manifest.json',
-    '/assets/icons-192.png',
+    '/assets/icons/icon.png',
     '/assets/icons/favicon.ico',
+    '/assets/icons/16x16.png',
+    '/assets/icons/32x32.png',
+    '/assets/icons/180x180.png',
+    '/assets/icons/192x192.png',
+    '/assets/icons/512x512.png',
 ];
 
 self.addEventListener('install', function (e) {
