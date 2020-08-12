@@ -436,6 +436,10 @@ button:hover {
   width: 100%;
 }
 
+.offline-notice {
+  font-weight: bolder;
+}
+
 @media (min-width: 740px) {
   h1 {
     position: absolute;
@@ -460,7 +464,7 @@ button:hover {
     border-bottom: 10px solid #222;
   }
 
-  .join-container, .game-info {
+  .join-container, .game-info, .offline-notice {
     display: flex;
     flex-direction: column;
     align-items: center;
