@@ -414,6 +414,11 @@ button:hover {
   z-index: 1;
 }
 
+.rules-text-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 .rules-checkbox:checked ~ .rules-text {
   transform: translate(0,0);
 }
@@ -424,6 +429,10 @@ button:hover {
 
 .rules-text li {
   margin-bottom: 1em;
+}
+
+.rules-img {
+  width: 100%;
 }
 
 @media (min-width: 740px) {
