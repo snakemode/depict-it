@@ -6,11 +6,12 @@
   <title>Depict-it</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="Description" content="The hilarious game of draw and describe.">
   <meta name="theme-color" content="#17B5E9">
   <link rel="apple-touch-icon" href="/assets/icons-192.png">
 
-  <script src="/js/ably-1.js" defer></script>
-  <script src="/js/vue.min.js"></script>
+  <script src="/js/ably.min-1.js" defer></script>
+  <script src="/js/vue.min.js" defer></script>
   <script src="/index.js" type="module"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Sora&display=swap" rel="stylesheet" />
@@ -30,6 +31,7 @@
     <div class="debug">
       {{ state?.status == undefined ? "disconnected" : state?.status }}
     </div>
+
     <header>
       <h1 v-bind:class="{ hide: state?.lastInstruction?.type == 'drawing-request'}">Depict-it</h1>
       <input class="rules-checkbox" id="rules" type="checkbox" />
@@ -45,7 +47,7 @@
           <p>At game end, the progression of the prompt will be shown to all players, and they can vote on which they
             think is the most funny, clever or just downright nonsensical.</p>
           <p>The winner is the player with the most votes at the end of all the voting rounds.</p>
-          <img class="rules-img" src="./assets/rules.png" alt="description of how to play" />
+          <img class="rules-img" src="./assets/rules.webp" alt="description of how to play" />
 
           <h3>Game Play</h3>
           <ol>
@@ -71,33 +73,44 @@
       </div>
     </header>
 
-    <div v-if="!joinedOrHosting" class="join-container">
-      <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
+    <div v-if="!online" class="offline-notice">
+      <h1>You are offline!</h1>
+      <p>Scrawl is a multiplayer game that requires the internet.</p>
+      <p>Please try again when you have an internet connection!</p>
     </div>
-    <div v-else id="activeGame" class="game-info">
-      <div class="game-lobby" v-if="gameCanBeStarted">
-        <invite-link :game-id="gameId"></invite-link>
-        <connected-players-summary :state="transmittedServerState"></connected-players-summary>
-        <ready-or-waiting-prompt :is-host="isHost" :state="transmittedServerState" v-on:startgame="startGame">
-        </ready-or-waiting-prompt>
+    <div v-else>
+
+      <div v-if="!joinedOrHosting" class="join-container">
+        <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
       </div>
-      <div v-if="!gameCanBeStarted && !state?.lastInstruction">
-        <loader></loader>
+      <div v-else id="activeGame" class="game-info">
+        <div class="game-lobby" v-if="gameCanBeStarted">
+          <invite-link :game-id="gameId"></invite-link>
+          <connected-players-summary :state="transmittedServerState"></connected-players-summary>
+          <ready-or-waiting-prompt :is-host="isHost" :state="transmittedServerState" v-on:startgame="startGame">
+          </ready-or-waiting-prompt>
+        </div>
+        <div v-if="!gameCanBeStarted && !state?.lastInstruction">
+          <loader></loader>
+        </div>
+
+        <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout">
+        </timer-bar>
+
+        <div v-if="state?.lastInstruction" class="playfield">
+          <playfield-wait-for-others :state="state"></playfield-wait-for-others>
+
+          <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
+          <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
+          <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
+
+          <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
+        </div>
       </div>
 
-      <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout">
-      </timer-bar>
-
-      <div v-if="state?.lastInstruction" class="playfield">
-        <playfield-wait-for-others :state="state"></playfield-wait-for-others>
-
-        <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
-        <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
-        <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
-
-        <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
-      </div>
     </div>
+
+
   </main>
 </body>
 
