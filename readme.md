@@ -1306,17 +1306,83 @@ This is a super quick way to add a little bit of statefulness to our app - espec
 
 # Drawing using HTML5 Canvas
 
-- Mouse stuff
-- Finger painting
-- Adjustments for scrolling / finger touching
+We have a `Vue component` that we use to handle drawing with a mouse, or "finger painting" on touch devices.
+
+```js
+export const DrawableCanvas = {
+  ...
+
+  mounted: function () {
+    const element = document.getElementById(this.canvasId);
+    if (element && !this.canvas) {
+      this.canvas = new DrawableCanvasElement(this.canvasId).registerPaletteElements(this.paletteId);
+    }
+  },
+
+  ...
+
+  template: `
+  <div class="drawable-canvas">
+    <div class="canvas-and-paints">
+      <canvas v-bind:id="canvasId" class="image-frame paint-canvas" width="400" height="400"></canvas>  
+      <div v-bind:id="paletteId" class="palette">
+        <div style="background-color: black;" v-on:click="colorSelected"></div>
+        <div style="background-color: red;" v-on:click="colorSelected"></div>
+        <div style="background-color: green;" v-on:click="colorSelected"></div>
+        <div style="background-color: blue;" v-on:click="colorSelected"></div>
+        <div style="background-color: white;" v-on:click="eraserSelected"></div>
+      </div>
+    </div>
+    <button v-on:click="$emit('drawing-finished', canvas.toString())" class="form-button finished-drawing">I'm finished!</button>
+  </div>`
+};
+```
+
+There are two important things about this `component`
+- We use the class `DrawableCanvasElement` from the npm package [`@snakemode/snake-canvas`](https://github.com/snakemode/snake-canvas) (This package was built while writing this game)
+- We emit an event called `drawing-finished` when the user clicks the `I'm finished` button in the template.
+
+This event is listened to in the consuming `Vue component` - in this case the `PlayfieldDrawing` component that deals with the drawing phase of the game.
+
+As an event, we pass the result of the function call `canvas.toString()` - this is a thin wrapper around the native browser call to convert a HTML Canvas element to a base64 encoded PNG. The consuming component then uses this to upload images to our `Azure Blob Storage` account.
+
+## How does the snake canvas work
+
+There's not too much too the snake-canvas - it takes an element Id (that it presumes is of a HTML Canvas Element), and adds some click handlers on mouse up/down/move. Whenever the mouse is moved, a line between the last position and the current one is drawn, and a 1px blur applied to smooth out the aliasing in the image.
+
+You might notice that we're also calling the function `registerPaletteElements` - this adds a click handler to each child element of the passed in element Id, so that when you click on any of them, the active colour is set to the background colour of that element.
+
+This means we can add and remove colours to our drawable canvas at will.
+
+## Touch support
+
+The canvas also has touch support - we have to do a little bit of maths to make sure we're using the correct x and y coordinates in our canvas to support both mouse and touch. Multi-touch isn't supported.
+
+```js    
+getLocationFrom(e) {
+  const location = { x: 0, y: 0 };
+
+  if (e.constructor.name === "TouchEvent") {
+      const bounds = e.target.getBoundingClientRect();
+      const touch = e.targetTouches[0];
+
+      location.x = touch.clientX - bounds.left;
+      location.y = touch.clientY - bounds.top;
+  } else {
+      location.x = e.offsetX;
+      location.y = e.offsetY;
+  }
+
+  return location;
+}
+```
+This function is used to work out where we're drawing on our canvas - using either our mouse position, or the position of the first touch event.
 
 
-# Capturing input from players
+# Recap
 
-- Using async / await
-- Extra function in handlers to gather input or timeout
-- Wait on ably messages
-- Host can skip steps
+Hope you've enjoyed this teardown of a browser game written in Vue!
+
 
 
 # Running on your machine
