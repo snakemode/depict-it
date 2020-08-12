@@ -33,7 +33,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    console.log("Always");
+    if (navigator.onLine) {
+        return fetch(event.request);
+    }
+
     event.respondWith(
         caches.match(event.request, { ignoreSearch: true }).then(response => {
             return response || fetch(event.request);
