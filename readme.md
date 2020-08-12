@@ -16,11 +16,16 @@ You can play this online here: https://depictit.snkmo.de
 * Each `Game Stack` is displayed shown, and all the players get to vote on the `funniest` card in the `Game Stack`
 * Points are awarded and the `Host` can start a new round.
 
+## This document
+
+If you're just interested on running this on your own machines, or on Azure, scroll all the way down to the bottom of this document.
+The rest of this readme is a teardown, and an explaination of how this game hangs together.
 
 # Contents
 
 - [Depict-It](#depict-it)
   - [The rules of the game](#the-rules-of-the-game)
+  - [This document](#this-document)
 - [Contents](#contents)
   - [What are we going to build?](#what-are-we-going-to-build)
 - [Our dependencies](#our-dependencies)
@@ -412,7 +417,7 @@ The first, is a `connection-acknowledged` message, that is sent **specifically**
 
 Then, it sends a `game-state` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
 
-There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first.
+There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first. We'll revisit expanded versions of `P2PClient` and `P2PServer` later in this article.
 
 # Designing our game
 
@@ -1023,6 +1028,8 @@ Finally we're going to define our `host` and `join` methods, to bind to clicks, 
 
 This is the entire outline of the top level of our `Vue app`, but most of the display logic is hidden in our `Vue components`.
 
+Remember, when a user joins or hosts a game, a `p2pclient` or `p2pserver` instance are created - and the state managed inside of them becomes observable, so we can bind any properties on these objects into our `Vue app`.
+
 At the bottom of `Index.js` is also our `handleMessagefromAbly` function - that passes messages received over our `p2p channel` onto our `p2pServer` and `p2pClient` instances. Let's take a quick look inside those classes again to see how this all works.
 
 ## Inside P2PServer
@@ -1431,8 +1438,9 @@ This function is used to work out where we're drawing on our canvas - using eith
 
 # Recap
 
-Hope you've enjoyed this teardown of a browser game written in Vue!
+We've spoken at length about how the core pieces of this game hangs together.
 
+If you want a deeper understanding, the code is all here, and you can run it locally by pulling this repo, and executing npm run start, once you've added API keys for Ably, and Azure Blob Storage into the `/api/local.settings.json` file.
 
 
 # Running on your machine
@@ -1461,6 +1469,34 @@ func settings add ABLY_API_KEY Your-Ably-Api-Key
 
 Running this command will encrypt your API key into the file `/api/local.settings.json`.
 You don't need to check it in to source control, and even if you do, it won't be usable on another machine.
+
+Next you'll need to [Create an Azure Blob Storage Account](https://azure.microsoft.com/en-gb/services/storage/blobs/?&OCID=AID2100128_SEM_XqK-bwAAAfw50RTJ:20200812092318:s&msclkid=3cef80961050146d866fdfa5a5531dc2&ef_id=XqK-bwAAAfw50RTJ:20200812092318:s&dclid=CLKMy-irlesCFTwWBgAdZdYGKA), create a container, and a storage bucket, and generate an API key.
+
+Please refer to the Azure docs for this. Once you know all your Azure configuration, you can either edit your `local.settings.json` file by hand, or add to it using the `func` command as above. You'll need to add the following keys:
+
+```bash
+AZURE_ACCOUNT
+AZURE_CONTAINERNAME
+AZURE_BLOBSTORAGE
+AZURE_KEY
+```
+
+An example, unencrypted, settings file looks like this:
+
+```js
+{
+  "IsEncrypted": false,
+  "Values": {
+    "ABLY_API_KEY": "ably-api-key-here",
+    "AZURE_ACCOUNT": "scrawlimages",
+    "AZURE_CONTAINERNAME": "gameimages",
+    "AZURE_BLOBSTORAGE": "https://scrawlimages.blob.core.windows.net",
+    "AZURE_KEY": "some-azure-access-token-from-the-storage-account",
+    "FUNCTIONS_WORKER_RUNTIME": "node"
+  },
+  "ConnectionStrings": {}
+}
+```
 
 ## How to run for local dev
 
