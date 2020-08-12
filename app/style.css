@@ -612,6 +612,11 @@ button:hover {
     margin: 0;
   }
 
+  .footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
 }
 
 @keyframes flipInY {
