@@ -1,6 +1,6 @@
 body {
   display: grid;
-  grid-template-rows: auto 122px;
+  grid-template-rows: auto 60px;
   height: 100vh;
   margin: 0 auto;
   border: 0;
@@ -452,19 +452,19 @@ button:hover {
 
 .footer {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
   margin: 20px;
   text-align: right;
 }
 
 .ably {
   display: block;
-  height: 60px;
-  width: 160px;
+  height: 40px;
+  width: 120px;
   color: transparent;
   background: url(./assets/ably.svg) no-repeat bottom right;
-  background-size: 150px;
+  background-size: 100px;
 }
 
 @media (min-width: 740px) {
@@ -613,9 +613,18 @@ button:hover {
   }
 
   .footer {
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
     position: absolute;
     bottom: 0;
     right: 0;
+  }
+
+  .ably {
+    width: 160px;
+    height: 70px;
+    background-size: 160px;
   }
 }
 
