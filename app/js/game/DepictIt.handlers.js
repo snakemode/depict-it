@@ -52,7 +52,7 @@ export class GetUserDrawingHandler {
 
             for (let stack of stacksThatHaventBeenAddedTo) {
                 const stackItem = new StackItem("image", "/assets/no-submit.png");
-                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId(), systemGenerated: true });
             }
         }
 
@@ -64,7 +64,12 @@ export class GetUserDrawingHandler {
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
-            stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
+            stack.add({
+                id: createId(),
+                ...stackItem,
+                author: message.metadata.clientId,
+                authorName: message.metadata.friendlyName
+            });
             context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;
@@ -100,8 +105,9 @@ export class GetUserCaptionHandler {
             const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
 
             for (let stack of stacksThatHaventBeenAddedTo) {
-                const stackItem = new StackItem("string", "Answer not submitted");
-                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+                const initialHint = stack.items[0].value;
+                const stackItem = new StackItem("string", initialHint);
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId(), systemGenerated: true });
             }
         }
 
@@ -113,7 +119,13 @@ export class GetUserCaptionHandler {
             const stackItem = new StackItem("string", message.caption);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
-            stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
+            stack.add({
+                id: createId(),
+                ...stackItem,
+                author: message.metadata.clientId,
+                authorName: message.metadata.friendlyName
+            });
+
             context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;
