@@ -3,23 +3,23 @@ Depict-It
 
 Depict-It is a party game for 4+ players (ideally!) where you mutate a phrase through drawings and captions, to make funny scenarios up with your friends.
 
-You can play this online here: https://depictit.snkmo.de
+You can play Depict-It online here: https://depictit.snkmo.de
 
 ## The rules of the game
 
 * The game is played in rounds. 
 * Each player is provided with a `Game Stack` containing a `Caption` and a blank screen for them to draw on.
-* They have 180 seconds to draw a picture for the caption.
-* Once either *all players* have finished, or 180 seconds elapses each drawing is passed to the next player.
-* Now each player captions the drawing in front of them to the best of their ability
-* Once the first player has their own `Game Stack` returned to them the `Scoring phase` begins.
-* Each `Game Stack` is displayed shown, and all the players get to vote on the `funniest` card in the `Game Stack`
+* They have 180 seconds to draw a picture of what is described in the caption.
+* Once either *all players* have finished, or 180 seconds elapses, each drawing is passed to the next player.
+* Now each player writes a caption which describes the drawing presented to them.
+* Once the first player has their own **Game Stack** returned to them the `Scoring phase` begins.
+* During scoring, each progression from starting caption through drawings and descriptions is displayed. The players can vote on the `funniest` card in the progression.
 * Points are awarded and the `Host` can start a new round.
 
 ## This document
 
-If you're just interested on running this on your own machines, or on Azure, scroll all the way down to the bottom of this document.
-The rest of this readme is a teardown, and an explaination of how this game hangs together.
+If you're just interested on running this on your own machine, or on Azure, scroll to the bottom of this document for instructions.
+The rest of this readme is a teardown, and an explaination of how the game is made.
 
 # Contents
 
@@ -28,12 +28,12 @@ The rest of this readme is a teardown, and an explaination of how this game hang
   - [This document](#this-document)
 - [Contents](#contents)
   - [What are we going to build?](#what-are-we-going-to-build)
-- [Our dependencies](#our-dependencies)
+- [Dependencies](#dependencies)
   - [A brief introduction to Vue.js](#a-brief-introduction-to-vuejs)
   - [Ably Channels for pub-sub](#ably-channels-for-pub-sub)
   - [Ably channels and API keys](#ably-channels-and-api-keys)
-  - [Making sure we send consistent messages by wrapping our Ably client](#making-sure-we-send-consistent-messages-by-wrapping-our-ably-client)
-- [The game as a web app](#the-game-as-a-web-app)
+  - [Making sure to send consistent messages by wrapping the Ably client](#making-sure-to-send-consistent-messages-by-wrapping-the-ably-client)
+- [Building a Web App](#building-a-web-app)
   - [HandleMessageFromAbly](#handlemessagefromably)
   - [P2PClient](#p2pclient)
   - [P2PServer](#p2pserver)
@@ -69,22 +69,22 @@ The rest of this readme is a teardown, and an explaination of how this game hang
 
 ## What are we going to build?
 
-We're going to build `Depict-It` as a browser game.
+`Depict-It` is [a progressive web app](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps). It is built with JavaScript, the [Vue.js](https://vuejs.org/) framework, HTML and CSS.
 
-To do this, we're going to create a `web application` using `Vue.js`, some code derived from this [Ably Peer to Peer sample](https://github.com/thisisjofrank/p2p-demo-ably) and `ably` to send messages between our players.
+The game uses the [Ably Basic Peer to Peer demo](https://github.com/thisisjofrank/p2p-demo-ably) as a base and [Ably Channels](https://www.ably.io/channels) to send messages between the players.
 
-We'll be hosting the application on `Azure Static Web Applications` and we'll use `Azure Blob Storage` to store user generated content.
+We'll be hosting the application on [Azure Static Web Applications](https://azure.microsoft.com/en-gb/pricing/details/app-service/static/) and we'll use [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/) to store user generated content.
 
-# Our dependencies
+# Dependencies
 
-We're going to be working with `Vue.js` and `Ably`.
+The app uses with Vue.js and Ably.
 
 ## A brief introduction to Vue.js
 
 > Vue (pronounced /vjuː/, like view) is a progressive framework for building user interfaces. It is designed from the ground up to be incrementally adoptable, and can easily scale between a library and a framework depending on different use cases. It consists of an approachable core library that focuses on the view layer only, and an ecosystem of supporting libraries that helps you tackle complexity in large Single-Page Applications. 
 > <cite>-- [vue.js Github repo](https://github.com/vuejs/vue)</cite>
 
-[Vue.js](https://vuejs.org/) is a single page app framework, and we will use it to build the UI of our app. Our Vue code lives in [index.js](index.js) - and handles all of the user interactions. We're using Vue because it doesn't require a toolchain and it provides simple binding syntax for updating the UI when data changes.
+[Vue.js](https://vuejs.org/) is a single page app framework, and we will use it to build the UI of the app. The Vue code lives in [index.js](index.js) and handles all of the user interactions. We're using Vue because it doesn't require a toolchain and it provides simple binding syntax for updating the UI when data changes.
 
 A Vue app looks a little like this abridged sample:
 
@@ -101,30 +101,27 @@ var app = new Vue({
 });
 ```
 
-It finds an element with the id of `app` in our markup, and treats any elements within it as markup that can contain `Vue Directives` - extra attributes to bind data and manipulate our HTML based on the applications state.
+It finds an element with the id of `app` in the markup, and treats any elements within it as markup that can contain `Vue Directives` - extra attributes to bind data and manipulate the HTML based on the application's state.
 
-Typically, the Vue app makes data available (such as `greeting` in the above code snippet), and when that data changes, it'll re-render the parts of the UI that are bound to it.
-Vue.js exposes a `methods` property, which we use to implement things like click handlers and callbacks from our UI, like the `doSomething` function above.
+Typically, the Vue app makes the properties of the data object available to bind into your markup (such as `greeting` in the above code snippet). When data changes, it'll re-render the parts of the UI that are bound to it.
+Vue.js exposes a `methods` property, which cab be used to implement things like click handlers and callbacks from the UI, like the `doSomething` function above.
 
-This snippet of HTML should help illustrate how Vue if-statements and directives work
+This snippet of HTML should help illustrate how Vue if-statements and directives work:
 
 ```html
-<div id="app">
+<main id="app">
     <div v-if="displayGreeting" v-on:click="doSomething">
         {{ greeting }}
     </div>
-</div>
+</main>
 ```
 
-Here you'll see Vue's `v-if` directive, which means that this `div` and its contents will only display if the `displayGreeting` `data` property is true.
+Here you'll see Vue's `v-if` directive, which means that the`div` and its contents will only display if the `displayGreeting` data property is true.
 You can also see Vue's binding syntax, where we use `{{ greeting }}` to bind data to the UI.
-
-**Vue is simple to get started with, especially with a small app like this, with easy to understand data-binding syntax.
-Vue works well for our example here, because it doesn't require much additional code.**
 
 ## Ably Channels for pub-sub
 
-We're also going to use Ably for pub-sub between our players.
+The app uses [Ably](https://www.ably.io/) for [pub-sub](https://www.ably.io/documentation/core-features/pubsub) between our players.
 
 [Ably Channels](https://www.ably.io/channels) are multicast (many publishers can publish to many subscribers) and we can use them to build peer-to-peer apps.
 
@@ -142,13 +139,12 @@ In order to run this app, you will need an Ably API key. If you are not already 
 
 This app is going to use [Ably Channels](https://www.ably.io/channels) and [Token Authentication](https://www.ably.io/documentation/rest/authentication/#token-authentication).
 
+## Making sure to send consistent messages by wrapping the Ably client
 
-## Making sure we send consistent messages by wrapping our Ably client
+In [PubSubClient.js](PubSubClient.js) we make a class called `PubSubClient` - which does a few things for us:
 
-We're going to make a class called `PubSubClient` which will do a few things for us:
-
-1. Allow us to call connect twice to the same channel to make our calling code simpler
-2. Adds metadata to messages sent outwards, so we don't have to remember to do it in our calling code.
+1. Allows us to call connect twice to the same channel to make the calling code simpler
+2. Adds metadata to messages sent outwards, so we don't have to remember to do it in the calling code.
 
 ```js
 class PubSubClient {
@@ -158,9 +154,9 @@ class PubSubClient {
   }
 ```
 
-First we're defining a `constructor` for our class - and setting up some values. These values are a property called `connected`, set to false, and `onMessageReceivedCallback` - a function passed to the constructor that we will use later when Ably messages arrive.
+First we define a `constructor` for the class - and set up some values - a property called `connected`, set to false, and `onMessageReceivedCallback` - a function passed to the constructor that we will use later when Ably messages arrive.
 
-We're then going to define our `connect` function
+Inside the `PubSubClient` class, we define a `connect` function -
 
 ```js
   async connect(identity, uniqueId) {
@@ -179,9 +175,9 @@ We're then going to define our `connect` function
   }
 ```
 
-While we're making our connection, we're subscribing to an `Ably Channel` and adding a callback function that passes on the `data` property from the Ably message. This data is the `json` that our `peers` sent, along with some `identifying metadata` (like the user's `friendlyName` in this example) - to whatever function we pass to our constructor.
+While we're making a connection, we're subscribing to an Ably Channel and adding a callback function that passes on the `data` property from the Ably message. The data property in the Ably message is the JSON that the `peers` sent, along with some `identifying metadata`. The `PubSubClient` calls the callback function that we pass to its constructor with the data and the metadata we receive from Ably - in this case, the metadata would contain the `identity` object with a unique ID and name for each player.
 
-We're also going to define a `sendMessage` function, that adds some functionality on top of the default `Ably publish`.
+In the `PubSubClient` we also define a `sendMessage` function, that adds some functionality on top of the default `Ably publish`.
 
 ```javascript
   sendMessage(message, targetClientId) {
@@ -196,19 +192,15 @@ We're also going to define a `sendMessage` function, that adds some functionalit
 }
 ```
 
-What we're doing here, is making sure that whenever `sendMessage` is called, we're including the data stored in `this.metadata` that was set during construction - our clients friendlyName. This ensures that whenever a message is sent from a peer, it's always going to include the name of the person that sent it.
+This ensures that whenever `sendMessage` is called, the data stored in `this.metadata` that was set during construction, is included. We're also making sure that if the message is for a specific peer - set using `targetClientId` - then this property is added to our message before we publish it on the Ably Channel.
 
-We're also making sure that if the message is for a specific peer - set using `targetClientId` - then this property is added to our message before we publish it on the Ably Channel.
+The 'PubSubClient' is passed to the instances of our `P2PClient` and `P2PServer` classes, to make sure they publish messages in a predictable way.
 
-We're going to pass this wrapper to the instances of our `P2PClient` and `P2PServer` classes, to make sure they publish messages in a predictable way.
+# Building a Web App
 
-# The game as a web app
+The application is composed of a `Vue` UI, and two main classes, `P2PClient` and `P2PServer`.
 
-Our application is going to be composed of a `Vue` UI, and two main classes, `P2PClient` and `P2PServer`.
-
-The `peer` who elects themselves as host will be the only one to have an instance of `P2PServer` and all of our `peers` will be `P2PClients`.
-
-When we define our `Vue` app, we're going to create two `null` properties, one for each of these things, inside of `Vue data`.
+The `peer` who elects themselves as host will be the only one to have an instance of `P2PServer` and all of the `peers` will be `P2PClients`. When we define the Vue app, we create two `null` properties, one for each of these things, inside `Vue data`:
 
 ```js
 var app = new Vue({
@@ -219,11 +211,11 @@ var app = new Vue({
   ...
 ```
 
-When a Vue instance is created, it adds all the properties found in its data object to Vue’s **reactivity system**. When the values of those properties change, the view will “react”, updating to match the new values.
+When a Vue instance is created, it adds all the properties found in its data object to Vue’s [reactivity system](https://vuejs.org/v2/guide/reactivity.html). When the values of those properties change, the view will “react”, updating to match the new values.
 
-By defining both our `p2pClient` and `p2pServer` properties inside of Vue's data object, we make them **reactive**, so any changes observed to the properties, will cause the UI to **re-render**.
+By defining both  of the `p2pClient` and `p2pServer` properties inside of Vue's data object, they become **reactive** - any changes observed to the properties, will cause the UI to **re-render**.
 
-Our Vue app only contains two functions, one to start `hosting` and the other to `join`. In reality, they're both doing the same thing (connecting to an `Ably channel` by name), but depending on which button is clicked in our UI, that `peer` will either behave as a host or a client.
+Our Vue app only contains two functions, one to start `hosting` and the other to `join`. In reality, they're both doing the same thing (connecting to an `Ably channel` by name), but depending on which button is clicked in the UI, that `peer` will either behave as a host or a client.
 
 ```js
     host: async function(evt) {
@@ -241,17 +233,17 @@ Our Vue app only contains two functions, one to start `hosting` and the other to
       await this.p2pClient.connect();
     },
 ```
-Our `host` function, creates an instance of the `PubSubClient`, and provides it with a callback to `handleMessageFromAbly` then:
+
+The `host` function, creates an instance of the `PubSubClient`, and provides it with a callback to `handleMessageFromAbly` then:
 
 * Creates a new `Identity` instance, using the `friendlyName` bound to our UI
 * Creates a new `P2PServer`
 * Creates a new `P2PClient`
-* Connects to each of them (which in turn, calls `connect` on our `PubSubClient` instance)
+* Connects to each of them (which in turn, calls `connect` on the `PubSubClient` instance)
 
-Joining is very similar
+Joining is very similar:
 
 ```js
-
     join: async function(evt) {
       evt.preventDefault();
 
@@ -270,7 +262,7 @@ Here, we're doing *exactly the same* as the host, except we're only creating a `
 
 ## HandleMessageFromAbly
 
-`handleMessageFromAbly` is the callback function we want our `PubSubClient` to trigger whenever a message appears on the `Ably Channel`.
+`handleMessageFromAbly` is the callback function that the `PubSubClient` will trigger whenever a message is received on the Ably Channel.
 
 ```js
 function shouldHandleMessage(message, metadata) {  
@@ -284,15 +276,16 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
   } 
 }
 ```
+handleMessageFromAbly is responsible for calling `onReceiveMessage` on the instance of `P2PServer` if the current player is the `host`, and then calling `onReceivedMessage` on the instance of `P2PClient`.
 
-It's responsible for calling any p2pServer `onReceiveMessage` if the client is a `host`, calling `onReceiveMessage` on our client, but also making sure that if the message has been flagged as for a specific client by including the property `forClientId`, it doesn't get processed by other peers.
+If the received message has a property called `forClientId` and it is **not** for the current client, the message will not be processed.
 
 This is deliberately **not secure**. All the messages sent on our `Ably channel` are multicast, and received by all peers, so it should not be considered tamper proof - but it does prevent us having to filter inside of our client and server instances.
 
 ## P2PClient
 
-The `P2PClient` class does most of the work in the app.
-It's responsible for sending a `connected` message over the `PubSubClient` when `connect` is called, and most importantly of keeping track of a copy of the `serverState` whenever a message is received.
+The [`P2pClient`](P2PClient.js) class does most of the work in the app.
+It is responsible for sending a `connected` message over the `PubSubClient` when `connect` is called, and most importantly of keeping track of a copy of the `serverState` whenever a message is received.
 
 ```js
 class P2PClient {
@@ -312,9 +305,10 @@ class P2PClient {
     };
   }
 ```
-Our constructor assigns it's parameters to instance variables, and initilises a `null` `this.serverState` property, along with it's own client state in `this.state`.
 
-We then go on to define our `connect` function
+The `P2pClient` constructor assigns its parameters to instance variables, and initilises a `null` `this.serverState` property, along with its own client state in `this.state`.
+
+We then go on to define the `connect` function:
 
 ```js
   async connect() {
@@ -325,11 +319,9 @@ We then go on to define our `connect` function
   }
 ```
 
-This uses the provided `PubSubClient` (here stored as the property `this.ably`) to send a `connected` message. The `PubSubClient` is doing the rest of the work - adding in the `identity` of the sender during the `sendMessage` call.
+This uses the provided `PubSubClient` (here stored as the property `this.ably`) to send a `connected` message. The `PubSubClient` is doing the rest of the work - adding in the `identity` of the sender during the `sendMessage` call. It also sets `this.state.status` to `awaiting-acknowledgement` - the default state for all of the client instances until the `P2PServer` has sent them a `connection-acknowledged` message.
 
-It also sets `this.state.status` to `awaiting-acknowledgement` - the default state for all of our client instances until the `P2PServer` has sent them a `connection-acknowledged` message.
-
-`OnReceiveMessage` does a little more work
+`OnReceiveMessage` does a little more work:
 
 ```js  
   onReceiveMessage(message) {
@@ -350,19 +342,13 @@ It also sets `this.state.status` to `awaiting-acknowledgement` - the default sta
   }
 ```
 
-There are two things to pay close attention to here - firstly that we update the property `this.serverState` whenever an incoming message has a property called `serverState` on it - our clients use this to keep a local copy of whatever the `host` says its state is, and we'll use this to bind to our UI later.
-
-Then there's our switch on `message.kind` - the type of message we're receiving.
-
-In this case, we only actually care about our `connection-acknowledged` message, updating our `this.state.status` property to `acknowledged` once we receive one.
+There are two things to pay close attention to here - firstly that we update the property `this.serverState` whenever an incoming message has a property called `serverState` on it. Clients use this to keep a local copy of whatever the `host` says its state is, and we'll use this to bind to our UI later. Secondly, there is a switch on `message.kind` - the type of message we're receiving. In this case, we only actually care about the `connection-acknowledged` message, updating the `this.state.status` property to `acknowledged` once we receive one.
 
 There are a few commented lines in this code that we'll discuss later on.
 
 ## P2PServer
 
-Our `P2PServer` class hardly differs from the client.
-
-It contains a constructor that creates an empty `this.state` object
+The [`P2PServer`](P2PServer.js) class hardly differs from the client. It contains a constructor that creates an empty `this.state` object:
 
 ```js
 export class P2PServer {
@@ -412,36 +398,27 @@ All the work is done in `onClientConnected`
   }
 ```
 
-When a client connects, we keep track of their `metadata` - the `friendlyName`, and then send two messages.
-The first, is a `connection-acknowledged` message, that is sent **specifically** to the `clientId` that just connected.
+When a client connects, we keep track of their `metadata` and then send two messages. The first, is a `connection-acknowledged` message, that is sent **specifically** to the `clientId` that just connected. The second is a `game-state` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
 
-Then, it sends a `game-state` message, with a copy of the latest `this.state` object, that will in turn trigger all the clients to update their internal state.
+There's a little more that happens in the server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first. We'll revisit expanded versions of `P2PClient` and `P2PServer` later in this article.
 
-There's a little more that happens in our server class (you might notice the currently commented `stateMachine` line) but let's talk about how our game logic works first. We'll revisit expanded versions of `P2PClient` and `P2PServer` later in this article.
+# Designing the game
 
-# Designing our game
+The game is going to play out over messages between the `host` and all of the `players`.
 
-Our game is going to play out over messages between the `host` and all the `players`.
+We will send messages from the `host` to each individual client representing the next thing they have to do. The `game stacks` (the piles of Depcit-It cards), will be stored in memory in the host's browser, with only the information required to display to each respective player sent in messages at any one time. This keeps our message payloads small and means we can structure the application in pairs of messages - requests for user input and their responses.
 
-As a principal we're going to send messages from the `host` to each individual client representing the next thing they have to do.
-The `game stacks` - the piles of Depcit-It cards, will be stored in memory in the `hosts` browser, with only the information required to display to the player sent in messages at any one time.
+The game has five key phases:
 
-This:
-
-- Keeps our message payloads small
-- Means we can structure our application in pairs of messages - requests for user input and their responses.
-
-Our game has five key phases:
-
-- Dealing and setup
-- Collecting image input from players
-- Collecting text captions from players
-- Collecting scores from players
-- Displaying scores
+* Dealing and setup
+* Collecting image input from players (repeats until game end)
+* Collecting text captions from players (repeats until game end)
+* Collecting scores from players
+* Displaying scores
 
 Each of these phases will be driven by pairs of messages.
 
-To fit inside our `p2p client`, we're going to always store a variable called `lastMessage` in our web app - and have our UI respond to the contents of this last message. This is a simple way to control what is shown on each players screen.
+We store a variable called `lastMessage` in inside the `p2p client` this allows us to make the UI to respond to the contents of this last message. This is a simple way to control what is shown on each players screen.
 
 We'll use a message type called `wait` to place players in a holding page while other players complete their inputs.
 
@@ -460,29 +437,27 @@ Here are the messages used in each phase of the game:
 | Displaying scores                       | `show-scores`           | { kind: "instruction", type: "show-scores", playerScores: state.players }                |
 |                                         | `wait`                  | { kind: "instruction", type: "wait" }                                                    |
 
-Each of these messages will be sent through our `PubSubClient` class, that'll add some identifying information (the id of the player that sent each message) into the message body for us to filter by in our code.
+Each of these messages will be sent through the `PubSubClient` class, which will add some identifying information (the id of the player that sent each message) into the message body for us to filter by in the code.
 
 As our game runs, and sends these messages to each individual client, it can collect their responses and move the `game state` forwards.
 
 Luckily, there isn't very much logic in the game, it has to:
 
-- Ensure when a player sends a response to a request, it's placed on the correct `game stack` of items
+- Ensure that when a player sends a response to a request, it is placed on the correct `game stack` of items
 - Keep track of scores when players vote on items
 - Keep track of which stack each player is currently holding
 
-We need to make sure we write code for each of our game phases to send these `p2p messages` at the right time, and then build a web UI that responds to the last message received to add our gameplay experience.
+We need to write some code for each of the game phases to send these `p2p messages` at the right time, and then, build a web UI that responds to the last message received to add a gameplay experience.
 
-There's a pattern in software called a `State Machine` - a way to model a system that can exist in one of several known states, and we're going to build a `State Machine` to run our game logic.
+We're going to use a software pattern called a `State Machine` - a way to model a system that can exist in one of several known states, to run the game logic.
 
 ## The GameStateMachine
 
-Forgetting the web-UI for a moment, we need to write some code to capture the logic of our game.
+Next we'll write code to capture the logic of the game. We're going to break the phases of the game up into different `Handlers` - that represent both the logic of that portion of the game, and the logic that handles user input during that specific game phase.
 
-We're going to break the various phases of our game up into different `Handlers` - that represent both the logic of that portion of the game, and the logic that handles user input during that specific game phase.
+Our implementation is a part [state machine](https://www.smashingmagazine.com/2018/01/rise-state-machines/), part [command pattern](https://www.dofactory.com/javascript/design-patterns/command) handler.
 
-Our implementation is part `state-machine`, part `command-pattern-style handler`.
-
-Let's take a look at what our state machine code can look like - here's a "simple" two-step game definition, taken from one of our unit tests:
+Let's take a look at what state machine code **can** look like - here's a two-step game definition, taken from [one of our unit tests)[tests/js/game/GameStateMachine.test.js]:
 
 ```js
 const twoStepGame = () => ({
@@ -500,12 +475,11 @@ const twoStepGame = () => ({
 });
 ```
 
-This game definition doesn't do anything on it's own - it's a collection of `steps`.
-In this example, we have a start handler that just flags that execute has been called, and then `transitionTo`s the `EndHandler`.
+This game definition doesn't do anything on it's own - it's a collection of `steps`. This example shows a start handler that just flags that execute has been called, and then `transitionTo`s the `EndHandler`.
 
 ### Defining a game
 
-A game definition looks exactly like this:
+A game definition looks like this:
 
 ```js
 const gameDef = () => ({
@@ -553,9 +527,9 @@ This is an exhaustive example, with both an `execute` and a `handleInput` functi
 
 ## How the GameStateMachine works
 
-The `GameStateMachine` takes our `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed, and when. It's always expecting a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
+The (`GameStateMachine`)[/app/js/game/GameStateMachine.js] takes a `Game Definition` - comprised of `steps` and an optional `context` object, and manages which steps are executed and when. It always expects a game to have a `StartHandler` and an `EndHandler` - as it uses those strings to know which game steps to start and end on.
 
-You create a new `instance` of a Game by doing something like this:
+Create a new instance of a Game by doing something like this:
 
 ```js
 const game = new GameStateMachine({
@@ -568,14 +542,9 @@ const game = new GameStateMachine({
     }
 });
 ```
-Once you have a `game` object, you can call
+Then, when when you have a `game` object, you can call `game.run();` to start processing the game logic at the `StartHandler`.
 
-```js
-  game.run();
-```
-To start processing the game logic at the `StartHandler`.
-
-Let's peak under the hook of the `GameStateMachine` to see what it's doing.
+### What is the Game State Machine doing?
 
 The constructor for the `GameStateMachine` takes the `steps` and the `context` and saves them inside itself.
 Once that's done, the `run` function does all the hard work.
@@ -606,16 +575,16 @@ The state machine:
 
 * Keeps track of the `currentStepKey` - this is the string that you use to define your `steps` in the `game definition`.
 * Keeps track of time
-* awaits the `execute` function of the `StartHandler`
+* Awaits the `execute` function of the `StartHandler`
 * Evaluates the response
 
 Once a response from the current handler has been received:
 
-* If the `currentStepKey` is `EndHandler` we return, the game has concluded.
-* Otherwise, we update the `currentStepKey` to be the target of the `transitionTo` response - changing the current active state of the game.
-* We then call `run` again, to process the step we've just arrived at.
+* If the `currentStepKey` is `EndHandler` then return, the game has concluded.
+* Otherwise, update the `currentStepKey` to be the target of the `transitionTo` response - changing the current active state of the game.
+* Then call `run` again, to process the step we've just arrived at.
 
-This flow of moving between game steps based on the outcome of the current step allows us to define games of all kinds of shapes.
+This flow of moving between game steps based on the outcome of the current step allows us to define all kinds of games!
 
 The state machine contains the function `handleInput`
 
@@ -629,6 +598,7 @@ async handleInput(input) {
     }
 }
 ```
+
 This is the glue code that we can pass input to, which will in turn find the currently active step, and forward the input onto the `handleInput` function defined in it. This means if any of our steps require user input, the input will be passed through this function.
 
 We'll have to wire this up to our Web UI and Ably connection later.
@@ -638,7 +608,7 @@ We'll have to wire this up to our Web UI and Ably connection later.
 
 Now that we understand a little about how the `GameStateMachine` can be used to define "any game", let's get specific and talk about `Depict-It`.
 
-Inside of `/app/js/game/` there are a series of files
+Inside of `/app/js/game/` there are a series of files. (The ones with `DepictIt` in the filename contain the game logic.)
 
 ```
 DepictIt.js
@@ -648,9 +618,7 @@ DepictIt.types.js
 GameStateMachine.js
 ```
 
-The ones with `DepictIt` in the filename, predictably contain our game logic.
-
-`DepictIt.js` is our entrypoint, and references all our game handlers, returning the `Game Definition` that we need to create our game.
+[`DepictIt.js`](app/js/game/DepictIt.js) is the entrypoint, and references all of the game handlers, returning the `Game Definition` needed to create a game:
 
 ```js
 export const DepictIt = (handlerContext) => new GameStateMachine({
@@ -666,11 +634,10 @@ export const DepictIt = (handlerContext) => new GameStateMachine({
   context: handlerContext
 });
 ```
-It's a function, because we're going to pass in our Ably connection inside the `handlerContext` parameter here, but it returns a fully created `GameStateMachine` instance for us to run in our `Vue.js` app.
 
-You can see we have our game defined as a series of handlers in the sample above. Each of these game handlers are `imported` from the `DepictIt.handlers.js` file. The game handlers themselves are a couple of hundred lines of code long in total.
+It is a function because we're going to pass in our Ably connection inside the `handlerContext` parameter here, but it returns a fully created `GameStateMachine` instance to run in the Vue.js app. The game is defined as a series of handlers in the sample above. Each of these game handlers are `imported` from the `DepictIt.handlers.js` file.
 
-Each `Handler` has access to an `ably client` that we're going to supply as a property called `channel` in our `context` object, and our game works by having the `hosting players browser` keep track of where all the `game hands` are, sending players `p2p messages` to make the client code in their browsers prompt the players for input.
+Each `Handler` has access to an `ably client` supplied as a property called `channel` in our `context` object, and the game works by having the hosting player's browser keep track of where all the `game hands` are, sending players `p2p messages` to make the client code in their browsers prompt the players for input.
 
 Each of these messages looks similar:
 
@@ -682,7 +649,8 @@ context.channel.sendMessage({
     timeout: this.waitForUsersFor 
   }, player.clientId);      
 ```
-They each contain a `kind` of `instruction`, which will allow our clients to process these messages differently than the standard `connection` messages. And they also each have a `type` - which varies depending on the phase of the game currently playing.
+
+They each contain a property called `kind` with a value of `instruction`, which will allow the clients to process these messages differently to the standard `connection` messages. They also each have a `type` - which varies depending on the phase of the game currently playing.
 
 The `Handlers` control which message `types` they send, but they'll always also contain a `value`.
 
