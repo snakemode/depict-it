@@ -359,7 +359,7 @@ button:hover {
   width: 100%;
   padding: 10px;
   max-width: 90vw;
-  min-width: 400px;
+  min-width: 300px;
 }
 
 .scores {
