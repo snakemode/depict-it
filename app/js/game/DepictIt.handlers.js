@@ -25,6 +25,8 @@ export class DealHandler {
 export class GetUserDrawingHandler {
     constructor(waitForUsersFor) {
         this.waitForUsersFor = waitForUsersFor;
+        this.userTimeoutPromptAt = waitForUsersFor - 3_000;
+        this.userTimeoutPromptAt = this.userTimeoutPromptAt < 0 ? this.waitForUsersFor : this.userTimeoutPromptAt;
     }
 
     async execute(state, context) {
@@ -35,7 +37,7 @@ export class GetUserDrawingHandler {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
 
-            context.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.userTimeoutPromptAt }, player.clientId);
         }
 
         const result = { transitionTo: "PassStacksAroundHandler" };
@@ -50,7 +52,7 @@ export class GetUserDrawingHandler {
 
             for (let stack of stacksThatHaventBeenAddedTo) {
                 const stackItem = new StackItem("image", "/assets/no-submit.png");
-                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId(), systemGenerated: true });
             }
         }
 
@@ -62,7 +64,12 @@ export class GetUserDrawingHandler {
             const stackItem = new StackItem("image", message.imageUrl);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
-            stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
+            stack.add({
+                id: createId(),
+                ...stackItem,
+                author: message.metadata.clientId,
+                authorName: message.metadata.friendlyName
+            });
             context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;
@@ -73,6 +80,8 @@ export class GetUserDrawingHandler {
 export class GetUserCaptionHandler {
     constructor(waitForUsersFor) {
         this.waitForUsersFor = waitForUsersFor;
+        this.userTimeoutPromptAt = waitForUsersFor - 3_000;
+        this.userTimeoutPromptAt = this.userTimeoutPromptAt < 0 ? this.waitForUsersFor : this.userTimeoutPromptAt;
     }
 
     async execute(state, context) {
@@ -82,7 +91,7 @@ export class GetUserCaptionHandler {
         for (let player of state.players) {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
-            context.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.userTimeoutPromptAt }, player.clientId);
         }
 
         let redirect = { transitionTo: "PassStacksAroundHandler" };
@@ -96,8 +105,9 @@ export class GetUserCaptionHandler {
             const stacksThatHaventBeenAddedTo = state.stacks.filter(s => s.items.length === this.initialStackLength);
 
             for (let stack of stacksThatHaventBeenAddedTo) {
-                const stackItem = new StackItem("string", "Answer not submitted");
-                stack.add({ ...stackItem, author: "SYSTEM", id: createId() });
+                const initialHint = stack.items[0].value;
+                const stackItem = new StackItem("string", initialHint);
+                stack.add({ ...stackItem, author: "SYSTEM", id: createId(), systemGenerated: true });
             }
         }
 
@@ -109,7 +119,13 @@ export class GetUserCaptionHandler {
             const stackItem = new StackItem("string", message.caption);
             const stack = state.stacks.filter(s => s.heldBy == message.metadata.clientId)[0];
 
-            stack.add({ ...stackItem, author: message.metadata.clientId, id: createId() });
+            stack.add({
+                id: createId(),
+                ...stackItem,
+                author: message.metadata.clientId,
+                authorName: message.metadata.friendlyName
+            });
+
             context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
 
             this.submitted++;

@@ -128,6 +128,20 @@ describe("GetUserDrawingHandler", () => {
 
         expect(state.stacks[0].items.length).toBe(initialStackLength + 1);
     });
+
+    it("execute, timeout returned to user has three seconds of leeway in it.", async () => {
+        step = new GetUserDrawingHandler(10_000);
+        step.execute(state, context);
+
+        expect(channel.sentMessages[0].message.timeout).toBe(7_000);
+    });
+
+    it("execute when three seconds of leeway would be too much, timeout is the same as the handler timeout", async () => {
+        step = new GetUserDrawingHandler(2_000);
+        step.execute(state, context);
+
+        expect(channel.sentMessages[0].message.timeout).toBe(2_000);
+    });
 });
 
 describe("GetUserCaptionHandler", () => {
@@ -178,12 +192,28 @@ describe("GetUserCaptionHandler", () => {
 
     it("execute, if user times out, all stacks still have correct number of items in them so things don't crash later.", async () => {
         const initialStackLength = state.stacks[0].items.length;
-        console.log(initialStackLength);
-
         step = new GetUserCaptionHandler(100);
-        const result = await step.execute(state, context);
 
-        expect(state.stacks[0].items.length).toBe(initialStackLength + 1);
+        await step.execute(state, context);
+
+        const firstStack = state.stacks[0];
+        expect(firstStack.items.length).toBe(initialStackLength + 1);
+        expect(firstStack.items[firstStack.items.length - 1].value).toBe("hint1");
+        expect(firstStack.items[firstStack.items.length - 1].systemGenerated).toBe(true);
+    });
+
+    it("execute, timeout returned to user has three seconds of leeway in it.", async () => {
+        step = new GetUserCaptionHandler(10_000);
+        step.execute(state, context);
+
+        expect(channel.sentMessages[0].message.timeout).toBe(7_000);
+    });
+
+    it("execute when three seconds of leeway would be too much, timeout is the same as the handler timeout", async () => {
+        step = new GetUserCaptionHandler(2_000);
+        step.execute(state, context);
+
+        expect(channel.sentMessages[0].message.timeout).toBe(2_000);
     });
 });
 

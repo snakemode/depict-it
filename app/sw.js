@@ -1,24 +1,13 @@
 var cacheName = 'depict-it';
 
 var filesToCache = [
-    '/',
-    '/index.html',
+    '/offline.html',
     '/style.css',
-    '/index.js',
-    '/js/ably.min-1.js',
-    '/js/vue.min.js',
-    '/assets/bg.webp',
-    '/assets/rules.webp',
+    "/manifest.json",
     '/assets/logo.svg',
-    '/assets/loading.gif',
-    '/manifest.json',
-    '/assets/icons/icon.png',
-    '/assets/icons/favicon.ico',
-    '/assets/icons/16x16.png',
-    '/assets/icons/32x32.png',
-    '/assets/icons/180x180.png',
-    '/assets/icons/192x192.png',
-    '/assets/icons/512x512.png',
+    '/assets/ably.svg',
+    '/assets/bg.webp',
+    "/assets/icons/favicon.ico",
 ];
 
 self.addEventListener('install', function (e) {
@@ -30,26 +19,26 @@ self.addEventListener('install', function (e) {
             return cache.addAll(filesToCache);
         })
     );
-
 });
 
+
 self.addEventListener('activate', event => {
-    console.log("Activate");
     event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', event => {
-    if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+self.addEventListener('fetch', (event) => {
+    if (navigator.onLine) {
         return;
     }
 
-    if (navigator.onLine) {
-        return event.respondWith(fetch(event.request));
-    }
+    event.respondWith((async () => {
+        const response = await caches.match(event.request, { ignoreSearch: true });
+        if (response) {
+            return response;
+        }
 
-    event.respondWith(
-        caches.match(event.request, { ignoreSearch: true }).then(response => {
-            return response || fetch(event.request);
-        })
-    );
+        const cache = await caches.open(cacheName);
+        return await cache.match("/offline.html");
+
+    })());
 });
