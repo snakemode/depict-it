@@ -25,6 +25,8 @@ export class DealHandler {
 export class GetUserDrawingHandler {
     constructor(waitForUsersFor) {
         this.waitForUsersFor = waitForUsersFor;
+        this.userTimeoutPromptAt = waitForUsersFor - 3_000;
+        this.userTimeoutPromptAt = this.userTimeoutPromptAt < 0 ? this.waitForUsersFor : this.userTimeoutPromptAt;
     }
 
     async execute(state, context) {
@@ -35,7 +37,7 @@ export class GetUserDrawingHandler {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
 
-            context.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "drawing-request", value: lastItem.value, timeout: this.userTimeoutPromptAt }, player.clientId);
         }
 
         const result = { transitionTo: "PassStacksAroundHandler" };
@@ -73,6 +75,8 @@ export class GetUserDrawingHandler {
 export class GetUserCaptionHandler {
     constructor(waitForUsersFor) {
         this.waitForUsersFor = waitForUsersFor;
+        this.userTimeoutPromptAt = waitForUsersFor - 3_000;
+        this.userTimeoutPromptAt = this.userTimeoutPromptAt < 0 ? this.waitForUsersFor : this.userTimeoutPromptAt;
     }
 
     async execute(state, context) {
@@ -82,7 +86,7 @@ export class GetUserCaptionHandler {
         for (let player of state.players) {
             const stack = state.stacks.filter(s => s.heldBy == player.clientId)[0];
             const lastItem = stack.items[stack.items.length - 1];
-            context.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.waitForUsersFor }, player.clientId);
+            context.channel.sendMessage({ kind: "instruction", type: "caption-request", value: lastItem.value, timeout: this.userTimeoutPromptAt }, player.clientId);
         }
 
         let redirect = { transitionTo: "PassStacksAroundHandler" };
