@@ -1,4 +1,7 @@
 const Ably = require('ably/promises');
+const checkConfig = require("../checkConfiguration");
+
+checkConfig(["ABLY_API_KEY"]);
 
 module.exports = async function (context, req) {
     const client = new Ably.Realtime(process.env.ABLY_API_KEY);
