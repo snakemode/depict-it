@@ -1,5 +1,9 @@
+import { chromium } from "playwright";
+const chromeOptions = { headless: false };
+
 export class DepictItAppPageObject {
-    static async create(browser) {
+    static async create() {
+        const browser = await chromium.launch(chromeOptions);
         const page = await browser.newPage();
         await page.goto('http://127.0.0.1:8080');
         return new DepictItAppPageObject(browser, page);

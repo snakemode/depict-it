@@ -9,7 +9,7 @@
         "copydeps": "node build.js",
         "start": "run-p dev:api dev:server",
         "test": "jest",
-        "test:acceptance": "jest acceptance",
+        "test:acceptance": "jest acceptance --runInBand",
         "dev:api": "npm run start --prefix api",
         "dev:server": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api",
         "dev:server:test": "npx live-server app --proxy=/api:http://127.0.0.1:7071/api --no-browser --quiet",

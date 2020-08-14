@@ -1,16 +1,13 @@
-import { chromium } from "playwright";
 import { DepictItAppPageObject } from "./DepictItAppPageObject";
 
 jest.setTimeout(30_000);
-const chromeOptions = { headless: false };
 
 describe("Behaviour of the app as a game host", () => {
 
-    let browser, host, cleanup;
+    let host, cleanup;
     beforeEach(async () => {
-        browser = await chromium.launch(chromeOptions);
-        host = await DepictItAppPageObject.create(browser);
-        cleanup = [browser, host];
+        host = await DepictItAppPageObject.create();
+        cleanup = [host];
     });
 
     afterEach(async () => { cleanup.forEach(item => item.close()); });
@@ -20,22 +17,15 @@ describe("Behaviour of the app as a game host", () => {
 
         expect(joinUrl).not.toBeNull();
     });
-
-    async function newPageObject() {
-        const instance = await DepictItAppPageObject.create(browser);
-        cleanup.push(instance);
-        return instance;
-    }
 });
 
 describe("Behaviour of the app as a game client", () => {
 
-    let browser, host, cleanup, joinUrl;
+    let host, cleanup, joinUrl;
     beforeEach(async () => {
-        browser = await chromium.launch(chromeOptions);
-        host = await DepictItAppPageObject.create(browser);
+        host = await DepictItAppPageObject.create();
         joinUrl = await host.hostASession();
-        cleanup = [browser, host];
+        cleanup = [host];
     });
 
     afterEach(async () => { cleanup.forEach(item => item.close()); });
@@ -136,7 +126,7 @@ describe("Behaviour of the app as a game client", () => {
     });
 
     async function newPageObject() {
-        const instance = await DepictItAppPageObject.create(browser);
+        const instance = await DepictItAppPageObject.create();
         cleanup.push(instance);
         return instance;
     }
