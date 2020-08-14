@@ -16,6 +16,15 @@ import { PlayfieldCaption } from "./components/PlayfieldCaption.js";
 import { PlayfieldPickOne } from "./components/PlayfieldPickOne.js";
 import { PlayfieldDrawing } from "./components/PlayfieldDrawing.js";
 
+Vue.config.errorHandler = function (err, vm, info) {
+    console.error("Error", err, vm, info);
+
+    try {
+        rg4js('send', { error: err, customData: [{ info: info }] });
+    }
+    catch { }
+};
+
 Vue.component('DrawableCanvas', DrawableCanvas);
 Vue.component('StackItem', StackItem);
 Vue.component('TimerBar', TimerBar);
