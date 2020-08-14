@@ -6,7 +6,7 @@ export const StackItem = {
     }
   },
   template: `    
-<div>
+<div class="card">
   <span v-if="item.type == 'string'"
         v-on:click="emitIdOfClickedElement"
         class="stack-item stack-text">{{ item.value }}</span>
@@ -16,10 +16,10 @@ export const StackItem = {
         v-on:click="emitIdOfClickedElement"
         class="stack-item" />
 
-  <div style="display:none;">
+  <div class="author">
     <!-- Author names here -->
-    <span v-if="item.systemGenerated">🤖 SYSTEM</span>
-    <span v-else>💻 {{ item.authorName }}</span>
+    <span class="author-name" v-if="item.systemGenerated">🤖 Auto</span>
+    <span class="author-name" v-else>{{ item.authorName }}</span>
   </div>
 </div>
 `

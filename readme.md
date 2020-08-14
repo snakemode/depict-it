@@ -1,5 +1,4 @@
-Depict-It
-===========
+# Depict-It
 
 Depict-It is a party game for 4+ players (ideally!) where you mutate a phrase through drawings and captions, to make funny scenarios up with your friends.
 
@@ -23,49 +22,49 @@ The rest of this readme is a teardown, and an explaination of how the game is ma
 
 # Contents
 
-- [Depict-It](#depict-it)
-  - [The rules of the game](#the-rules-of-the-game)
-  - [This document](#this-document)
-- [Contents](#contents)
-  - [What are we going to build?](#what-are-we-going-to-build)
-- [Dependencies](#dependencies)
-  - [A brief introduction to Vue.js](#a-brief-introduction-to-vuejs)
-  - [Ably Channels for pub-sub](#ably-channels-for-pub-sub)
-  - [Ably channels and API keys](#ably-channels-and-api-keys)
-  - [Making sure to send consistent messages by wrapping the Ably client](#making-sure-to-send-consistent-messages-by-wrapping-the-ably-client)
-- [Building a Web App](#building-a-web-app)
-  - [HandleMessageFromAbly](#handlemessagefromably)
-  - [P2PClient](#p2pclient)
-  - [P2PServer](#p2pserver)
-- [Designing our game](#designing-our-game)
-  - [The GameStateMachine](#the-gamestatemachine)
-    - [Defining a game](#defining-a-game)
-    - [Defining a handler](#defining-a-handler)
-  - [How the GameStateMachine works](#how-the-gamestatemachine-works)
-  - [The GameStateMachine and our game](#the-gamestatemachine-and-our-game)
-    - [StartHandler](#starthandler)
-    - [DealHandler](#dealhandler)
-    - [GetUserDrawingHandler](#getuserdrawinghandler)
-    - [GetUserCaptionHandler](#getusercaptionhandler)
-    - [PassStacksAroundHandler](#passstacksaroundhandler)
-    - [GetUserScoresHandler](#getuserscoreshandler)
-    - [EndHandler](#endhandler)
-  - [Handlers and async / await](#handlers-and-async--await)
-- [The game UI](#the-game-ui)
-  - [Building our UI with Vue](#building-our-ui-with-vue)
-  - [Inside P2PServer](#inside-p2pserver)
-  - [Inside P2PClient](#inside-p2pclient)
-  - [Splitting our game phases into Vue componenets](#splitting-our-game-phases-into-vue-componenets)
-  - [The DepictIt Client](#the-depictit-client)
-  - [Storing images into Azure Blob Storage via an Azure Function](#storing-images-into-azure-blob-storage-via-an-azure-function)
-  - [Drawing using HTML5 Canvas](#drawing-using-html5-canvas)
-    - [How does the snake canvas work](#how-does-the-snake-canvas-work)
-    - [Touch support](#touch-support)
-- [Recap](#recap)
-- [Running on your machine](#running-on-your-machine)
-  - [Local dev pre-requirements](#local-dev-pre-requirements)
-  - [How to run for local dev](#how-to-run-for-local-dev)
-- [Hosting on Azure](#hosting-on-azure)
+* [Depict-It](#depict-it)
+  * [The rules of the game](#the-rules-of-the-game)
+  * [This document](#this-document)
+* [Contents](#contents)
+  * [What are we going to build?](#what-are-we-going-to-build)
+* [Dependencies](#dependencies)
+  * [A brief introduction to Vue.js](#a-brief-introduction-to-vuejs)
+  * [Ably Channels for pub-sub](#ably-channels-for-pub-sub)
+  * [Ably channels and API keys](#ably-channels-and-api-keys)
+  * [Making sure to send consistent messages by wrapping the Ably client](#making-sure-to-send-consistent-messages-by-wrapping-the-ably-client)
+* [Building a Web App](#building-a-web-app)
+  * [HandleMessageFromAbly](#handlemessagefromably)
+  * [P2PClient](#p2pclient)
+  * [P2PServer](#p2pserver)
+* [Designing our game](#designing-our-game)
+  * [The GameStateMachine](#the-gamestatemachine)
+    * [Defining a game](#defining-a-game)
+    * [Defining a handler](#defining-a-handler)
+  * [How the GameStateMachine works](#how-the-gamestatemachine-works)
+  * [The GameStateMachine and our game](#the-gamestatemachine-and-our-game)
+    * [StartHandler](#starthandler)
+    * [DealHandler](#dealhandler)
+    * [GetUserDrawingHandler](#getuserdrawinghandler)
+    * [GetUserCaptionHandler](#getusercaptionhandler)
+    * [PassStacksAroundHandler](#passstacksaroundhandler)
+    * [GetUserScoresHandler](#getuserscoreshandler)
+    * [EndHandler](#endhandler)
+  * [Handlers and async / await](#handlers-and-async--await)
+* [The game UI](#the-game-ui)
+  * [Building our UI with Vue](#building-our-ui-with-vue)
+  * [Inside P2PServer](#inside-p2pserver)
+  * [Inside P2PClient](#inside-p2pclient)
+  * [Splitting our game phases into Vue componenets](#splitting-our-game-phases-into-vue-componenets)
+  * [The DepictIt Client](#the-depictit-client)
+  * [Storing images into Azure Blob Storage via an Azure Function](#storing-images-into-azure-blob-storage-via-an-azure-function)
+  * [Drawing using HTML5 Canvas](#drawing-using-html5-canvas)
+    * [How does the snake canvas work](#how-does-the-snake-canvas-work)
+    * [Touch support](#touch-support)
+* [Recap](#recap)
+* [Running on your machine](#running-on-your-machine)
+  * [Local dev pre-requirements](#local-dev-pre-requirements)
+  * [How to run for local dev](#how-to-run-for-local-dev)
+* [Hosting on Azure](#hosting-on-azure)
 
 ## What are we going to build?
 
@@ -82,7 +81,7 @@ The app uses with Vue.js and Ably.
 ## A brief introduction to Vue.js
 
 > Vue (pronounced /vjuː/, like view) is a progressive framework for building user interfaces. It is designed from the ground up to be incrementally adoptable, and can easily scale between a library and a framework depending on different use cases. It consists of an approachable core library that focuses on the view layer only, and an ecosystem of supporting libraries that helps you tackle complexity in large Single-Page Applications. 
-> <cite>-- [vue.js Github repo](https://github.com/vuejs/vue)</cite>
+> <cite>-* [vue.js Github repo](https://github.com/vuejs/vue)</cite>
 
 [Vue.js](https://vuejs.org/) is a single page app framework, and we will use it to build the UI of the app. The Vue code lives in [index.js](index.js) and handles all of the user interactions. We're using Vue because it doesn't require a toolchain and it provides simple binding syntax for updating the UI when data changes.
 
@@ -443,9 +442,9 @@ As our game runs, and sends these messages to each individual client, it can col
 
 Luckily, there isn't very much logic in the game, it has to:
 
-- Ensure that when a player sends a response to a request, it is placed on the correct `game stack` of items
-- Keep track of scores when players vote on items
-- Keep track of which stack each player is currently holding
+* Ensure that when a player sends a response to a request, it is placed on the correct `game stack` of items
+* Keep track of scores when players vote on items
+* Keep track of which stack each player is currently holding
 
 We need to write some code for each of the game phases to send these `p2p messages` at the right time, and then, build a web UI that responds to the last message received to add a gameplay experience.
 
@@ -463,8 +462,8 @@ Let's take a look at what state machine code **can** look like - here's a two-st
 const twoStepGame = () => ({
     steps: {
         "StartHandler": {
-            execute: async function (state) { 
-                state.executeCalled = true; 
+            execute: async function (state) {
+                state.executeCalled = true;
                 return { transitionTo: "EndHandler" };
             }
         },
@@ -504,12 +503,12 @@ Here's one of the handlers from the previous example:
 
 ```js
 {
-    execute: async function (state, context) { 
-        await waitUntil(() => state.gotInput == true, 5_000);                
-        return { transitionTo: "EndHandler" }; 
+    execute: async function (state, context) {
+        await waitUntil(() => state.gotInput == true, 5_000);
+        return { transitionTo: "EndHandler" };
     },
-    handleInput: async function(state, context, input) { 
-        state.gotInput = true; 
+    handleInput: async function(state, context, input) {
+        state.gotInput = true;
     }
 }
 ```
@@ -586,7 +585,7 @@ Once a response from the current handler has been received:
 
 This flow of moving between game steps based on the outcome of the current step allows us to define all kinds of games!
 
-The state machine contains the function `handleInput`
+The state machine contains a `handleInput` function:
 
 ```js
 async handleInput(input) {
@@ -599,18 +598,15 @@ async handleInput(input) {
 }
 ```
 
-This is the glue code that we can pass input to, which will in turn find the currently active step, and forward the input onto the `handleInput` function defined in it. This means if any of our steps require user input, the input will be passed through this function.
+We pass user input to this function and it will find the currently active step, and forward the input onto the relevant `handleInput` function defined in it. This means if any of our steps require user input, the input will be passed through this function.
 
-We'll have to wire this up to our Web UI and Ably connection later.
-
+We can connect this up to our Web UI and Ably connection later.
 
 ## The GameStateMachine and our game
 
-Now that we understand a little about how the `GameStateMachine` can be used to define "any game", let's get specific and talk about `Depict-It`.
+Inside `/app/js/game/` there are a series of files. (The ones with `DepictIt` in the filename contain the game logic.)
 
-Inside of `/app/js/game/` there are a series of files. (The ones with `DepictIt` in the filename contain the game logic.)
-
-```
+```[bash]
 DepictIt.js
 DepictIt.cards.js
 DepictIt.handlers.js
@@ -635,76 +631,75 @@ export const DepictIt = (handlerContext) => new GameStateMachine({
 });
 ```
 
-It is a function because we're going to pass in our Ably connection inside the `handlerContext` parameter here, but it returns a fully created `GameStateMachine` instance to run in the Vue.js app. The game is defined as a series of handlers in the sample above. Each of these game handlers are `imported` from the `DepictIt.handlers.js` file.
+It is a function because we're going to pass in an Ably connection inside the `handlerContext` parameter, but it returns a fully created `GameStateMachine` instance to run in the Vue.js app. The game is defined as a series of handlers in the sample above. Each of these game handlers are imported from the `DepictIt.handlers.js` file.
 
-Each `Handler` has access to an `ably client` supplied as a property called `channel` in our `context` object, and the game works by having the hosting player's browser keep track of where all the `game hands` are, sending players `p2p messages` to make the client code in their browsers prompt the players for input.
+Each `Handler` has access to an `ably client` supplied as a property called `channel` in a `context` object. The game works by having the hosting player's browser keep track of where all the `game hands` are, sending players p2p messages to make the client code in their browsers prompt the players for input.
 
 Each of these messages looks similar:
 
 ```js
-context.channel.sendMessage({ 
-    kind: "instruction", 
-    type: "drawing-request", 
-    value: lastItem.value, 
-    timeout: this.waitForUsersFor 
-  }, player.clientId);      
+context.channel.sendMessage({
+    kind: "instruction",
+    type: "drawing-request",
+    value: lastItem.value,
+    timeout: this.waitForUsersFor
+  }, player.clientId);
 ```
 
-They each contain a property called `kind` with a value of `instruction`, which will allow the clients to process these messages differently to the standard `connection` messages. They also each have a `type` - which varies depending on the phase of the game currently playing.
+They each contain a property called `kind` with a value of `instruction`, which will allow the clients to process these messages differently to the standard `connection` messages. They also each have a `type` - which varies depending on which phase of the game is currently being played.
 
-The `Handlers` control which message `types` they send, but they'll always also contain a `value`.
+The `Handlers` control which message `types` they send, they'll always also contain a `value`.
 
-This value, when we're in a drawing phase of the game, is going to be the `hint` the player is using to draw from, and if we're in the `captioning` phase of the game, it'll contain the `url` of the image they need to caption so our players browser can render it in the UI.
+This value, when in the drawing phase of the game, is going to be the `prompt` the player is using to draw from, and if we're in the `captioning` phase of the game, it'll contain the URL of the image they need to caption so our players browser can render it in the UI.
 
-The messages can also feature an optional `timeout` value - some of our steps have a time limit on the length of time they'll wait for users to reply with a drawing or caption, so including this `timeout` in the `instruction` means we can render a timer bar on the client side.
+The messages can also feature an optional `timeout` value (some of the steps have a time limit on the length of time they'll wait for users to reply with a drawing or caption), so including this `timeout` in the `instruction` means we can render a timer bar on the client side.
 
-Let's dive into a few of our steps and take a look at what they do.
+Let's dive into a few of our steps and take a look at what they do:
 
 ### StartHandler
 
-**On execute**
+On execute:
 
-* Creates hint deck imported from  `DepictIt.cards.js`
+* Creates prompt deck imported from  `DepictIt.cards.js`
 * Shuffles deck
 * Transitions to `DealHandler`
 
-**On handleInput**
+On handleInput:
 
 * There is no user input.
 
 ### DealHandler
 
-**On execute**
+On execute:
 
 * Creates `Game Stack` for every player in `state.players`
-* Adds hint to the top of the `Game Stack`
+* Adds prompt to the top of the `Game Stack`
 * Transitions to `GetUserDrawingHandler`
 
-**On handleInput**
+On handleInput:
 
 * There is no user input.
 
 ### GetUserDrawingHandler
 
-**On execute**
+On execute:
 
 * Sends `drawing-request` for every player in `state.players`
-* Request contains `hint` from the top of that players `Game Stack`
+* Request contains `prompt` from the top of that players `Game Stack`
 * Waits for players to respond, or 180 seconds have elapsed
 * Adds placeholder images to `Game Stack` if players do not respond.
 * Transitions to `PassStacksAroundHandler`
 
-
-**On handleInput**
+On handleInput:
 
 * Handler expects a `url` property in player response message.
-* `url` points to image stored somewhere publically accessible. 
+* `url` points to image stored somewhere publically accessible.
 * We're going to use `Azure storage buckets` for this later on.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
 ### GetUserCaptionHandler
 
-**On execute**
+On execute:
 
 * Sends `caption-request` for every player in `state.players`
 * Request contains `url` from the top of that players `Game Stack`
@@ -712,15 +707,14 @@ Let's dive into a few of our steps and take a look at what they do.
 * Adds "Answer not submitted" to `Game Stack` if players do not respond.
 * Transitions to `PassStacksAroundHandler`
 
-
-**On handleInput**
+On handleInput:
 
 * Handler expects a `caption` property in player response message.
 * When player input is received, an `instruction` is sent to the player, prompting them to `wait`.
 
 ### PassStacksAroundHandler
 
-**On execute**
+On execute:
 
 * Moves the `Game Stacks` forward to the next player that is required to contribute
 * If the `Game Stacks` have been moved to their original owner, transitions to `GetUserScoresHandler`
@@ -730,32 +724,28 @@ Let's dive into a few of our steps and take a look at what they do.
 
 ### GetUserScoresHandler
 
-**On execute**
+On execute:
 
 * Sends a `pick-one-request` for each `Game Stack`
 * Waits for all users to submit a score for that specific `Game Stack`
 * Sends the next `pick-one-request` until all `Game Stacks` have been scored.
 
-**On handleInput**
+On handleInput:
 
 * Assigns a vote to the author of each picked `Game Stack Item`
 * Also handles admin input to progress the game forward and skip the user scoring, to prevent games hanging.
 
 ### EndHandler
 
-**On execute**
+On execute:
 
 * Sends a `show-scores` message with the final scores of the `Game round`
 
 ## Handlers and async / await
 
-The interesting thing about these handlers, is we're using `async/await` and an `unresolved Promise` to pause the execution while we wait for user input.
-This is a fun trick, allowing us to represent our game's control flow `linearly` while waiting for messages to arrive over our `p2p channel`.
+The interesting thing about these handlers is that we're using `async/await` and an **unresolved Promise** to pause the execution while we wait for user input. This allows us to represent the game's control flow linearly while waiting for messages to arrive over the `p2p channel`.
 
-Lets take a look at our `GetUserDrawingHandler` as an example of this.
-
-First we setup our execute method, creating an instance variable `submitted` (scoped to `this`). 
-We know that when the number of `submitted` drawings, is equal to the total number of `players`, every player has sent an image.
+`GetUserDrawingHandler` is an example of this linear flow: First we setup an execute method, creating an instance variable called `submitted` (scoped to `this`). We know that when the number of `submitted` drawings, is equal to the total number of `players`, every player has sent an image.
 
 ```js
 async execute(state, context) {
@@ -771,6 +761,7 @@ Next, we send an `instruction` to each player, in this case a `drawing-request`
         context.channel.sendMessage({ kind: "instruction", type: "drawing-request", ...);
     }
 ```
+
 Then we begin waiting for responses.
 We use the syntax `await waitUntil(() => some condition)` here to do this.
 
@@ -789,10 +780,9 @@ We use the syntax `await waitUntil(() => some condition)` here to do this.
 }
 ```
 
-What this does, is create an `unresolved Promise` that in the background is `polling` and executing the `function` passed to it.
-This function can contain anything, and when it returns `true`, we continue our execution as the `Promise` will resolve.
+What this does, is create an **unresolved Promise** that in the background is (polling)[https://davidwalsh.name/javascript-polling] and executing the function passed to it. This function can contain anything, and when it returns `true`, the execution will continue and the `Promise` will resolve.
 
-While our code is `paused` here `awaiting` the unresolved `Promise`, further user input can be provided by calling `handleInput` from our `Ably client callback`.
+While the code is paused here, awaiting the unresolved Promise, further user input can be provided by calling `handleInput` from the Ably client callback.
 
 ```js
 async handleInput(state, context, message) {
@@ -808,14 +798,13 @@ async handleInput(state, context, message) {
 }
 ```
 
-You'll notice the code here increments `this.submitted` - each time our `waitUntil` condition runs, it's checking what the current value of `this.submitted` is, and when `this.submitted` finally reaches the target `state.players.length`.
+Notice that the code here increments `this.submitted` - each time the `waitUntil` condition runs, it is checking what the current value of `this.submitted` is, and when `this.submitted` finally reaches the target `state.players.length`.
 
-Our `waitUntil` call, also takes a timeout value - in this example it's the `instance variable` `this.waitForUsersFor` which is prvoided in our constructor. If our `callback condition` hasn't been reached by the time we reach this `timeout` value, the `Promise` will be rejected, and an `exception` will be thrown.
+The `waitUntil` call, also takes a timeout value - in this example it's the `instance variable` `this.waitForUsersFor` which is prvoided in our constructor. If our `callback condition` hasn't been reached by the time we reach this `timeout` value, the `Promise` will be rejected, and an `exception` will be thrown.
 
 In the real handler, we have some code there to make sure that each of our `Game Stacks` is in a valid state.
 
 Each of the handlers that require user input follows this pattern.
-
 
 # The game UI
 
@@ -1182,18 +1171,19 @@ export const StackItem = {
       this.$emit('click', this.item.id);
     }
   },
-  template: `    
+  template: `
 <span v-if="item.type == 'string'"
       v-on:click="emitIdOfClickedElement"
       class="stack-item stack-text">{{ item.value }}</span>
 
-<img  v-else      
+<img  v-else
       v-bind:src="item.value"
       v-on:click="emitIdOfClickedElement"
       class="stack-item" />
 `
 };
 ```
+
 `Vue Components`
 - Can Have named `props` that you can bind in `HTML` using the `:prop-name="something"` syntax
 - Can Have methods
@@ -1222,9 +1212,9 @@ export const PlayfieldDrawing = {
 
   template: `      
   <section v-if="state?.lastInstruction?.type == 'drawing-request'">
-    <div class="drawing-hint">
-      <div class="hint-front">Draw This</div>
-      <div class="hint-back">
+    <div class="drawing-prompt">
+      <div class="prompt-front">Draw This</div>
+      <div class="prompt-back">
         {{ state.lastInstruction.value }}
       </div>
     </div>
