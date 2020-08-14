@@ -307,15 +307,11 @@ button:hover {
 
 .gallery {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 20px;
-}
-
-.gallery .section-heading {
-  padding-top: 2em;
-  max-width: calc(100% - 280px - 280px);
 }
 
 .gallery-item {
@@ -629,7 +625,14 @@ button:hover {
   }
 
   .gallery {
+    flex-direction: row;
     gap: 60px;
+  }
+  .gallery .section-heading {
+    width: auto;
+    margin-left: 300px;
+    margin-right: 300px;
+    padding-top: 2em;
   }
 
   .score {
