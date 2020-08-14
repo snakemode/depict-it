@@ -313,6 +313,11 @@ button:hover {
   gap: 20px;
 }
 
+.gallery .section-heading {
+  padding-top: 2em;
+  max-width: calc(100% - 280px - 280px);
+}
+
 .gallery-item {
   display: flex;
   justify-content: center;
@@ -643,9 +648,10 @@ button:hover {
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-end;
-    position: static;
+    position: absolute;
     bottom: 0;
     right: 0;
+    z-index: -1;
   }
 
   .ably {
