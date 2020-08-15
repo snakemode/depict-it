@@ -64,7 +64,9 @@ export var app = new Vue({
 });
 
 function shouldHandleMessage(message, metadata) {
-  return message.forClientId == null || !message.forClientId || (message.forClientId && message.forClientId === metadata.clientId);
+  let messageReceipients = message.forClientId?.constructor === Array ? message.forClientId : [message.forClientId];
+  messageReceipients = messageReceipients.filter(mr => mr != null);
+  return messageReceipients.length == 0 || messageReceipients.indexOf(metadata.clientId) > -1;
 }
 
 function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
@@ -73,7 +75,6 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
     p2pClient?.onReceiveMessage(message);
   }
 }
-
 
 window.addEventListener('offline', function (e) { app.online = false; });
 window.addEventListener('online', function (e) { app.online = true; });

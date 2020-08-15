@@ -23,8 +23,6 @@ export class DealHandler {
             const hint = state.hints.pop();
             const stack = new Stack(player.clientId, hint);
             state.stacks.push(stack);
-
-            // send message to confirm player is "in" game?
         }
         return { transitionTo: "GetUserDrawingHandler" };
     }
@@ -179,7 +177,7 @@ export class GetUserScoresHandler {
             this.skip = false;
             this.submitted = 0;
 
-            context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack });
+            context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack }, state.activePlayers.map(p => p.clientId));
 
             try {
                 await waitUntil(() => { return this.skip || (this.submitted == state.activePlayers.length); });
