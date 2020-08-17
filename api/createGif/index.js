@@ -4,6 +4,13 @@ const fetch = require('node-fetch');
 const fs = require("fs");
 const saveToAzure = require("../features/storage/saveToAzure");
 
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 module.exports = async function (context, req) {
     if (!req.body.stack
         || !req.body.stack.items
@@ -22,12 +29,10 @@ module.exports = async function (context, req) {
     }
 
     const gif = await gifFromFrames(frames);
-
-    const filename = "temp.gif";
-    const buffer = new ArrayBuffer();
+    const filename = uuidv4() + "-temp.gif";
 
     const url = await saveToAzure(filename, gif);
-    fs.writeFileSync("C:\\dev\\depict-it\\file.gif", gif.buffer);
+    // fs.writeFileSync("C:\\dev\\depict-it\\test-output\\" + filename, gif);
 
     return gifResponse(context, url);
 };
@@ -54,8 +59,8 @@ async function imageFromUrl(url) {
 
 async function imageWithText(text) {
     const image = new Jimp(400, 400, 'white');
-    let x = 10
-    let y = 10
+    let x = 10;
+    let y = 10;
 
     const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
     image.print(font, x, y, text);
