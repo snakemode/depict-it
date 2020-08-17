@@ -5,7 +5,7 @@ body {
   margin: 0 auto;
   border: 0;
   padding: 0;
-  background: #17b5e9 url(./assets/bg.webp);
+  background: #17b5e9 url(./assets/bg.png);
   box-sizing: border-box;
   font-family: 'Sora', arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -573,6 +573,7 @@ button:hover {
   }
 
   .hint-front, .hint-back {
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     position: absolute;
     top: 0;
@@ -628,6 +629,7 @@ button:hover {
     flex-direction: row;
     gap: 60px;
   }
+
   .gallery .section-heading {
     width: auto;
     margin-left: 300px;
