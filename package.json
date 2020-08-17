@@ -18,7 +18,12 @@
     },
     "author": "",
     "dependencies": {
-        "@snakemode/snake-canvas": "^1.0.6"
+        "@azure/identity": "^1.0.3",
+        "@azure/storage-blob": "^12.2.0-preview.1",
+        "@snakemode/snake-canvas": "^1.0.6",
+        "gifwrap": "^0.9.2",
+        "jimp": "^0.16.0",
+        "node-fetch": "^2.6.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.10.4",

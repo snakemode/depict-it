@@ -3,7 +3,7 @@ import { DepictItCards } from "./DepictIt.cards.js";
 import { waitUntil } from "./GameStateMachine.js";
 
 function playerIsInActivePlayers(state, playerIdentity) {
-    return state.activePlayers.filter(ap => ap.clientId == playerIdentity.clientId).length > 0;
+    return state.activePlayers.filter(ap => ap.clientId == playerIdentity?.clientId).length > 0;
 }
 
 export class StartHandler {

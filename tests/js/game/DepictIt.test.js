@@ -83,6 +83,7 @@ describe("GetUserDrawingHandler", () => {
         channel = new NullMessageChannel();
         state = {
             players: [identity],
+            activePlayers: [identity],
             stacks: [new Stack(identity.clientId, "hint1")],
             hints: ["hint1", "hint2"]
         };
@@ -151,6 +152,7 @@ describe("GetUserCaptionHandler", () => {
         channel = new NullMessageChannel();
         state = {
             players: [identity],
+            activePlayers: [identity],
             stacks: [new Stack(identity.clientId, "hint1")],
             hints: ["hint1", "hint2"]
         };
@@ -225,6 +227,7 @@ describe("PassStacksAroundHandler", () => {
         channel = new NullMessageChannel();
         state = {
             players: [p1, p2],
+            activePlayers: [p1, p2],
             stacks: [
                 new Stack(p1.clientId, "hint1"),
                 new Stack(p2.clientId, "hint2"),
@@ -278,6 +281,7 @@ describe("GetUserScoresHandler", () => {
         channel = new NullMessageChannel();
         state = {
             players: [p1],
+            activePlayers: [p1],
             stacks: [
                 new Stack(p1.clientId, "hint1"),
             ],
@@ -314,7 +318,7 @@ describe("GetUserScoresHandler", () => {
 
     it("execute, can be skipped by host", async () => {
         setTimeout(async () => {
-            step.handleInput(state, context, { kind: "skip-scoring-forwards" });
+            step.handleInput(state, context, { kind: "skip-scoring-forwards", metadata: { clientId: p1.clientId } });
         }, 100);
 
         const result = await step.execute(state, context);
@@ -330,6 +334,7 @@ describe("EndHandler", () => {
         channel = new NullMessageChannel();
         state = {
             players: [p1],
+            activePlayers: [p1],
             stacks: [new Stack(p1.clientId, "hint1")],
             hints: ["hint1"],
         };

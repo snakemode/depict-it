@@ -1,6 +1,4 @@
-const { StorageSharedKeyCredential } = require("@azure/storage-blob");
-const { BlobServiceClient } = require("@azure/storage-blob");
-const checkConfig = require("../checkConfiguration");
+const saveToAzure = require("../features/storage/saveToAzure");
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -9,21 +7,12 @@ function uuidv4() {
     });
 }
 
-checkConfig(["AZURE_ACCOUNT", "AZURE_KEY", "AZURE_BLOBSTORAGE", "AZURE_CONTAINERNAME"]);
-
 module.exports = async function (context, req) {
-
-    const defaultAzureCredential = new StorageSharedKeyCredential(process.env.AZURE_ACCOUNT, process.env.AZURE_KEY);
-    const blobServiceClient = new BlobServiceClient(process.env.AZURE_BLOBSTORAGE, defaultAzureCredential);
-    const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINERNAME);
-
     const unique = `game_${req.body.gameId}_${uuidv4()}.png`;
-    const url = `${process.env.AZURE_BLOBSTORAGE}/${process.env.AZURE_CONTAINERNAME}/${unique}`;
     const fileData = req.body.imageData.replace(/^data:image\/\w+;base64,/, "");
     const buffer = new Buffer(fileData, 'base64');
 
-    const blockBlobClient = containerClient.getBlockBlobClient(unique);
-    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length || 0);
+    const url = await saveToAzure(unique, buffer);
 
     context.res = {
         headers: { "content-type": "application/json" },
