@@ -5,7 +5,7 @@ body {
   margin: 0 auto;
   border: 0;
   padding: 0;
-  background: red;
+  background: #17b5e9 url(./assets/bg.png);
   box-sizing: border-box;
   font-family: 'Sora', arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -156,26 +156,16 @@ button:hover {
   padding: 10px;
 }
 
-@supports (gap: 40px) {
-  .players {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    margin: 0 0 1em;
-    padding: 0;
-    gap: 40px;
-  }
-}
 
-@supports not (gap: 40px) {
-  .players {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    width: 100%;
-    margin: 0 0 1em;
-    padding: 0;
-  }
+.players {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  place-items: center;
+  grid-gap: 20px;
+  width: 100%;
+  margin: 0 0 1em;
+  padding: 0;
+
 }
 
 .player {
@@ -320,26 +310,12 @@ button:hover {
   margin-bottom: 1em;
 }
 
-@supports (gap: 20px) {
-  .gallery {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-  }
-}
 
-@supports not (gap: 20px) {
-  .gallery {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    margin: 10px;
-  }
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .gallery-item {
@@ -349,6 +325,7 @@ button:hover {
   position: relative;
   width: 400px;
   height: 400px;
+  margin: 10px;
   border-radius: 40px;
   border: 6px solid #222;
   border-left: 10px solid #222;
@@ -487,7 +464,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 10px;
+  margin: 20px;
   text-align: right;
 }
 
@@ -560,7 +537,7 @@ button:hover {
 
   .timer {
     position: absolute;
-    top: calc(100% - 40px);
+    top: calc(100% + 20px);
     left: 130px;
     width: calc(100vh - 180px - 60px);
     height: 40px;
@@ -651,16 +628,8 @@ button:hover {
     height: min-content;
   }
 
-  .gallery {
-    flex-direction: row;
-    gap: 40px;
-  }
-
-  @supports not (gap: 20px) {
-    .gallery {
-      flex-direction: row;
-      justify-content: space-around;
-    }
+  .gallery-item {
+    margin: 30px;
   }
 
   .score {
