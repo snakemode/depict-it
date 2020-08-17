@@ -19,11 +19,14 @@ export const PlayfieldPickOne = {
 
   template: `
     <div>
-
       <section v-if="state?.lastInstruction?.type == 'pick-one-request'" class="gallery">
         <h2 class="section-heading">Which card is best?</h2>
         <div v-for="item in state?.lastInstruction?.stack.items" class="gallery-item">
           <stack-item :item="item" v-on:click="sendVote"></stack-item>
+        </div>
+        
+        <div>
+          Share this: {{ state?.lastInstruction?.gif }}
         </div>
       </section>
             

@@ -1,5 +1,5 @@
 const Ably = require('ably/promises');
-const checkConfig = require("../checkConfiguration");
+const checkConfig = require("../features/checkConfiguration");
 
 checkConfig(["ABLY_API_KEY"]);
 

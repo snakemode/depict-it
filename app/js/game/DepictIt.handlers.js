@@ -177,7 +177,9 @@ export class GetUserScoresHandler {
             this.skip = false;
             this.submitted = 0;
 
-            context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack }, state.activePlayers.map(p => p.clientId));
+            const shareableGif = await this.getSharableUrl(stack);
+
+            context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack, gif: shareableGif }, state.activePlayers.map(p => p.clientId));
 
             try {
                 await waitUntil(() => { return this.skip || (this.submitted == state.activePlayers.length); });
@@ -223,6 +225,21 @@ export class GetUserScoresHandler {
 
         context.channel.sendMessage({ kind: "instruction", type: "wait" }, message.metadata.clientId);
         this.submitted++;
+    }
+
+    async getSharableUrl(stack) {
+        try {
+            const result = await fetch("/api/createGif", {
+                method: "POST",
+                body: JSON.stringify({ stack })
+            });
+
+            const response = await result.json();
+            return response.url;
+        } catch {
+            console.log("Failed to generate gif");
+            return "";
+        }
     }
 }
 

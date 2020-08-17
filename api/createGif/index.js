@@ -29,9 +29,9 @@ module.exports = async function (context, req) {
     }
 
     const gif = await gifFromFrames(frames);
-    const filename = uuidv4() + "-temp.gif";
+    const filename = uuidv4() + ".gif";
 
-    const url = await saveToAzure(filename, gif);
+    const url = await saveToAzure(filename, gif, "shareables", "image/gif");
     // fs.writeFileSync("C:\\dev\\depict-it\\test-output\\" + filename, gif);
 
     return gifResponse(context, url);
