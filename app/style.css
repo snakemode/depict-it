@@ -156,13 +156,26 @@ button:hover {
   padding: 10px;
 }
 
-.players {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-  margin: 0 0 1em;
-  padding: 0;
-  gap: 40px;
+@supports (gap: 40px) {
+  .players {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0 0 1em;
+    padding: 0;
+    gap: 40px;
+  }
+}
+
+@supports not (gap: 40px) {
+  .players {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0 0 1em;
+    padding: 0;
+  }
 }
 
 .player {
@@ -307,13 +320,26 @@ button:hover {
   margin-bottom: 1em;
 }
 
-.gallery {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
+@supports (gap: 20px) {
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+@supports not (gap: 20px) {
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+  }
 }
 
 .gallery-item {
@@ -461,7 +487,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 20px;
+  margin: 10px;
   text-align: right;
 }
 
@@ -502,8 +528,8 @@ button:hover {
     position: absolute;
     top: 20px;
     left: 20px;
-    width: 240px;
-    height: 180px;
+    width: 230px;
+    height: 160px;
     border: 0;
   }
 
@@ -523,11 +549,9 @@ button:hover {
   }
 
   .join-container, .game-info, .offline-notice {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+      position: relative;
+      padding-top: 16vh;
+      z-index: 2;
   }
   
   .copy-link-text {
@@ -629,14 +653,14 @@ button:hover {
 
   .gallery {
     flex-direction: row;
-    gap: 60px;
+    gap: 40px;
   }
 
-  .gallery .section-heading {
-    width: auto;
-    margin-left: 300px;
-    margin-right: 300px;
-    padding-top: 2em;
+  @supports not (gap: 20px) {
+    .gallery {
+      flex-direction: row;
+      justify-content: space-around;
+    }
   }
 
   .score {
@@ -655,7 +679,7 @@ button:hover {
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-end;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     right: 0;
     z-index: 1;
