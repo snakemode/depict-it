@@ -120,7 +120,7 @@ You can also see Vue's binding syntax, where we use `{{ greeting }}` to bind dat
 
 ## Ably Channels for pub-sub
 
-The app uses [Ably](https://www.ably.io/) for [pub-sub](https://www.ably.io/documentation/core-features/pubsub) between our players.
+The app uses [Ably](https://www.ably.io/) for [pub-sub](https://www.ably.io/documentation/core-features/pubsub) between the players.
 
 [Ably Channels](https://www.ably.io/channels) are multicast (many publishers can publish to many subscribers) and we can use them to build peer-to-peer apps.
 
@@ -650,7 +650,7 @@ They each contain a property called `kind` with a value of `instruction`, which 
 
 The `Handlers` control which message `types` they send, they'll always also contain a `value`.
 
-This value, when in the drawing phase of the game, is going to be the `prompt` the player is using to draw from, and if we're in the `captioning` phase of the game, it'll contain the URL of the image they need to caption so our players browser can render it in the UI.
+This value, when in the drawing phase of the game, is going to be the `prompt` the player is using to draw from, and if we're in the `captioning` phase of the game, it'll contain the URL of the image they need to caption so our player's browser can render it in the UI.
 
 The messages can also feature an optional `timeout` value (some of the steps have a time limit on the length of time they'll wait for users to reply with a drawing or caption), so including this `timeout` in the `instruction` means we can render a timer bar on the client side.
 
