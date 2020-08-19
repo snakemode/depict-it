@@ -34,12 +34,8 @@
 
                 const response = await fetch("/api/tweetGif", { method: "POST", body: JSON.stringify({ stack }) });
                 const responseBody = await response.json();
-                const tweetId = response.tweet_id;
 
-                statusElement.innerText = `Tweeted ${tweetId}`;
-
-
-                window.location = `https://twitter.com/intent/retweet?tweet_id=${tweetId}`;
+                window.location = `https://twitter.com/intent/retweet?tweet_id=${responseBody.id_str}&related=DepictItGame`;
             }
             catch {
                 statusElement.innerText = "Sorry, there was an error sharing your game stack.";
