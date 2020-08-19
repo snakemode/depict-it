@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
     const media = await client.post('media/upload', { media: gif });
 
     var status = {
-        status: 'Look at this Depict-It stack!',
+        status: 'Look at this Depict-It progression!',
         media_ids: media.media_id_string
     };
 
