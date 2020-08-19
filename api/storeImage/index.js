@@ -10,7 +10,7 @@ function uuidv4() {
 module.exports = async function (context, req) {
     const unique = `game_${req.body.gameId}_${uuidv4()}.png`;
     const fileData = req.body.imageData.replace(/^data:image\/\w+;base64,/, "");
-    const buffer = new Buffer(fileData, 'base64');
+    const buffer = Buffer.from(fileData, "base64");
 
     const url = await saveToAzure(unique, buffer);
 
