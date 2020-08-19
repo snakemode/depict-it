@@ -17,6 +17,13 @@ export const PlayfieldPickOne = {
     },
     cardUrl: function () {
       return `${window.location.protocol}//${window.location.host}/api/share-card/?id=${this.state?.lastInstruction?.stack.id}`;
+    },
+    twitterUrl: function () {
+      const text = "Take a look at this Depict-It hand!";
+      const via = "DepictItGame";
+      const hashtags = "depictit";
+      const related = "ablyrealtime";
+      return `https://twitter.com/intent/tweet?hashtags=${encodeURI(hashtags)}&related=${encodeURI(related)}&text=${encodeURI(text)}&tw_p=tweetbutton&url=${encodeURI(this.cardUrl)}&via=${via}`;
     }
   },
 
@@ -29,17 +36,7 @@ export const PlayfieldPickOne = {
         </div>
         
         <div>
-          <a :href="cardUrl">Share this stack</a>
-
-          <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" 
-            class="twitter-share-button" 
-            data-size="large" 
-            data-text="Take a look at this Depict-It hand!" 
-            :data-url="cardUrl" 
-            data-via="DepictItGame" 
-            data-hashtags="depictit" 
-            data-related="ablyrealtime" 
-            data-show-count="false">Tweet</a>
+          <a :href="twitterUrl" target="_twitterShare">Tweet</a>          
         </div>
       </section>
             
