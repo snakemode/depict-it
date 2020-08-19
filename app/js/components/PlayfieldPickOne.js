@@ -7,23 +7,16 @@ export const PlayfieldPickOne = {
     },
     progressVote: async function () {
       await this.client.hostProgressedVote();
-    }
+    },
+    storeStackInLocalStorage: async function () {
+      localStorage.setItem("share", JSON.stringify(this.state?.lastInstruction?.stack));
+    },
   },
 
   computed: {
     displaySkipButtonForHost: function () {
       const previousInstruction = this.state?.instructionHistory[this.state?.instructionHistory.length - 2];
       return this.isHost && (this.state?.lastInstruction?.type == 'wait' && previousInstruction.type == "pick-one-request");
-    },
-    cardUrl: function () {
-      return `${window.location.protocol}//${window.location.host}/api/share-card/?id=${this.state?.lastInstruction?.stack.id}`;
-    },
-    twitterUrl: function () {
-      const text = "Take a look at this Depict-It hand!";
-      const via = "DepictItGame";
-      const hashtags = "depictit";
-      const related = "ablyrealtime";
-      return `https://twitter.com/intent/tweet?hashtags=${encodeURI(hashtags)}&related=${encodeURI(related)}&text=${encodeURI(text)}&tw_p=tweetbutton&url=${encodeURI(this.cardUrl)}&via=${via}`;
     }
   },
 
@@ -36,7 +29,7 @@ export const PlayfieldPickOne = {
         </div>
         
         <div>
-          <a :href="twitterUrl" target="_twitterShare">Tweet</a>          
+          <a v-on:click="storeStackInLocalStorage" href="/share" target="_twitterShare">Tweet</a>          
         </div>
       </section>
             
