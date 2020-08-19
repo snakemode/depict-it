@@ -12,9 +12,7 @@ export var app = new Vue({
     p2pServer: null,
 
     gameId: null,
-    friendlyName: null,
-
-    online: navigator.onLine ?? false
+    friendlyName: null
   },
   computed: {
     state: function () { return this.p2pClient?.state; },
@@ -75,9 +73,6 @@ function handleMessagefromAbly(message, metadata, p2pClient, p2pServer) {
     p2pClient?.onReceiveMessage(message);
   }
 }
-
-window.addEventListener('offline', function (e) { app.online = false; });
-window.addEventListener('online', function (e) { app.online = true; });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');

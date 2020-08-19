@@ -82,39 +82,33 @@
       </div>
     </header>
 
-    <div v-if="!online" class="offline-notice">
-      <h2>You are offline!</h2>
-      <p>Depict-It is a multiplayer game that requires the internet.</p>
-      <p>Please try again when you have an internet connection!</p>
+
+
+    <div v-if="!joinedOrHosting" class="join-container">
+      <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
     </div>
-    <div v-else>
-
-      <div v-if="!joinedOrHosting" class="join-container">
-        <create-game-form v-on:create="host" v-on:join="join"></create-game-form>
+    <div v-else id="activeGame" class="game-info">
+      <div class="game-lobby" v-if="gameCanBeStarted">
+        <invite-link :game-id="gameId"></invite-link>
+        <connected-players-summary :state="transmittedServerState"></connected-players-summary>
+        <ready-or-waiting-prompt :is-host="isHost" :state="transmittedServerState" v-on:startgame="startGame">
+        </ready-or-waiting-prompt>
       </div>
-      <div v-else id="activeGame" class="game-info">
-        <div class="game-lobby" v-if="gameCanBeStarted">
-          <invite-link :game-id="gameId"></invite-link>
-          <connected-players-summary :state="transmittedServerState"></connected-players-summary>
-          <ready-or-waiting-prompt :is-host="isHost" :state="transmittedServerState" v-on:startgame="startGame">
-          </ready-or-waiting-prompt>
-        </div>
-        <div v-if="!gameCanBeStarted && !state?.lastInstruction">
-          <loader></loader>
-        </div>
+      <div v-if="!gameCanBeStarted && !state?.lastInstruction">
+        <loader></loader>
+      </div>
 
-        <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout">
-        </timer-bar>
+      <timer-bar v-if="state?.lastInstruction?.timeout != null" :countdown="state?.lastInstruction?.timeout">
+      </timer-bar>
 
-        <div v-if="state?.lastInstruction" class="playfield">
-          <playfield-wait-for-others :state="state"></playfield-wait-for-others>
+      <div v-if="state?.lastInstruction" class="playfield">
+        <playfield-wait-for-others :state="state"></playfield-wait-for-others>
 
-          <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
-          <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
-          <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
+        <playfield-drawing :state="state" :client="depictItClient"></playfield-drawing>
+        <playfield-caption :state="state" :client="depictItClient"></playfield-caption>
+        <playfield-pick-one :state="state" :client="depictItClient" :is-host="isHost"></playfield-pick-one>
 
-          <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
-        </div>
+        <playfield-show-scores :state="state" :is-host="isHost" v-on:nextround="nextRound"></playfield-show-scores>
       </div>
     </div>
   </main>
