@@ -22,17 +22,14 @@ export const PlayfieldPickOne = {
 
   template: `
     <div>
+    <h2 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-heading">Vote and Share</h2>
+    <h3 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-subheading">Click on a card to pick your favourite and award points to its depictor.</h3>
       <section v-if="state?.lastInstruction?.type == 'pick-one-request'" class="gallery">
-        <h2 class="section-heading">Which card is best?</h2>
         <div v-for="item in state?.lastInstruction?.stack.items" class="gallery-item">
           <stack-item :item="item" v-on:click="sendVote"></stack-item>
         </div>
-        
-        <div>
-          <a v-on:click="storeStackInLocalStorage" href="/share" target="_twitterShare">Tweet</a>          
-        </div>
       </section>
-            
+      <a v-if="state?.lastInstruction?.type == 'pick-one-request'" v-on:click="storeStackInLocalStorage" href="/share" target="_twitterShare" class="tweet">Tweet this progression</a>          
 
       <div v-if="displaySkipButtonForHost" class="form">
         <p>You are the host and can skip the scoring forwards.</p>

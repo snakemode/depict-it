@@ -64,6 +64,12 @@ p {
    2px  2px 0 #000;
 }
 
+.section-subheading {
+  margin: 0 20px;
+  text-align: center;
+  font-weight: normal;
+}
+
 .form, .game-lobby {
   position: relative;
   width: 100%;
@@ -92,20 +98,24 @@ label {
   background-color: white;
 }
 
-button {
+button, 
+.tweet {
+  display: block;
   width: 100%;
   padding: 20px;
   border: 0;
   border-radius: 4px;
   font-size: 1em;
   color: white;
+  text-decoration: none;
   background-color: #9265ba;
   cursor: pointer;
   box-shadow: 0 6px #704c90;
 }
 
 button:hover, 
-.rules:hover {
+.rules:hover, 
+.tweet:hover {
   transform: translateY(4px);
   box-shadow: 0 2px #704c90
 }
@@ -364,7 +374,7 @@ button:hover,
 }
 
 .gallery-item:first-of-type .stack-text {
-  font-size: 1.4em;
+  font-size: 1em;
 }
 
 .score-card {
@@ -495,6 +505,16 @@ button:hover,
   text-align: center;
   background-color: #f1c40f;
   transform: translate(40%, 40%);
+}
+
+.tweet {
+  width: max-content;
+  margin: 10px auto 20px;
+  padding-left: 80px;
+  background-image: url(./assets/tw.svg);
+  background-repeat: no-repeat;
+  background-position: 20px center;
+  background-size: 40px;
 }
 
 @media (min-width: 740px) {
