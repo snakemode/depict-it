@@ -177,7 +177,7 @@ export class GetUserScoresHandler {
             this.skip = false;
             this.submitted = 0;
 
-            this.generateGif(stack);
+            // this.generateGif(stack);
 
             context.channel.sendMessage({ kind: "instruction", type: "pick-one-request", stack: stack }, state.activePlayers.map(p => p.clientId));
 
