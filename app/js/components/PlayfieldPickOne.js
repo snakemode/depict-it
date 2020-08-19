@@ -16,7 +16,7 @@ export const PlayfieldPickOne = {
       return this.isHost && (this.state?.lastInstruction?.type == 'wait' && previousInstruction.type == "pick-one-request");
     },
     cardUrl: function () {
-      return `/api/share-card/?id=${this.state?.lastInstruction?.stack.id}`;
+      return `${window.location.protocol}//${window.location.host}/api/share-card/?id=${this.state?.lastInstruction?.stack.id}`;
     }
   },
 
@@ -30,6 +30,16 @@ export const PlayfieldPickOne = {
         
         <div>
           <a :href="cardUrl">Share this stack</a>
+
+          <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" 
+            class="twitter-share-button" 
+            data-size="large" 
+            data-text="Take a look at this Depict-It hand!" 
+            :data-url="cardUrl" 
+            data-via="DepictItGame" 
+            data-hashtags="depictit" 
+            data-related="ablyrealtime" 
+            data-show-count="false">Tweet</a>
         </div>
       </section>
             

@@ -49,7 +49,7 @@ async function imageFromUrl(url) {
     const targetCanvas = new Jimp(400, 400, 'white');
     targetCanvas.blit(image, 0, 0)
 
-    GifUtil.quantizeSorokin(targetCanvas, 200);
+    GifUtil.quantizeDekker(targetCanvas, 250);
 
     return new GifFrame(new BitmapImage(targetCanvas.bitmap), { delayCentisecs: 100 });
 }
