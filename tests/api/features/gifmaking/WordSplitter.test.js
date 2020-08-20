@@ -1,4 +1,3 @@
-import { intToRGBA } from "jimp";
 import WordSplitter from "../../../../api/features/gifmaking/WordSplitter";
 
 describe("WordSplitter", () => {
@@ -16,23 +15,20 @@ describe("WordSplitter", () => {
         expect(result[1]).toBe("6789");
     });
 
-    it("Returns two lines when three words are split but there's a word over the boundary", () => {
-        const result = WordSplitter("My cat a very nice", 5);
+    it("Returns lines when words are split but there's a word over the boundary", () => {
+        const result = WordSplitter("My cat a very nice", 5, 7);
 
-        expect(result[0]).toBe("My");
-        expect(result[1]).toBe("cat a");
+        expect(result[0]).toBe("My cat");
+        expect(result[1]).toBe("a very");
+        expect(result[2]).toBe("nice");
+    });
+
+    it("Forces a word split once the length hits the cap, regardless of word position", () => {
+        const result = WordSplitter("My cat a very nice", 4, 5);
+
+        expect(result[0]).toBe("My ca");
+        expect(result[1]).toBe("t a");
         expect(result[2]).toBe("very");
         expect(result[3]).toBe("nice");
     });
-
-    it("Returns lines when word is always too long", () => {
-        const result = WordSplitter("Thisisaverylongword", 5);
-
-        expect(result[0]).toBe("This-");
-        expect(result[1]).toBe("-isa-");
-        expect(result[2]).toBe("-ery-");
-        expect(result[3]).toBe("-lon-");
-        expect(result[4]).toBe("-word");
-    });
-
 });
