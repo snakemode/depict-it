@@ -1,7 +1,9 @@
 const { GifFrame, GifUtil, GifCodec, BitmapImage } = require('gifwrap');
 const Jimp = require("jimp");
 const fetch = require('node-fetch');
-const WordSplitter = require("../gifmaking/WordSplitter");
+const WordSequence = require("../gifmaking/WordSequence");
+
+const wordSequence = new WordSequence();
 
 class GifCreator {
     constructor() {
@@ -21,8 +23,6 @@ class GifCreator {
         }
 
         const gif = await this.gifFromFrames(frames);
-
-        console.log("Created gif");
         return gif;
     }
 
@@ -44,7 +44,7 @@ class GifCreator {
         const targetCanvas = new Jimp(400, 400, 'white');
         targetCanvas.blit(image, 0, 0)
 
-        GifUtil.quantizeDekker(targetCanvas, 250);
+        GifUtil.quantizeSorokin(targetCanvas, 250);
 
         return new GifFrame(new BitmapImage(targetCanvas.bitmap), { delayCentisecs: 100 });
     }
@@ -56,18 +56,28 @@ class GifCreator {
 
     async imageWithText(text) {
         const textFrame = await Jimp.read("./features/gifmaking/text.gif");
-        let x = 35;
-        let y = 80;
 
-        const lines = WordSplitter(text, 18, 24);
+        const startY = 80;
+        const lineHeight = 35;
+        const totalFrameHeight = 250;
+
+        const lines = wordSequence.splitOverLines(text, 18, 24);
+        wordSequence.center(lines, 24);
+
+        const lineHeightRequirement = lineHeight * lines.length;
+        const lineOffset = startY + ((totalFrameHeight - lineHeightRequirement) / 2);
+
         const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+
+        let x = 35;
+        let y = lineOffset;
 
         for (let line of lines) {
             textFrame.print(font, x, y, line);
-            y += 35;
+            y += lineHeight;
         }
 
-        GifUtil.quantizeDekker(textFrame, 250);
+        GifUtil.quantizeSorokin(textFrame, 250);
 
         return new GifFrame(new BitmapImage(textFrame.bitmap), { delayCentisecs: 100 });
     }
