@@ -44,7 +44,7 @@ class GifCreator {
         const targetCanvas = new Jimp(400, 400, 'white');
         targetCanvas.blit(image, 0, 0)
 
-        GifUtil.quantizeDekker(targetCanvas, 250);
+        GifUtil.quantizeSorokin(targetCanvas, 250);
 
         return new GifFrame(new BitmapImage(targetCanvas.bitmap), { delayCentisecs: 100 });
     }
@@ -67,7 +67,7 @@ class GifCreator {
             y += 35;
         }
 
-        GifUtil.quantizeDekker(textFrame, 250);
+        GifUtil.quantizeSorokin(textFrame, 250);
 
         return new GifFrame(new BitmapImage(textFrame.bitmap), { delayCentisecs: 100 });
     }
