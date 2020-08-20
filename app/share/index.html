@@ -11,37 +11,85 @@
 
     <link rel="stylesheet" href="/style.css" />
     <link rel="icon" type="image/png" href="/assets/icons/favicon.ico">
+
+    <script src="gif.js"></script>
 </head>
 
 <body>
 
+    <div id="working">
+        <img id="ably" src="/assets/ably.svg" />
+    </div>
     <p id="status"></p>
 
     <script>
         (async function () {
             const statusElement = document.getElementById("status");
+            const workingElement = document.getElementById("working");
 
             try {
                 const stackAsJson = localStorage.getItem("share");
                 const stack = JSON.parse(stackAsJson);
 
-                if (stack == null) {
-                    statusElement.innerText = "An error occured loading the stack to share.";
-                    return;
+                const images = [];
+
+                for (let stackItem of stack.items) {
+                    /*const frame = stackItem.type == "image"
+                        ? await this.imageFromUrl(stackItem.value)
+                        : await this.imageWithText(stackItem.value);*/
+
+                    if (stackItem.type == "image") {
+
+                        let img1 = new Image();
+                        img1.src = stackItem.value;
+
+                        const img = document.createElement("img");
+                        img.src = stackItem.value;
+
+                        workingElement.appendChild(img);
+
+                        images.push(img);
+                    }
                 }
 
-                statusElement.innerText = "Generating GIF to share...";
+                var gif = new GIF({ workers: 2, quality: 10, width: 400, height: 400, background: "#fff" });
 
-                const response = await fetch("/api/tweetGif", { method: "POST", body: JSON.stringify({ stack }) });
-                const responseBody = await response.json();
+                gif.addFrame(document.getElementById("ably"), { delay: 200, width: 400, height: 400 });
 
-                window.location = `https://twitter.com/intent/retweet?tweet_id=${responseBody.id_str}&related=DepictItGame`;
+                for (let frame of images) {
+                    gif.addFrame(frame, { delay: 200, width: 400, height: 400 });
+                }
+
+                // or a canvas element
+                //gif.addFrame(canvasElement, { delay: 200 });
+                // or copy the pixels from a canvas context
+                //gif.addFrame(ctx, { copy: true });
+
+                gif.on('finished', function (blob) {
+                    window.open(URL.createObjectURL(blob));
+                });
+
+                gif.render();
+
+                /*
+                                if (stack == null) {
+                                    statusElement.innerText = "An error occured loading the stack to share.";
+                                    return;
+                                }
+                
+                                statusElement.innerText = "Generating GIF to share...";
+                
+                                const response = await fetch("/api/tweetGif", { method: "POST", body: JSON.stringify({ stack }) });
+                                const responseBody = await response.json();
+                
+                                window.location = `https://twitter.com/intent/retweet?tweet_id=${responseBody.id_str}&related=DepictItGame`;*/
             }
-            catch {
+            catch (ex) {
+                console.log(ex);
                 statusElement.innerText = "Sorry, there was an error sharing your game stack.";
             }
             finally {
-                localStorage.removeItem("share");
+                // localStorage.removeItem("share");
             }
         })();
     </script>

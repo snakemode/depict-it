@@ -205,11 +205,14 @@ export class GetUserScoresHandler {
             return;
         }
 
+        let stackThatWasVotedFor = null;
+
         for (let stack of state.stacks) {
             for (let item of stack.items) {
                 if (item.id == message.id) {
 
                     const author = state.activePlayers.filter(p => p.clientId == item.author)[0];
+                    stackThatWasVotedFor = stack;
 
                     if (!author) {
                         continue; // They voted on the original phrase, what?!
