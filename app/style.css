@@ -65,7 +65,8 @@ p {
 }
 
 .section-subheading {
-  margin: 0 20px;
+  max-width: 380px;
+  margin: 0 auto 20px;
   text-align: center;
   font-weight: normal;
 }
@@ -527,6 +528,17 @@ button:hover,
   background-repeat: no-repeat;
   background-position: 20px center;
   background-size: 40px;
+}
+
+.share {
+  display: grid;
+  place-items: center;
+}
+
+.share-loading {
+  display: block;
+  max-width: 300px;
+  margin: 1em auto;
 }
 
 @media (min-width: 740px) {
