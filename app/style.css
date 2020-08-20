@@ -99,6 +99,13 @@ label {
   background-color: white;
 }
 
+.textarea {
+  display: block;
+  width: calc(100% - 20px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 button, 
 .tweet {
   display: block;
@@ -119,6 +126,12 @@ button:hover,
 .tweet:hover {
   transform: translateY(4px);
   box-shadow: 0 2px #704c90
+}
+
+.caption-button {
+  width: calc(100% - 20px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .copy-link-text {
