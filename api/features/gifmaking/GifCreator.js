@@ -19,7 +19,10 @@ class GifCreator {
             frames.push(frame);
         }
 
-        return await this.gifFromFrames(frames);
+        const gif = await this.gifFromFrames(frames);
+
+        console.log("Created gif");
+        return gif;
     }
 
     async gifFromFrames(frames) {

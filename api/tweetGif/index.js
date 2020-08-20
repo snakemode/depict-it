@@ -1,5 +1,8 @@
-const GifCreator = require("../features/gifmaking/GifCreator");
 const Twitter = require('twitter');
+const GifCreator = require("../features/gifmaking/GifCreator");
+const checkConfig = require("../features/checkConfiguration");
+
+checkConfig(["TWITTER_CONSUMER_KEY", "TWITTER_CONSUMER_SECRET", "TWITTER_ACCESS_TOKEN_KEY", "TWITTER_ACCESS_TOKEN_SECRET"]);
 
 module.exports = async function (context, req) {
 
@@ -16,7 +19,7 @@ module.exports = async function (context, req) {
     const media = await client.post('media/upload', { media: gif });
 
     var status = {
-        status: 'Look at this DepictIt stack!',
+        status: 'Look at this Depict-It progression!',
         media_ids: media.media_id_string
     };
 
@@ -27,4 +30,5 @@ module.exports = async function (context, req) {
         body: tweet,
         status: 200
     };
+
 };
