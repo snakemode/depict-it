@@ -22,8 +22,8 @@ export const PlayfieldPickOne = {
 
   template: `
     <div>
-    <h2 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-heading">Vote and Share</h2>
-    <h3 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-subheading">Click on a card to pick your favourite and award points to its depictor.</h3>
+      <h2 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-heading">Vote and Share</h2>
+      <h3 v-if="state?.lastInstruction?.type == 'pick-one-request'" class="section-subheading">Click on a card to pick your favourite and award points to its depictor.</h3>
       <section v-if="state?.lastInstruction?.type == 'pick-one-request'" class="gallery">
         <div v-for="item in state?.lastInstruction?.stack.items" class="gallery-item">
           <stack-item :item="item" v-on:click="sendVote"></stack-item>
@@ -36,7 +36,6 @@ export const PlayfieldPickOne = {
         <p>If a player drops out and the game won't move forwards, click the button below.</p>
         <button v-on:click="progressVote">Move vote forwards</button>
       </div>
-
     </div>
     `
 };
