@@ -1,24 +1,18 @@
-module.exports = function (words, minSplit, maxLength) {
-
+function WordSplitter(words, minSplit, maxLength) {
     maxLength = maxLength || minSplit;
 
-    const output = [];
     let buffer = "";
+    const output = [];
 
     for (let char of words) {
-        buffer += char;
-
-        if (buffer.length === 1 && char == " ") {
-            buffer = buffer.trimLeft();
-        }
-
-        if (buffer.length === maxLength) {
-            output.push(buffer);
-            buffer = "";
+        if (skipLeadingSpace(buffer, char)) {
             continue;
         }
 
-        if (buffer.length >= minSplit && char === " ") {
+        buffer += char;
+
+        if (hardBreak(buffer, maxLength)
+            || softBreak(buffer, char, minSplit)) {
             output.push(buffer);
             buffer = "";
         }
@@ -28,9 +22,19 @@ module.exports = function (words, minSplit, maxLength) {
         output.push(buffer);
     }
 
-    for (let index in output) {
-        output[index] = output[index].trim();
-    }
+    trimLines(output);
 
     return output;
 };
+
+const skipLeadingSpace = (buffer, char) => (buffer.length === 0 && char == " ");
+const hardBreak = (buffer, maxLength) => (buffer.length === maxLength);
+const softBreak = (buffer, char, minSplit) => (buffer.length >= minSplit && char === " ");
+
+function trimLines(output) {
+    for (let index in output) {
+        output[index] = output[index].trim();
+    }
+}
+
+module.exports = WordSplitter;
