@@ -503,8 +503,20 @@ button:hover,
   font-family: 'Sora', arial, sans-serif;
   font-size: 11px;
   text-align: center;
-  background-color: #f1c40f;
+  color: white;
+  background-color: #9265ba;
   transform: translate(40%, 40%);
+}
+
+.card {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  place-items: center;
+}
+
+.card:hover .author {
+  background-color: #704c90;
 }
 
 .tweet {
