@@ -66,8 +66,8 @@ export class DrawableCanvasElement {
             const bounds = e.target.getBoundingClientRect();
             const touch = e.targetTouches[0];
 
-            location.x = touch.clientX - bounds.left;
-            location.y = touch.clientY - bounds.top;
+            location.x = touch.clientX - bounds.left - 10;
+            location.y = touch.clientY - bounds.top - 10;
         } else {
             location.x = e.offsetX;
             location.y = e.offsetY;
