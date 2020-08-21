@@ -1,3 +1,9 @@
+try {
+  // Warm up the Serverless functions so subsequent calls are faster.
+  fetch("/api/init");
+}
+catch { }
+
 import { Identity } from "./js/Identity.js";
 import { P2PClient } from "./js/p2p/P2PClient.js";
 import { P2PServer } from "./js/p2p/P2PServer.js";
