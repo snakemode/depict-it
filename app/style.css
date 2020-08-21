@@ -405,6 +405,7 @@ button:hover,
 }
 
 .score-score {
+  margin-left: 10px;
   text-align: right;
 }
 

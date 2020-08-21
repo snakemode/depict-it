@@ -6,13 +6,21 @@ export const PlayfieldShowScores = {
       this.$emit('nextround');
     }
   },
+  
+  computed: {
+    orderedScores: function () {
+      return this.state.lastInstruction.playerScores.sort((a, b) => {
+        return b.score - a.score;
+      });
+    }
+  },
 
   template: `
   <div v-if="state?.lastInstruction?.type == 'show-scores'" class="game-lobby score-card">
     <h2 class="section-heading">Scores</h2>
     <ul class="scores">
-    <li v-for="player in state?.lastInstruction?.playerScores" class="score">
-      <span class="score-name">{{ player.friendlyName }}:</span>
+    <li v-for="player in orderedScores" class="score">
+      <span class="score-name">{{ player.friendlyName }}: </span>
       <span class="score-score">{{ player.score }}</span>
     </li>
     </ul>
